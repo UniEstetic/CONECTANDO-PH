@@ -1,0 +1,593 @@
+/* Estilos generales */
+.container {
+  min-height: 100vh;
+    background: linear-gradient(#F3DEAA 0%, #b68c3a 24%, #9c7b2f 100%);
+}
+
+.containerResidentes {
+  width: 100%;
+}
+
+.mainContent {
+  display: flex;
+  gap: 30px;
+  padding: 30px;
+  min-height: calc(100vh - 100px);
+}
+
+/* Columnas principales */
+.columnLeft,
+.columnRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Headers de sección */
+.sectionHeader {
+  background-color: #f5f5dc;
+  color: #6b5b3e;
+  padding: 12px 20px;
+  margin-bottom: 2px;
+  border-radius: 30px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Formulario izquierdo */
+.formContainer {
+  padding: 25px;
+  border-radius: 0 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.formRowDouble {
+  display: flex;
+  gap: 20px;
+}
+
+.formRowDouble > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.formLabel {
+  min-width: 160px;
+  font-size: 13px;
+  color: white;
+  text-align: right;
+}
+
+.formLabelShort {
+  min-width: 120px;
+  font-size: 13px;
+  color: white;
+  text-align: right;
+}
+
+.formLabelNoMin {
+  font-size: 13px;
+  color: white;
+  white-space: nowrap;
+}
+
+.formInput {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #d4c5a9;
+  background-color: white;
+  font-size: 13px;
+}
+
+.formInputShort {
+  width: 100px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #d4c5a9;
+  background-color: white;
+  font-size: 13px;
+}
+
+.formSelect {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #d4c5a9;
+  background-color: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.buttonUpload {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: #7b68a8;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.buttonUpload:hover {
+  background-color: #6a5897;
+  transform: translateY(-1px);
+}
+
+/* Columna derecha - Botones de configuración */
+.configContainer {
+  padding: 40px;
+  border-radius: 0 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.configButton {
+  padding: 15px 35px;
+  border-radius: 25px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  min-width: 200px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.configButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.configButtonPurple {
+  background-color: #8b7ab8;
+}
+
+.configButtonBlue {
+  background-color: #5ba8c4;
+}
+
+.configButtonOrange {
+  background-color: #e89b5a;
+}
+
+.saveButtonContainer {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 8rem;
+  width: 100%;
+}
+
+.saveButton {
+  padding: 12px 40px;
+  border-radius: 20px;
+  border: none;
+  background-color: #7b68a8;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.saveButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Modales */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow-y: auto;
+}
+
+.modalContentWide {
+  max-width: 550px;
+}
+
+.modalHeader {
+  background: linear-gradient(90deg, #7b68a8 0%, #9b8bc4 100%);
+  padding: 20px;
+  margin: -30px -30px 20px -30px;
+  border-radius: 20px 20px 0 0;
+  text-align: center;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: white;
+}
+
+.modalSubtitle {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  color: white;
+  opacity: 0.95;
+}
+
+.modalTitleBlue {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: 500;
+  color: #5b9aad;
+}
+
+.modalSubtitleBlue {
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #f0f0f0;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+
+.modalInputGray {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #e8e8e8;
+  font-size: 13px;
+}
+
+.modalSelect {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #e8e8e8;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.torresList {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  max-height: 300px;
+}
+
+.torresListEmpty {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
+.torreItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.torreLabel {
+  font-size: 15px;
+  color: #333;
+  flex: 1;
+}
+
+.deleteButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background-color: #8b7ab8;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background-color: #7b68a8;
+  transform: scale(1.1);
+}
+
+.modalButtonContainer {
+  text-align: center;
+  @media screen and (max-width:1024px) {
+    margin-top:1rem;
+  }
+}
+
+.modalSaveButton {
+  padding: 12px 50px;
+  border-radius: 10px;
+  border: none;
+  background-color: #9ca3af;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.modalSaveButton:hover {
+  background-color: #8b92a0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modalSaveButtonBlue {
+  background-color: #5b9aad;
+}
+
+.modalSaveButtonBlue:hover {
+  background-color: #4a8999;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.formGroupRow {
+  display: flex;
+  gap: 10px;
+}
+
+.formGroupRow > select,
+.formGroupRow > input {
+  flex: 1;
+}
+
+/* Responsive - Tablets */
+@media (max-width: 1024px) {
+  .mainContent {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .formLabel {
+    min-width: 140px;
+    font-size: 12px;
+  }
+
+  .formLabelShort {
+    min-width: 100px;
+  }
+
+  .configContainer {
+    padding: 30px;
+  }
+
+  .configButton {
+    min-width: 180px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .mainContent {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .sectionHeader {
+    font-size: 14px;
+    padding: 10px 15px;
+    border-radius: 20px;
+  }
+
+  .formContainer {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .formRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .formRowDouble {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .formRowDouble > div {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .formLabel,
+  .formLabelShort,
+  .formLabelNoMin {
+    min-width: unset;
+    text-align: left;
+    font-weight: 500;
+  }
+
+  .formInput,
+  .formSelect {
+    width: 100%;
+  }
+
+  .formInputShort {
+    width: 100%;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .buttonUpload {
+    width: 100%;
+  }
+
+  .configContainer {
+    padding: 20px;
+    gap: 15px;
+  }
+
+  .configButton {
+    width: 100%;
+    min-width: unset;
+    padding: 12px 25px;
+    font-size: 14px;
+  }
+
+  .saveButton {
+    width: 80%;
+    margin: auto;
+  }
+
+  .modalOverlay {
+    padding: 10px;
+  }
+
+  .modalContent {
+    padding: 20px;
+    max-height: 85vh;
+  }
+
+  .modalHeader {
+    padding: 15px;
+    margin: -20px -20px 15px -20px;
+  }
+
+  .modalTitle {
+    font-size: 16px;
+  }
+
+  .modalSubtitle {
+    font-size: 13px;
+  }
+
+  .modalTitleBlue {
+    font-size: 18px;
+  }
+
+  .torresList {
+    max-height: 250px;
+    padding: 10px;
+  }
+
+  .configButton,
+  .modalSaveButton {
+    padding: 12px 30px;
+  }
+
+  .formGroupRow {
+    flex-direction: column;
+  }
+}
+
+/* Responsive - Mobile pequeño */
+@media (max-width: 480px) {
+  .mainContent {
+    padding: 10px;
+  }
+
+  .sectionHeader {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .formContainer {
+    padding: 12px;
+  }
+
+  .formLabel,
+  .formLabelShort,
+  .formLabelNoMin {
+    font-size: 18px;
+    color: white;
+  }
+
+  .formInput,
+  .formSelect,
+  .formInputShort {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .configButton {
+    font-size: 13px;
+    padding: 10px 20px;
+  }
+
+  .modalContent {
+    padding: 15px;
+  }
+
+  .modalHeader {
+    padding: 12px;
+    margin: -15px -15px 12px -15px;
+  }
+
+  .modalSaveButton {
+    padding: 10px 25px;
+    font-size: 14px;
+  }
+}
