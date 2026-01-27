@@ -34,7 +34,32 @@ import {
   VideoOff,
   MicOff,
   Circle,
+  X,
 } from "lucide-react";
+
+// Tipo para los mensajes
+interface Message {
+  id: string;
+  author: string;
+  text: string;
+  time: string;
+  isRead: boolean;
+  isModerator?: boolean;
+  replyTo?: {
+    author: string;
+    text: string;
+  };
+}
+
+// Tipo para peticiones de palabra
+interface WordRequest {
+  id: string;
+  name: string;
+  apartment: string;
+  tower: string;
+  initials: string;
+  time: string;
+}
 
 // Componente para el indicador de grabación
 function RecordingIndicator() {
@@ -176,6 +201,72 @@ function RecordingControls() {
   );
 }
 
+// Componente para notificaciones de mensajes
+function MessageNotifications({ 
+  messages, 
+  onClose 
+}: { 
+  messages: Message[], 
+  onClose: (id: string) => void 
+}) {
+  return (
+    <div className="message-notifications">
+      {messages.map((msg) => (
+        <div key={msg.id} className="notification-toast">
+          <div className="notification-content">
+            <div className="notification-header">
+              <MessageCircle size={16} color="#f44336" />
+              <span className="notification-title">Nuevo mensaje</span>
+              <button 
+                className="notification-close"
+                onClick={() => onClose(msg.id)}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className="notification-author">{msg.author}</div>
+            <div className="notification-text">{msg.text}</div>
+            <div className="notification-time">{msg.time}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Componente para notificaciones de peticiones de palabra
+function WordRequestNotifications({ 
+  requests, 
+  onClose 
+}: { 
+  requests: WordRequest[], 
+  onClose: (id: string) => void 
+}) {
+  return (
+    <div className="message-notifications">
+      {requests.map((req) => (
+        <div key={req.id} className="notification-toast notification-hand">
+          <div className="notification-content">
+            <div className="notification-header">
+              <Hand size={16} color="#9c27b0" />
+              <span className="notification-title notification-hand-title">Petición de palabra</span>
+              <button 
+                className="notification-close"
+                onClick={() => onClose(req.id)}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className="notification-author">{req.name}</div>
+            <div className="notification-text">Apto {req.apartment}, torre {req.tower}</div>
+            <div className="notification-time">{req.time}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // Componente interno que usa hooks de LiveKit
 function AssemblyInterface() {
   const participants = useParticipants();
@@ -191,6 +282,75 @@ function AssemblyInterface() {
   const [message, setMessage] = useState("");
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isMicOn, setIsMicOn] = useState(false);
+  const [isHandRaised, setIsHandRaised] = useState(false);
+
+  // Mensajes y notificaciones
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      author: 'Laura Arciniegas, apto 205, torre 1',
+      text: 'Agregar el documento de cotización para descargar',
+      time: '12:30 p.m.',
+      isRead: true,
+    },
+    {
+      id: '2',
+      author: 'Laura Arciniegas, apto 205, torre 1',
+      text: 'Agregar el documento de cotización para descargar',
+      time: '12:30 p.m.',
+      isRead: true,
+    },
+    {
+      id: '3',
+      author: 'Laura Arciniegas, apto 205, torre 1',
+      text: 'Agregar el documento de cotización para descargar',
+      time: '12:30 p.m.',
+      isRead: true,
+    },
+    {
+      id: '4',
+      author: 'Moderador',
+      text: 'Ok Agregaremos el documento de cotización para descargar',
+      time: '12:30 p.m.',
+      isRead: true,
+      isModerator: true,
+      replyTo: {
+        author: 'Moderador',
+        text: 'Ok Agregaremos el documento de cotización para descargar'
+      }
+    },
+  ]);
+
+  const [notifications, setNotifications] = useState<Message[]>([]);
+
+  // Peticiones de palabra
+  const [wordRequests, setWordRequests] = useState<WordRequest[]>([
+    {
+      id: '1',
+      name: 'Rodrigo Pérez',
+      apartment: '501',
+      tower: '6',
+      initials: 'RP',
+      time: '12:25 p.m.'
+    },
+    {
+      id: '2',
+      name: 'Claudia López',
+      apartment: '303',
+      tower: '2',
+      initials: 'CL',
+      time: '12:28 p.m.'
+    },
+    {
+      id: '3',
+      name: 'Laura Arciniegas',
+      apartment: '205',
+      tower: '1',
+      initials: 'LA',
+      time: '12:29 p.m.'
+    }
+  ]);
+  const [wordRequestNotifications, setWordRequestNotifications] = useState<WordRequest[]>([]);
 
   // Dos modales separados
   const [showVoteModal, setShowVoteModal] = useState(false);
@@ -213,7 +373,6 @@ function AssemblyInterface() {
       { name: "Martha Cañón", votes: 38, percent: 43.84 },
       { name: "Beymar González", votes: 43, percent: 53.12 },
     ],
-    // Matriz de votos (simulando apartamentos)
     votesMatrix: [
       [true, false, true, false, true, false, true, false, true, false],
       [false, true, false, true, false, true, false, true, false, true],
@@ -222,6 +381,53 @@ function AssemblyInterface() {
       [true, false, true, false, true, false, true, false, true, false],
       [false, true, false, true, false, true, false, true, false, true],
     ]
+  };
+
+  // Función para obtener la hora actual formateada
+  const getCurrentTime = () => {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = now.getMinutes();
+    const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+    return `${hours}:${minutesStr} ${ampm}`;
+  };
+
+  // Función para enviar mensaje
+  const sendMessage = () => {
+    if (!message.trim()) return;
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      author: 'Andrés (Tú)',
+      text: message,
+      time: getCurrentTime(),
+      isRead: true,
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    
+    // Crear notificación
+    setNotifications(prev => [...prev, { ...newMessage, isRead: false }]);
+    
+    // Auto-eliminar notificación después de 5 segundos
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== newMessage.id));
+    }, 5000);
+
+    setMessage('');
+  };
+
+  // Función para cerrar notificación
+  const closeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  // Función para cerrar notificación de petición de palabra
+  const closeWordRequestNotification = (id: string) => {
+    setWordRequestNotifications(prev => prev.filter(n => n.id !== id));
   };
 
   // Control de cámara y micrófono
@@ -233,6 +439,37 @@ function AssemblyInterface() {
   const toggleMic = () => {
     localParticipant.setMicrophoneEnabled(!isMicOn);
     setIsMicOn(!isMicOn);
+  };
+
+  // Control de petición de palabra
+  const toggleHandRaised = () => {
+    const newHandRaisedState = !isHandRaised;
+    setIsHandRaised(newHandRaisedState);
+
+    if (newHandRaisedState) {
+      // Levantar la mano
+      const newRequest: WordRequest = {
+        id: Date.now().toString(),
+        name: 'Andrés',
+        apartment: '102',
+        tower: '3',
+        initials: 'AN',
+        time: getCurrentTime()
+      };
+
+      setWordRequests(prev => [...prev, newRequest]);
+      
+      // Crear notificación
+      setWordRequestNotifications(prev => [...prev, newRequest]);
+      
+      // Auto-eliminar notificación después de 5 segundos
+      setTimeout(() => {
+        setWordRequestNotifications(prev => prev.filter(n => n.id !== newRequest.id));
+      }, 5000);
+    } else {
+      // Bajar la mano - eliminar de la lista
+      setWordRequests(prev => prev.filter(req => req.name !== 'Andrés'));
+    }
   };
 
   // Sincronizar estado inicial
@@ -403,8 +640,24 @@ function AssemblyInterface() {
           animation: pulse-button 2s infinite;
         }
 
+        .control-btn.hand-raised {
+          background: #9c27b0;
+          animation: pulse-hand 2s infinite;
+        }
+
         .control-btn:hover {
           transform: scale(1.05);
+        }
+
+        @keyframes pulse-hand {
+          0%, 100% { 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transform: scale(1);
+          }
+          50% { 
+            box-shadow: 0 2px 20px rgba(156, 39, 176, 0.6);
+            transform: scale(1.05);
+          }
         }
 
         .control-btn:disabled {
@@ -443,6 +696,100 @@ function AssemblyInterface() {
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
+        }
+
+        /* Estilos para notificaciones */
+        .message-notifications {
+          position: fixed;
+          bottom: 2rem;
+          right: 2rem;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          max-width: 380px;
+        }
+
+        .notification-toast {
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+          padding: 1rem;
+          animation: slideIn 0.3s ease-out;
+          border-left: 4px solid #f44336;
+        }
+
+        .notification-toast.notification-hand {
+          border-left-color: #9c27b0;
+        }
+
+        .notification-hand-title {
+          color: #9c27b0 !important;
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .notification-content {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .notification-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.25rem;
+        }
+
+        .notification-title {
+          flex: 1;
+          font-weight: 600;
+          font-size: 0.875rem;
+          color: #f44336;
+        }
+
+        .notification-close {
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 0.25rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: background 0.2s;
+        }
+
+        .notification-close:hover {
+          background: #f5f5f5;
+        }
+
+        .notification-author {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #222;
+        }
+
+        .notification-text {
+          font-size: 0.85rem;
+          color: #666;
+          line-height: 1.4;
+        }
+
+        .notification-time {
+          font-size: 0.75rem;
+          color: #999;
+          margin-top: 0.25rem;
         }
 
         .info-card {
@@ -675,7 +1022,7 @@ function AssemblyInterface() {
 
         .word-request-avatar,
         .connected-avatar {
-          width: 35px;
+          width: 44px;
           height: 35px;
           border-radius: 50%;
           display: flex;
@@ -755,6 +1102,19 @@ function AssemblyInterface() {
 
         .word-request-action {
           background: #9c27b0;
+        }
+
+        .word-request-time {
+          color: #999;
+          font-size: 0.75rem;
+          white-space: nowrap;
+        }
+
+        .no-requests {
+          text-align: center;
+          color: #999;
+          padding: 1.5rem;
+          font-size: 0.875rem;
         }
 
         .messages-container {
@@ -848,6 +1208,11 @@ function AssemblyInterface() {
         .message-send-btn:hover {
           background: #e53935;
           transform: scale(1.05);
+        }
+
+        .message-send-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         /* Mobile: mostrar attendance card, ocultar desktop-bottom-panels */
@@ -1350,6 +1715,14 @@ function AssemblyInterface() {
             color: #222;
           }
 
+          .word-request-time {
+            color: #666;
+          }
+
+          .no-requests {
+            color: #999;
+          }
+
           .option-radio {
             border-color: #999;
           }
@@ -1446,8 +1819,27 @@ function AssemblyInterface() {
           .video-container video {
             min-height: 400px;
           }
+
+          .message-notifications {
+            bottom: 1rem;
+            right: 1rem;
+            left: 1rem;
+            max-width: none;
+          }
         }
       `}</style>
+
+      {/* Notificaciones de mensajes */}
+      <MessageNotifications 
+        messages={notifications}
+        onClose={closeNotification}
+      />
+
+      {/* Notificaciones de peticiones de palabra */}
+      <WordRequestNotifications 
+        requests={wordRequestNotifications}
+        onClose={closeWordRequestNotification}
+      />
 
       <div className="text-center">
         <div className="logoWrapper">
@@ -1498,6 +1890,7 @@ function AssemblyInterface() {
                 <button
                   className={`control-btn ${isCameraOn ? "active" : "inactive"}`}
                   onClick={toggleCamera}
+                  title={isCameraOn ? "Apagar cámara" : "Encender cámara"}
                 >
                   {isCameraOn ? (
                     <Video size={24} color="#fff" />
@@ -1508,6 +1901,7 @@ function AssemblyInterface() {
                 <button
                   className={`control-btn ${isMicOn ? "active" : "inactive"}`}
                   onClick={toggleMic}
+                  title={isMicOn ? "Silenciar micrófono" : "Activar micrófono"}
                 >
                   {isMicOn ? (
                     <Mic size={24} color="#fff" />
@@ -1515,8 +1909,18 @@ function AssemblyInterface() {
                     <MicOff size={24} color="#fff" />
                   )}
                 </button>
-                <button className="control-btn">
+                <button 
+                  className="control-btn"
+                  title="Compartir pantalla"
+                >
                   <Monitor size={24} color="#666" />
+                </button>
+                <button
+                  className={`control-btn ${isHandRaised ? "hand-raised" : ""}`}
+                  onClick={toggleHandRaised}
+                  title={isHandRaised ? "Bajar mano" : "Levantar mano"}
+                >
+                  <Hand size={24} color={isHandRaised ? "#fff" : "#666"} />
                 </button>
                 <RecordingControls />
               </div>
@@ -1591,48 +1995,23 @@ function AssemblyInterface() {
               {showMessages && (
                 <div>
                   <div className="messages-container">
-                    <div className="message-item">
-                      <div className="message-header">
-                        <div className="message-author">Laura Arciniegas, apto 205, torre 1</div>
-                        <div className="message-time">Visto 12:30 p.m.</div>
-                      </div>
-                      <div className="message-text">
-                        Agregar el documento de cotización para descargar
-                      </div>
-                    </div>
-
-                    <div className="message-item">
-                      <div className="message-header">
-                        <div className="message-author">Laura Arciniegas, apto 205, torre 1</div>
-                        <div className="message-time">Visto 12:30 p.m.</div>
-                      </div>
-                      <div className="message-text">
-                        Agregar el documento de cotización para descargar
-                      </div>
-                    </div>
-
-                    <div className="message-item">
-                      <div className="message-header">
-                        <div className="message-author">Laura Arciniegas, apto 205, torre 1</div>
-                        <div className="message-time">Visto 12:30 p.m.</div>
-                      </div>
-                      <div className="message-text">
-                        Agregar el documento de cotización para descargar
-                      </div>
-                    </div>
-
-                    <div className="message-item">
-                      <div className="message-reply">
-                        <div className="message-reply-author">Moderador</div>
-                        <div className="message-reply-text">
-                          Ok Agregaremos el documento de cotización para descargar
+                    {messages.map((msg) => (
+                      <div className="message-item" key={msg.id}>
+                        {msg.replyTo && (
+                          <div className="message-reply">
+                            <div className="message-reply-author">{msg.replyTo.author}</div>
+                            <div className="message-reply-text">{msg.replyTo.text}</div>
+                          </div>
+                        )}
+                        <div className="message-header" style={msg.replyTo ? { marginTop: "0.5rem" } : {}}>
+                          <div className="message-author">{msg.author}</div>
+                          <div className="message-time">{msg.time}</div>
                         </div>
+                        {!msg.replyTo && (
+                          <div className="message-text">{msg.text}</div>
+                        )}
                       </div>
-                      <div className="message-header" style={{ marginTop: "0.5rem" }}>
-                        <div className="message-author">Moderador</div>
-                        <div className="message-time">12:30 p.m.</div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
                   <div className="message-input-container">
@@ -1642,8 +2021,18 @@ function AssemblyInterface() {
                       placeholder="Mensaje"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
                     />
-                    <button className="message-send-btn">
+                    <button 
+                      className="message-send-btn"
+                      onClick={sendMessage}
+                      disabled={!message.trim()}
+                    >
                       <Send size={20} color="white" />
                     </button>
                   </div>
@@ -1932,7 +2321,7 @@ function AssemblyInterface() {
                 <div className="info-card-icon icon-word-request">
                   <Hand size={20} color="white" />
                 </div>
-                <span>Petición de palabra (4)</span>
+                <span>Petición de palabra ({wordRequests.length})</span>
               </div>
               {showWordRequests ? (
                 <ChevronUp size={20} />
@@ -1943,33 +2332,20 @@ function AssemblyInterface() {
 
             {showWordRequests && (
               <div>
-                <div className="word-request-item">
-                  <div className="word-request-info">
-                    <div className="word-request-avatar">RP</div>
-                    <div className="word-request-name">Rodrigo Pérez, apto 501, torre 6</div>
+                {wordRequests.map((request) => (
+                  <div className="word-request-item" key={request.id}>
+                    <div className="word-request-info">
+                      <div className="word-request-avatar">{request.initials}</div>
+                      <div className="word-request-name">
+                        {request.name}, apto {request.apartment}, torre {request.tower}
+                      </div>
+                    </div>
+                    <div className="word-request-time">{request.time}</div>
                   </div>
-                  <div className="word-request-action">
-                    <Hand size={18} color="white" />
-                  </div>
-                </div>
-                <div className="word-request-item">
-                  <div className="word-request-info">
-                    <div className="word-request-avatar">CL</div>
-                    <div className="word-request-name">Claudia López, apto 303, torre 2</div>
-                  </div>
-                  <div className="word-request-action">
-                    <Hand size={18} color="white" />
-                  </div>
-                </div>
-                <div className="word-request-item">
-                  <div className="word-request-info">
-                    <div className="word-request-avatar">LA</div>
-                    <div className="word-request-name">Laura Arciniegas, apto 205, torre 1</div>
-                  </div>
-                  <div className="word-request-action">
-                    <Hand size={18} color="white" />
-                  </div>
-                </div>
+                ))}
+                {wordRequests.length === 0 && (
+                  <div className="no-requests">No hay peticiones de palabra</div>
+                )}
               </div>
             )}
           </div>
