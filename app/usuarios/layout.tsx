@@ -1,4 +1,7 @@
+'use client';
+
 import UsuariosFooter from './components/UsuariosFooter';
+
 
 export default function UsuariosLayout({
   children,
@@ -6,9 +9,11 @@ export default function UsuariosLayout({
   children: React.ReactNode;
 }) {
   return (
-    <><>
-      {children}
 
-    </><UsuariosFooter /></>
+      <><>
+        {children}
+
+      </><UsuariosFooter /></>
+  
   );
 }
