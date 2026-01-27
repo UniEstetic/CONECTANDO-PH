@@ -286,6 +286,7 @@ export default function TestConexionPage() {
                 <div><b>ID:</b> {userById.id}</div>
                 <div><b>Nombre:</b> {userById.first_name} {userById.last_name}</div>
                 <div><b>Email:</b> {userById.email}</div>
+                <div><b>Tipo de documento:</b> {userById.document_type}</div>
               </div>
             )}
             {searchError && <div style={{ color: 'red', marginTop: 8 }}>{searchError}</div>}

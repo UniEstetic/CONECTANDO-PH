@@ -44,10 +44,7 @@ export async function validateLogin(
 
   const data = (await res.json()) as ValidateLoginResponse;
 
-  // Guardar token final solo si es exitoso
-  if (data.result?.access_token) {
-    localStorage.setItem('access_token', data.result.access_token);
-  }
+  // Ya no es necesario guardar el token en localStorage, se guarda en cookie httpOnly desde el backend
 
   return data;
 }

@@ -1,17 +1,21 @@
 import { NextResponse } from 'next/server';
 
-export async function GET(req: Request, { params }: { params: { userId: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { userId: string } }
+) {
   try {
-    const authHeader = req.headers.get('authorization');
     const { userId } = params;
 
     const backendResponse = await fetch(
       `${process.env.BACKEND_API_URL}/user_roles/${userId}`,
       {
         method: 'GET',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          ...(authHeader ? { Authorization: authHeader } : {}),
+          // reenviamos la cookie al backend
+          cookie: req.headers.get('cookie') || '',
         },
       }
     );
@@ -31,12 +35,11 @@ export async function GET(req: Request, { params }: { params: { userId: string }
     return NextResponse.json(data, {
       status: backendResponse.status,
     });
-
   } catch (error) {
     console.error('PROXY ERROR 👉', error);
 
     return NextResponse.json(
-      { message: 'Internal proxy error', error },
+      { message: 'Internal proxy error' },
       { status: 500 }
     );
   }

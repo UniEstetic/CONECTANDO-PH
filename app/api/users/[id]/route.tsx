@@ -1,60 +1,91 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
-const BACKEND_URL = process.env.BACKEND_API_URL;
+const BACKEND_URL = process.env.BACKEND_API_URL!
 
+// 🔹 OBTENER USUARIO POR ID
 export async function GET(
   req: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = context.params;
+  try {
+    const backendResponse = await fetch(
+      `${BACKEND_URL}/users/id/${params.id}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          // reenviamos la cookie al backend
+          cookie: req.headers.get('cookie') || '',
+        },
+      }
+    )
 
-  const token = req.headers.get('authorization');
-
-  const res = await fetch(`${BACKEND_URL}/users/id/${id}`, {
-    headers: {
-      Authorization: token || '',
-    },
-  });
-
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+    const data = await backendResponse.json()
+    return NextResponse.json(data, { status: backendResponse.status })
+  } catch (error) {
+    return NextResponse.json(
+      { message: 'No autenticado o error interno' },
+      { status: 401 }
+    )
+  }
 }
 
+// 🔹 ACTUALIZAR USUARIO
 export async function PUT(
   req: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = context.params;
-  const body = await req.json();
-  const token = req.headers.get('authorization');
+  try {
+    const body = await req.json()
 
-  const res = await fetch(`${BACKEND_URL}/users/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: token || '',
-    },
-    body: JSON.stringify(body),
-  });
+    const backendResponse = await fetch(
+      `${BACKEND_URL}/users/${params.id}`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          cookie: req.headers.get('cookie') || '',
+        },
+        body: JSON.stringify(body),
+      }
+    )
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+    const data = await backendResponse.json()
+    return NextResponse.json(data, { status: backendResponse.status })
+  } catch (error) {
+    return NextResponse.json(
+      { message: 'No autenticado o error interno' },
+      { status: 401 }
+    )
+  }
 }
 
+// 🔹 ELIMINAR USUARIO
 export async function DELETE(
   req: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = context.params;
-  const token = req.headers.get('authorization');
+  try {
+    const backendResponse = await fetch(
+      `${BACKEND_URL}/users/${params.id}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          cookie: req.headers.get('cookie') || '',
+        },
+      }
+    )
 
-  const res = await fetch(`${BACKEND_URL}/users/${id}`, {
-    method: 'DELETE',
-    headers: {
-      Authorization: token || '',
-    },
-  });
-
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+    const data = await backendResponse.json()
+    return NextResponse.json(data, { status: backendResponse.status })
+  } catch (error) {
+    return NextResponse.json(
+      { message: 'No autenticado o error interno' },
+      { status: 401 }
+    )
+  }
 }

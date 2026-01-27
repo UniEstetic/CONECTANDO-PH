@@ -1,30 +1,30 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
-const BACKEND_URL = process.env.BACKEND_API_URL;
+const BACKEND_URL = process.env.BACKEND_API_URL
 
 // 🔹 OBTENER COPROPIEDAD POR ID
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const authHeader = req.headers.get('authorization');
+  try {
+    const res = await fetch(`${BACKEND_URL}/phs/${params.id}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: req.headers.get('cookie') || '',
+      },
+    })
 
-  if (!authHeader) {
+    const data = await res.json()
+    return NextResponse.json(data, { status: res.status })
+  } catch (error) {
     return NextResponse.json(
-      { error: 'No authorization token provided' },
+      { message: 'No autenticado' },
       { status: 401 }
-    );
+    )
   }
-
-  const res = await fetch(`${BACKEND_URL}/phs/${params.id}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: authHeader,
-    },
-  });
-
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
 }
 
 // 🔹 ACTUALIZAR COPROPIEDAD
@@ -32,27 +32,27 @@ export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const body = await req.json();
-  const authHeader = req.headers.get('authorization');
+  try {
+    const body = await req.json()
 
-  if (!authHeader) {
+    const res = await fetch(`${BACKEND_URL}/phs/${params.id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: req.headers.get('cookie') || '',
+      },
+      body: JSON.stringify(body),
+    })
+
+    const data = await res.json()
+    return NextResponse.json(data, { status: res.status })
+  } catch (error) {
     return NextResponse.json(
-      { error: 'No authorization token provided' },
+      { message: 'No autenticado' },
       { status: 401 }
-    );
+    )
   }
-
-  const res = await fetch(`${BACKEND_URL}/phs/${params.id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: authHeader,
-    },
-    body: JSON.stringify(body),
-  });
-
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
 }
 
 // 🔹 ELIMINAR COPROPIEDAD
@@ -60,23 +60,22 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const authHeader = req.headers.get('authorization');
+  try {
+    const res = await fetch(`${BACKEND_URL}/phs/${params.id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: req.headers.get('cookie') || '',
+      },
+    })
 
-  if (!authHeader) {
+    const data = await res.json()
+    return NextResponse.json(data, { status: res.status })
+  } catch (error) {
     return NextResponse.json(
-      { error: 'No authorization token provided' },
+      { message: 'No autenticado' },
       { status: 401 }
-    );
+    )
   }
-
-  const res = await fetch(`${BACKEND_URL}/phs/${params.id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: authHeader,
-    },
-  });
-
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
 }

@@ -8,6 +8,7 @@
 // 4. Devuelve la respuesta del backend al frontend.
 
 import { NextResponse } from 'next/server';
+import type { ValidateLoginResponse } from '@/app/lib/definitions';
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +22,13 @@ export async function POST(req: Request) {
       );
     }
 
+    // Asegura que el body tenga la forma { fields: { email, password } }
     const body = await req.json();
+    let backendBody = body;
+    // Si el body tiene email y password directos, los anida en fields
+    if (body.email && body.password && !body.fields) {
+      backendBody = { fields: { email: body.email, password: body.password } };
+    }
 
     // Obtiene la URL del backend desde variables de entorno
     const backendUrl = process.env.BACKEND_API_URL;
@@ -41,7 +48,7 @@ export async function POST(req: Request) {
         'Content-Type': 'application/json',
         Authorization: authHeader,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(backendBody),
     });
 
     if (!res.ok) {
@@ -53,7 +60,20 @@ export async function POST(req: Request) {
     }
 
     // Devuelve la respuesta del backend al frontend
-    const data = await res.json();
+    const data: ValidateLoginResponse = await res.json();
+    // Si el backend devuelve access_token, lo guardamos en cookie httpOnly
+    const accessToken = data?.result?.access_token;
+    if (accessToken) {
+      const response = NextResponse.json(data, { status: res.status });
+      response.cookies.set('access_token', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 días
+      });
+      return response;
+    }
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error('[AUTH/VALIDATE] Error:', error);

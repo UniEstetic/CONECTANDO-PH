@@ -35,17 +35,13 @@ export default function Page() {
         password
       );
 
-      // Si las credenciales son correctas, el backend devuelve el token de acceso final (JWT)
-      const accessToken = validateResponse.result.access_token;
-
-      // Se guarda el token en el localStorage del navegador
-      localStorage.setItem('access_token', accessToken);
+      // Se guarda en cookie httpOnly
       // Redirección a una ruta protegida después del login exitoso
       router.push('/test-conexion');
 
     } catch (error) {
       // Si ocurre cualquier error durante el proceso de login
-      alert('Error al iniciar sesión');
+      alert('Credenciales incorrectas. Intenta de nuevo.');
     }
   };
 

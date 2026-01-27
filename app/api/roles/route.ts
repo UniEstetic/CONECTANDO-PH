@@ -1,84 +1,87 @@
+import { NextResponse } from 'next/server'
+
+const BACKEND_URL = process.env.BACKEND_API_URL
+
+// 🔹 LISTAR ROLES
 export async function GET(req: Request) {
   try {
-    const authHeader = req.headers.get('authorization');
-
     const backendResponse = await fetch(
-      `${process.env.BACKEND_API_URL}/roles`,
+      `${BACKEND_URL}/roles`,
       {
         method: 'GET',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          ...(authHeader ? { Authorization: authHeader } : {}),
+          // reenviamos la cookie al backend
+          cookie: req.headers.get('cookie') || '',
         },
       }
-    );
+    )
 
-    const text = await backendResponse.text();
-    console.log('RAW BACKEND RESPONSE:', text);
+    const text = await backendResponse.text()
+    console.log('RAW BACKEND RESPONSE:', text)
 
     if (!text) {
       return NextResponse.json(
         { message: 'Empty response from backend' },
         { status: backendResponse.status }
-      );
+      )
     }
 
-    const data = JSON.parse(text);
+    const data = JSON.parse(text)
 
     return NextResponse.json(data, {
       status: backendResponse.status,
-    });
-
+    })
   } catch (error) {
-    console.error('PROXY ERROR 👉', error);
+    console.error('PROXY ERROR 👉', error)
 
     return NextResponse.json(
-      { message: 'Internal proxy error', error },
-      { status: 500 }
-    );
+      { message: 'No autenticado o error interno' },
+      { status: 401 }
+    )
   }
 }
-import { NextResponse } from 'next/server';
 
+// 🔹 CREAR ROL
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const authHeader = req.headers.get('authorization');
+    const body = await req.json()
 
     const backendResponse = await fetch(
-      `${process.env.BACKEND_API_URL}/roles`,
+      `${BACKEND_URL}/roles`,
       {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          ...(authHeader ? { Authorization: authHeader } : {}),
+          cookie: req.headers.get('cookie') || '',
         },
         body: JSON.stringify(body),
       }
-    );
+    )
 
-    const text = await backendResponse.text();
-    console.log('RAW BACKEND RESPONSE:', text);
+    const text = await backendResponse.text()
+    console.log('RAW BACKEND RESPONSE:', text)
 
     if (!text) {
       return NextResponse.json(
         { message: 'Empty response from backend' },
         { status: backendResponse.status }
-      );
+      )
     }
 
-    const data = JSON.parse(text);
+    const data = JSON.parse(text)
 
     return NextResponse.json(data, {
       status: backendResponse.status,
-    });
-
+    })
   } catch (error) {
-    console.error('PROXY ERROR 👉', error);
+    console.error('PROXY ERROR 👉', error)
 
     return NextResponse.json(
-      { message: 'Internal proxy error', error },
-      { status: 500 }
-    );
+      { message: 'No autenticado o error interno' },
+      { status: 401 }
+    )
   }
 }

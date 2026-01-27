@@ -8,7 +8,9 @@
 // 4. Si hay token, reenvía la petición al backend (/auth/profile) con el mismo token.
 // 5. Devuelve la respuesta del backend al frontend.
 
+
 import { NextResponse } from 'next/server';
+import { User } from '@/app/lib/definitions';
 
 export async function GET(req: Request) {
   // Obtiene el header Authorization del request (token JWT)
@@ -33,7 +35,7 @@ export async function GET(req: Request) {
     }
   );
 
-  // Devuelve la respuesta del backend al frontend
-  const data = await res.json();
+  // Devuelve la respuesta del backend al frontend, tipificando como User
+  const data: User = await res.json();
   return NextResponse.json(data, { status: res.status });
 }
