@@ -2,7 +2,6 @@
 
 import { SetStateAction, useState } from 'react';
 import styles from '@/app/ui/styles/roomStylesAdministrativo.module.css';
-import Image from 'next/image';
 import UsuariosHeader from '@/app/usuarios/components/UsuariosHeader';
 
 export default function menuAsambleas() {
@@ -49,7 +48,7 @@ export default function menuAsambleas() {
             
             <div className={styles.formGroup}>
               <label htmlFor="asistentes">Asistentes:</label>
-              <input type="text" id="asistentes" />
+              <select id="asistentes" className={styles.formSelect}/>
             </div>
             
             <div className={styles.formGroup}>

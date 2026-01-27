@@ -134,6 +134,11 @@
   }
 }
 
+.fechaResidentes{
+  color: #7a7a7a;
+  font-size: 12px;
+}
+
 /* Lista superior */
 .list {
   display: flex;
@@ -147,12 +152,15 @@
   align-items: center;
   background: #F3DEAA;
   border-radius: 999px;
-  padding: 10px 16px; 
+  padding: 10px 40px; 
   cursor: pointer;
   width: 50%;
   margin: auto;
+  flex-direction: column;
+  align-items:flex-start;
   @media screen and (max-width:1024px) {
     width: 90%;
+    padding: 10px 20px;
   }
 }
 
@@ -165,7 +173,80 @@
 }
 
 /* Accesos */
-.accessAdministrativo,
+
+/* Ajusta estos estilos en usuarios.module.css */
+
+/* Accesos */
+.access {
+  background: transparent; 
+  display: flex;
+  padding: 20px 28px;
+  justify-content: center; 
+  width: 100%;
+  margin: 0 auto;
+}
+
+.blockCards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.icon img {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 200px;
+}
+
+.label {
+  font-size: 13px;
+}
+
+/* Mobile styles */
+@media screen and (max-width: 1024px) {
+  .access {
+    padding: 20px 8px;
+  }
+
+  .blockCards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 0 8px;
+    margin-bottom: 0;
+  }
+  
+   .icon {
+    width: 100%;
+    max-width: 90px; /* 👈 Limita el contenedor */
+    margin: 0 auto;
+  }
+  
+  .icon img {
+    width: 180px !important;  /* 👈 Fuerza el tamaño */
+    height: 160px !important; /* 👈 Fuerza el tamaño */
+    max-width: 180px !important;
+  }
+}
+/* .accessAdministrativo,
 .access {
   background: transparent; 
   display: flex;
@@ -210,11 +291,11 @@
 
 @media screen and (max-width:1024px){
   .icon img {
-    width: 90px;      /* 👈 tamaño exacto como la imagen */
+    width: 90px;     
     height: 90px;
     object-fit: contain;
   }
-}
+} */
 
 
 .label {

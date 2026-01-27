@@ -9,8 +9,8 @@
 .curveSection {
   background: black;
   width: 100%;
-  border-bottom-left-radius: 50% 80px;
-  border-bottom-right-radius: 50% 80px;
+  border-bottom-left-radius: 40% 243px;
+  border-bottom-right-radius: 40% 243px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -130,8 +130,8 @@
     background: #000;
     height: 45vh;
     width: 100%;
-    border-bottom-left-radius: 100% 40%;
-    border-bottom-right-radius: 100% 40%;
+    border-bottom-left-radius: 100% 50%;
+    border-bottom-right-radius: 100% 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;

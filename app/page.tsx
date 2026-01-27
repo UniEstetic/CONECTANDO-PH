@@ -6,7 +6,8 @@ import AcmeLogo from '@/app/ui/logo';
 import Link from 'next/link';
 import Image from 'next/image';
 import { selectProvider, validateLogin } from './lib/auth.service';
-import { useRouter } from 'next/navigation';  
+import { useRouter } from 'next/navigation';
+ 
 
 // Componente principal de la página (Next.js / React)
 export default function Page() {
@@ -44,6 +45,7 @@ export default function Page() {
       alert('Credenciales incorrectas. Intenta de nuevo.');
     }
   };
+}
 
 
   return (

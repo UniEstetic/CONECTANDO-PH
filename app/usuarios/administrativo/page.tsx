@@ -4,9 +4,18 @@ import UsuariosHeader from '@/app/usuarios/components/UsuariosHeader'
 
 export default function UsuariosAdministrativo() {
   const opciones = [
-    'Tienes 4 nuevos PQRS por gestionar',
-    'Tienes 5 nuevas reservas de zonas comunes',
-    'Tienes un nuevo módulo de capacitación',
+    {
+      titulo: 'Noviembre 12 del 2024',
+      descripcion: 'Tienes 4 nuevos PQRS por gestionar'
+    },
+    {
+      titulo: 'Noviembre 13 del 2024',
+      descripcion: 'Tienes 5 nuevas reservas de zonas comunes'
+    },
+    {
+      titulo: 'Noviembre 14 del 2024',
+      descripcion: 'Tienes un nuevo módulo de capacitación'
+    }
   ]
 
   const accesos = [
@@ -29,10 +38,13 @@ export default function UsuariosAdministrativo() {
         
         {/* Lista superior */}
         <section className={styles.list}>
-          {opciones.map((texto, i) => (
+          {opciones.map((opcion, i) => (
             <label key={i} className={styles.item}>
-              <input type="radio" name="noticia" />
-              <span className={styles.text}>{texto}</span>
+              <span className={styles.fechaResidentes}>{opcion.titulo}</span>
+              <div className={styles.containerRadioResidentes}>
+                <input type="radio" name="noticia" />
+                <span className={styles.text}>{opcion.descripcion}</span>
+              </div>
             </label>
           ))}
         </section>
