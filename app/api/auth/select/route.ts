@@ -16,7 +16,7 @@ import type { SelectProviderResponse } from '@/app/lib/definitions';
 
 export async function POST(req: Request) {
   try {
-    const body: { providerName: string } = await req.json();
+    const body: { providerName: string } = await req?.json();
 
     if (!clientId || !clientSecret) {
       return NextResponse.json(
