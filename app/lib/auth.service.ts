@@ -4,7 +4,7 @@ import { User, SelectProviderResponse, ValidateLoginResponse } from './definitio
 // Seleccionar proveedor de autenticación
 export async function selectProvider(providerName: string) {
   // Llamada al backend para seleccionar el proveedor de autenticación
-  const res = await apiClient('/api/auth/select', {
+  const res = await apiClient('/auth/select', {
     method: 'POST',
     body: JSON.stringify({ providerName }),
   });
@@ -27,7 +27,7 @@ export async function validateLogin(
   email: string,
   password: string
 ): Promise<ValidateLoginResponse> {
-  const res = await apiClient('/api/auth/validate', {
+  const res = await apiClient('/auth/validate', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${tempToken}`,
@@ -51,7 +51,7 @@ export async function validateLogin(
 // Obtener perfil del usuario autenticado
 export async function getProfile(): Promise<User> {
   // Usa el endpoint proxy correcto
-  const res = await apiClient('/api/auth/profile');
+  const res = await apiClient('/auth/profile');
 
   // Si el token no es válido o falta, muestra el error
   if (res.status === 401) {
