@@ -45,8 +45,6 @@ export default function Page() {
       alert('Credenciales incorrectas. Intenta de nuevo.');
     }
   };
-}
-
 
   return (
     <main className={styles.mainContainer}>
