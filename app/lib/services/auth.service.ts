@@ -1,5 +1,5 @@
-import { apiClient } from './apiClient';
-import { User, SelectProviderResponse, ValidateLoginResponse } from './definitions';
+import { apiClient, apiClientSession } from '@/app/lib/utils/apiClient';
+import { User, SelectProviderResponse, ValidateLoginResponse } from '@/app/lib/definitions';
 
 // Seleccionar proveedor de autenticación
 export async function selectProvider(providerName: string) {
@@ -49,9 +49,14 @@ export async function validateLogin(
   return data;
 }
 // Obtener perfil del usuario autenticado
-export async function getProfile(): Promise<User> {
+export async function getProfile(tokenBack:string): Promise<User> {
   // Usa el endpoint proxy correcto
-  const res = await apiClient('/auth/profile');
+  const res = await apiClientSession('/auth/getProfile',{
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${tokenBack}`,
+    },
+  });
 
   // Si el token no es válido o falta, muestra el error
   if (res.status === 401) {

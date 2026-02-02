@@ -1,25 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET!)
+import { auth } from "@/app/api/auth/[...nextauth]/auth.config";
 
-export async function middleware(req: NextRequest) {
-  const token = req.cookies.get('access_token')?.value
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
 
-  if (!token) {
-    return NextResponse.redirect(new URL('/', req.url))
+  // 1. Definir qué rutas son de autenticación (donde no quieres que esté si ya entró)
+  const isAuthRoute = nextUrl.pathname.startsWith("/login");
+  
+  // 2. Permitir siempre las rutas de la API de Auth
+  const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
+
+  if (isApiAuthRoute) return NextResponse.next();
+
+  // 3. Si es una ruta de login y ya está logueado, mandarlo al dashboard/home
+  if (isAuthRoute) {
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL("/", nextUrl));
+    }
+    return NextResponse.next();
   }
 
-  try {
-    await jwtVerify(token, secret)
-    return NextResponse.next()
-  } catch {
-    const res = NextResponse.redirect(new URL('/', req.url))
-    res.cookies.delete('access_token')
-    return res
+  // 4. Si NO está logueado y NO está en login, mandarlo a login
+  if (!isLoggedIn && !isAuthRoute) {
+    return NextResponse.redirect(new URL("/login", nextUrl));
   }
-}
+
+  return NextResponse.next();
+});
 
 export const config = {
-  matcher: ['/usuarios/:path*', '/test-conexion', '/admin/:path*'],
+  //matcher: ['/usuarios/:path*', '/test-conexion', '/admin/:path*'],
+  matcher: ["/((?!api|_next/static|_next/image|imagenes|favicon.ico).*)"],
 }
