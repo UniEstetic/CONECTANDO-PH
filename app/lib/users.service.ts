@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient } from './utils/apiClient';
 import { User } from './definitions';
 
 // 🔹 Buscar usuario por ID
