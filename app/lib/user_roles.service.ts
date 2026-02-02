@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient } from './utils/apiClient';
 
 // Asignar rol a usuario
 export async function assignUserRole(userId: string, payload: any) {

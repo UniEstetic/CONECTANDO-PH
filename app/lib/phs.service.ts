@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient } from './utils/apiClient';
 
 // LISTAR
 export async function getPhs() {
