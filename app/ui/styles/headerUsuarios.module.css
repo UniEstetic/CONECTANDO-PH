@@ -24,3 +24,19 @@
   color: white;
   padding-left: 10px;
 }
+
+.logogut{
+  width: 95%;
+  display: flex;
+  justify-content: flex-end;
+  color: black;
+  font-weight: 500;
+}
+
+.logogutButton{
+  background: white;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 0.5rem;
+  border-radius: 20px;
+}

@@ -15,7 +15,6 @@ export default function Header() {
             Hola, 
           </p>
           <strong className={styles.saludoName}>Andrés</strong>
-          <LogoutPage/>
         </div>
       </div> 
   );
