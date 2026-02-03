@@ -3,10 +3,13 @@ import styles from '@/app/ui/styles/usuarios.module.css';
 import Link from 'next/link';
 import { ImportIcon } from 'lucide-react';
 import Header from "@/app/general/header";
+import Footer from "@/app/general/footer";
+import LogoutPage from "@/app/login/logout";
 
 export default function UsuariosPage() {
   return (
     <div className={styles.container}>
+      <LogoutPage />
       <Header/>
       <p className={styles.opcionesUsuarios}>Tus opciones</p>
 
@@ -50,6 +53,7 @@ export default function UsuariosPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
