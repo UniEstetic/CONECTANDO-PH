@@ -5,6 +5,7 @@ import LogoutPage from "@/app/login/logout";
 export default function UsuariosHeader() {
   return (
     <div className={styles.headerUsuariosPropiedad}>
+      <LogoutPage/>
       <LogoUsuarios />
 
       <div className={styles.blockName}>
@@ -12,7 +13,6 @@ export default function UsuariosHeader() {
             Hola, 
           </p>
           <strong className={styles.saludoName}>Andrés</strong>
-          <LogoutPage/>
       </div>
     </div>
   )

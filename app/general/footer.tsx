@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from '../../ui/styles/footer.module.css';
+import styles from '../ui/styles/footer.module.css';
 
-export default function UsuariosFooter() {
+export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.containerFooter}>
@@ -11,7 +11,7 @@ export default function UsuariosFooter() {
           src="/imagenes/10_boton inicio.svg"
           alt="Inicio"
           width={30}
-          height={10}
+          height={10} 
         />
       </Link>
 
