@@ -1,6 +1,7 @@
 .container{
     padding-bottom: 2rem;
     background: linear-gradient(#F3DEAA 0%, #b68c3a 24%, #9c7b2f 100%);
+    min-height: 100vh;
 }
 
 .containerSelection{
@@ -12,7 +13,8 @@
   display: flex;
   gap: 2rem;
   padding: 2rem;
-  width: 100%; 
+  width: 100%;
+  justify-content: center; 
 }
 
 

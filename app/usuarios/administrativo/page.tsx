@@ -1,5 +1,6 @@
 import styles from '@/app/ui/styles/usuarios.module.css';
 import Image from 'next/image'
+import Link from 'next/link'
 import UsuariosHeader from '@/app/usuarios/components/UsuariosHeader'
 
 export default function UsuariosAdministrativo() {
@@ -19,15 +20,15 @@ export default function UsuariosAdministrativo() {
   ]
 
   const accesos = [
-    { img: '/imagenes/15_boton mis copropiedades.svg' },
-    { img: '/imagenes/16_boton mis usuarios.svg' },
-    { img: '/imagenes/04_boton comunicados.svg'  },
-    { img: '/imagenes/05_boton pqrs.svg' },
-    { img: '/imagenes/06_boton documentos.svg' },
-    { img: '/imagenes/09_boton mis visitantes.svg' },
-    { img: '/imagenes/12_boton asambleas.svg' },
-    { img: '/imagenes/13_boton porteria.svg' },
-    { img: '/imagenes/14_boton formacion.svg' },
+    { img: '/imagenes/15_boton mis copropiedades.svg', url: '', alt: 'Mis copropiedades' },
+    { img: '/imagenes/16_boton mis usuarios.svg', url: '', alt: 'Mis usuarios' },
+    { img: '/imagenes/04_boton comunicados.svg', url: '', alt: 'Comunicados' },
+    { img: '/imagenes/05_boton pqrs.svg', url: '', alt: 'PQRS' },
+    { img: '/imagenes/06_boton documentos.svg', url: '', alt: 'Documentos' },
+    { img: '/imagenes/09_boton mis visitantes.svg', url: '', alt: 'Mis visitantes' },
+    { img: '/imagenes/12_boton asambleas.svg', url: '/usuarios/administrativo/menuasambleas', alt: 'Asambleas' },
+    { img: '/imagenes/13_boton porteria.svg', url: '', alt: 'Portería' },
+    { img: '/imagenes/14_boton formacion.svg', url: '', alt: 'Formación' },
   ]
 
   return (
@@ -54,19 +55,20 @@ export default function UsuariosAdministrativo() {
           <div className={styles.blockCards}>
           {accesos.map((item, i) => (
             <div key={i} className={styles.card}>
-              <div className={styles.icon}>
-                <Image
-                  src={item.img}
-                  alt="Residente o propietario"
-                  width={200}
-                  height={200}
-                />
-              </div>
+              <Link href={item.url} className={styles.cardLink}>
+                <div className={styles.icon}>
+                  <Image
+                    src={item.img}
+                    alt={item.alt}
+                    width={200}
+                    height={200}
+                  />
+                </div>
+              </Link>
             </div>
           ))}
           </div>
         </section>
-
       </main>
     </div>
   )

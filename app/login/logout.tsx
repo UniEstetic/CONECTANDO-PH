@@ -1,14 +1,12 @@
-import { signOut } from "@/app/api/auth/[...nextauth]/auth.config"; 
+import { handleSignOut } from "@/app/actions/auth";
+import styles from "../ui/styles/headerUsuarios.module.css"
 
 export default function LogoutPage() {
   return (
-    <form
-      action={async () => {
-        "use server";
-        await signOut({ redirectTo: "/login" });
-      }}
-    >
-      <button type="submit">Cerrar Sesión</button>
+    <form className={styles.logogut} action={handleSignOut}>
+      <button className={styles.logogutButton} type="submit">
+        Cerrar Sesión
+      </button>
     </form>
   );
 }
