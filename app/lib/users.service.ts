@@ -1,5 +1,5 @@
 import { apiClient } from './utils/apiClient';
-import { User } from './definitions';
+import { User } from './definitions/definitions';
 
 // 🔹 Buscar usuario por ID
 export async function getUserById(id: string): Promise<User> {

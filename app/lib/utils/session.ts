@@ -1,6 +1,6 @@
 import 'server-only'
 import { SignJWT, jwtVerify } from 'jose'
-import { SessionPayload } from '@/app/lib/definitions'
+import { SessionPayload } from '@/app/lib/definitions/definitions'
 import { redirect } from 'next/navigation';
 
 import { cookies } from 'next/headers'

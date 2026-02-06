@@ -10,7 +10,7 @@
 
 
 import { NextResponse } from 'next/server';
-import { User } from '@/app/lib/definitions';
+import { User } from '@/app/lib/definitions/definitions';
 
 export async function GET(req: Request) {
   // Obtiene el header Authorization del request (token JWT)

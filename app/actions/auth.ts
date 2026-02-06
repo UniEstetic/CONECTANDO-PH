@@ -1,6 +1,6 @@
 'use server'
 
-import { SignupFormSchema, FormState } from '@/app/lib/definitions'
+import { SignupFormSchema, FormState } from '@/app/lib/definitions/definitions'
 import { redirect } from 'next/navigation';
 import { createSession } from '@/app/lib/utils/session'
 import { signOut } from "@/app/api/auth/[...nextauth]/auth.config";

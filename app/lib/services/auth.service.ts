@@ -1,5 +1,5 @@
 import { apiClient, apiClientSession } from '@/app/lib/utils/apiClient';
-import { User, SelectProviderResponse, ValidateLoginResponse } from '@/app/lib/definitions';
+import { User, UserAuth, SelectProviderResponse, ValidateLoginResponse } from '@/app/lib/definitions/definitions';
 
 // Seleccionar proveedor de autenticación
 export async function selectProvider(providerName: string) {
@@ -49,7 +49,7 @@ export async function validateLogin(
   return data;
 }
 // Obtener perfil del usuario autenticado
-export async function getProfile(tokenBack:string): Promise<User> {
+export async function getProfile(tokenBack:string): Promise<UserAuth> {
   // Usa el endpoint proxy correcto
   const res = await apiClientSession('/auth/getProfile',{
     method: 'GET',
@@ -66,8 +66,8 @@ export async function getProfile(tokenBack:string): Promise<User> {
   const data = await res.json();
   // Si la respuesta tiene status y message, devuélvelos
   if (data.status && data.message && data.data) {
-    return data.data as User;
+    return data.data as UserAuth;
   }
   // Si no, devuelve el resultado plano (asumiendo que es User)
-  return data as User;
+  return data as UserAuth;
 }
