@@ -100,7 +100,11 @@ export default function menuAsambleas() {
                 </div>
               )}
               
-              {tipoSeleccionado === 'Encuesta' && (
+              
+              
+              
+            </div>
+            {tipoSeleccionado === 'Encuesta' && (
                 <div className={styles.encuestaForm}>
                   <div className={styles.formField}>
                     <label>Pregunta:</label>
@@ -158,9 +162,6 @@ export default function menuAsambleas() {
                   </div>
                 </div>
               )}
-              
-              
-            </div>
           </div>
         </div>
       </main>
