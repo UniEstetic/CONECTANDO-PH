@@ -34,6 +34,30 @@ export interface User {
   team: string;     
 }
 
+export interface UserAuth{
+  userProfile: {
+    email: string,
+    firstName: string,
+    lastName: string,
+    document: string,
+    documentType: string,
+    phone: string,
+    avatar: string,
+    roles: string[]
+  },
+  userId: string,
+  ownership: {
+    id: string,
+    name: string,
+    tax_id: string,
+    address: string,
+    city: string,
+    country: string,
+    state: string
+  },
+  scope: string
+}
+
 export interface SessionPayload {
   userId: string;
   expiresAt: Date;
