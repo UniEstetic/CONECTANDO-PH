@@ -9,16 +9,17 @@ export default function menuAsambleas() {
     <div className={styles.container}>
       <main className={styles.containerResidentes}>
         <UsuariosHeader />
-        
-        <div className={styles.assambleasContainer}>
-          <div className={styles.assambleasSidebar}>
+
+        <div className={styles.divAssambleasConf}>
+          <div>
             <Link href="/usuarios/administrativo/administrarasambleas" className={styles.btnUsuarios}>
               <button className={styles.configButton}>
                 Configurar nueva asamblea
                 </button>
             </Link>
-            
-            
+          </div>
+
+          <div className={styles.assambleasSidebar}>
             <div className={styles.assambleasList}>
               <h3 className={styles.assambleasTitle}>Asambleas programadas</h3>
               
@@ -39,7 +40,8 @@ export default function menuAsambleas() {
               </div>
             </div>
           </div>
-
+        </div>
+        <div className={styles.assambleasContainer}>
           {/* Sección derecha - Tutoriales */}
           <div className={styles.containerSelection}>
             <div className={styles.tutorialesSection}>
