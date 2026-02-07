@@ -15,7 +15,7 @@ export interface Assembly {
   created_at: string; 
 }
 
-export interface responseCreateAssembly {
+export interface responseAssembly {
   status: string;
   message: string;
   data: Assembly;
