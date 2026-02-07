@@ -39,6 +39,6 @@ export async function apiClientSession(
       ...(options.headers || {}),
     },
   })
-  console.log('BACKEND_API_URL', `${URL_BACKEND}${url}`, URL_BACKEND, res) ;
+  
   return res;
 }
