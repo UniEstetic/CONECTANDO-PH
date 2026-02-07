@@ -7,7 +7,7 @@ export interface QuestionOptions {
   is_active: boolean;
 }
 
-export interface responseCreateQuestionOptions {
+export interface responseQuestionOptions {
   status: string;
   message: string;
   data: QuestionOptions;

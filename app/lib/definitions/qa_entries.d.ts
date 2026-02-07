@@ -9,7 +9,7 @@ export interface QaEntries {
   created_at: string;
 }
 
-export interface responseCreateQaEntries {
+export interface responseQaEntries {
   status: string;
   message: string;
   data: QaEntries;

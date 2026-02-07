@@ -19,7 +19,7 @@ export interface Phs {
   created_by: string;
 }
 
-export interface responseCreatePhs {
+export interface responsePhs {
   status: string;
   message: string;
   data: Phs;
