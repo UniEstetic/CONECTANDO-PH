@@ -14,7 +14,7 @@ export interface Units {
   created_at: string;
 }
 
-export interface responseCreateUnits {
+export interface responseUnits {
   status: string;
   message: string;
   data: Units;

@@ -10,7 +10,7 @@ export interface Agenda {
   created_at: string;
 }
 
-export interface responseCreateAgenda {
+export interface responseAgenda {
   status: string;
   message: string;
   data: Agenda;
