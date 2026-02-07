@@ -8,7 +8,7 @@ export interface Roles {
   created_at: string;
 }
 
-export interface responseCreateRoles {
+export interface responseRoles {
   status: string;
   message: string;
   data: Roles;

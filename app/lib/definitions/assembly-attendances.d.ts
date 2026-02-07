@@ -9,7 +9,7 @@ export interface AssemblyAttendances {
   notes: string;
 }
 
-export interface responseCreateAssemblyAttendances {
+export interface responseAssemblyAttendances {
   status: string;
   message: string;
   data: AssemblyAttendances;
