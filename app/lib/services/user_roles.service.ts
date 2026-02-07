@@ -1,8 +1,8 @@
-import { apiClient } from './utils/apiClient';
+import { apiClientSession } from '../utils/apiClient';
 
 // Asignar rol a usuario
 export async function assignUserRole(userId: string, payload: any) {
-  const res = await apiClient(`/api/user_roles/assing/${userId}`, {
+  const res = await apiClientSession(`/user_roles/assing/${userId}`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -11,6 +11,6 @@ export async function assignUserRole(userId: string, payload: any) {
 
 // Obtener roles de usuario
 export async function getUserRoles(userId: string) {
-  const res = await apiClient(`/api/user_roles/${userId}`);
+  const res = await apiClientSession(`/user_roles/${userId}`);
   return res.json();
 }

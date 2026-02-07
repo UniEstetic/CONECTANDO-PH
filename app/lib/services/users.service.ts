@@ -1,9 +1,9 @@
-import { apiClient } from './utils/apiClient';
-import { User } from './definitions/definitions';
+import { apiClientSession } from '../utils/apiClient';
+import { User } from '../definitions/users';
 
 // 🔹 Buscar usuario por ID
 export async function getUserById(id: string): Promise<User> {
-  const res = await apiClient(`/api/users/${id}`);
+  const res = await apiClientSession(`/users/${id}`);
   if (!res.ok) {
     throw new Error('Error al obtener usuario por ID');
   }
@@ -12,7 +12,7 @@ export async function getUserById(id: string): Promise<User> {
 
 // 🔹 Eliminar usuario
 export async function deleteUser(id: string) {
-  const res = await apiClient(`/api/users/${id}`, {
+  const res = await apiClientSession(`/users/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) {
@@ -23,7 +23,7 @@ export async function deleteUser(id: string) {
 
 // 🔹 Listar usuarios
 export async function getUsers(): Promise<User[]> {
-  const res = await apiClient('/api/users');
+  const res = await apiClientSession('/users');
   if (!res.ok) {
     throw new Error('Error al obtener usuarios');
   }
@@ -32,7 +32,7 @@ export async function getUsers(): Promise<User[]> {
 
 // 🔹 Crear usuario
 export async function createUser(payload: Omit<User, 'id'>): Promise<User> {
-  const res = await apiClient('/api/users/register', {
+  const res = await apiClientSession('/users/register', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -47,7 +47,7 @@ export async function updateUser(
   id: string,
   payload: Partial<User>
 ): Promise<User> {
-  const res = await apiClient(`/api/users/${id}`, {
+  const res = await apiClientSession(`/users/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
@@ -57,18 +57,9 @@ export async function updateUser(
   return res.json() as Promise<User>;
 }
 
-// 🔹 Obtener perfil del usuario autenticado
-export async function getUserProfile(): Promise<User> {
-  const res = await apiClient('/api/users/getProfile');
-  if (!res.ok) {
-    throw new Error('Token inválido o expirado');
-  }
-  return res.json() as Promise<User>;
-}
-
 // 🔹 Buscar usuario por email
 export async function getUserByEmail(email: string): Promise<User> {
-  const res = await apiClient(`/api/users/email/${email}`);
+  const res = await apiClientSession(`/users/email/${email}`);
   if (!res.ok) {
     throw new Error('Error al obtener usuario por email');
   }
