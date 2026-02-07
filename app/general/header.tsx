@@ -1,9 +1,14 @@
+'use client';
 import styles from '@/app/ui/styles/usuarios.module.css';
 
 import LogoUsuarios from '@/app/usuarios/components/logo_usuarios';
 import LogoutPage from "@/app/login/logout";
+import { useSession } from "next-auth/react";
 
 export default function Header() {
+  const { data: session } = useSession();
+  const firstName = session?.user?.userProfile?.firstName || 'Usuario';
+
   return (
     <div className={styles.header}>
         
@@ -14,8 +19,7 @@ export default function Header() {
           <p className={styles.saludo}>
             Hola, 
           </p>
-          <strong className={styles.saludoName}>Andrés</strong>
-          <LogoutPage/>
+          <strong className={styles.saludoName}>{firstName}</strong>
         </div>
       </div> 
   );
