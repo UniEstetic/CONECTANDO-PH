@@ -7,7 +7,7 @@ export interface AssemblyAnnouncements {
   created_at: string;
 }
 
-export interface responseCreateAssemblyAnnouncements {
+export interface responseAssemblyAnnouncements {
   status: string;
   message: string;
   data: AssemblyAnnouncements;
