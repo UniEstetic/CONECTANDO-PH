@@ -1,34 +1,34 @@
-import { apiClient, apiClientSession } from '@/app/lib/utils/apiClient';
-import { User, SelectProviderResponse, ValidateLoginResponse } from '@/app/lib/definitions';
+import { apiClient, apiClientSession } from "@/app/lib/utils/apiClient";
+import {
+  UserAuth,
+  SelectProviderResponse,
+  ValidateLoginResponse,
+} from "@/app/lib/definitions/next-auth";
 
 // Seleccionar proveedor de autenticación
 export async function selectProvider(providerName: string) {
-  // Llamada al backend para seleccionar el proveedor de autenticación
-  const res = await apiClient('/auth/select', {
-    method: 'POST',
+  const res = await apiClient("/auth/select", {
+    method: "POST",
     body: JSON.stringify({ providerName }),
   });
 
-  // Validación de la respuesta HTTP
   if (!res.ok) {
-    // Lectura del mensaje de error del backend (si existe)
     const error = await res.json().catch(() => ({}));
     throw new Error(
-      error.message || `Error al seleccionar proveedor (${res.status})`
+      error.message || `Error al seleccionar proveedor (${res.status})`,
     );
   }
 
-  // Retorna la respuesta del backend (token temporal)
   return res.json() as Promise<SelectProviderResponse>;
 }
 // Validar login
 export async function validateLogin(
   tempToken: string,
   email: string,
-  password: string
+  password: string,
 ): Promise<ValidateLoginResponse> {
-  const res = await apiClient('/auth/validate', {
-    method: 'POST',
+  const res = await apiClient("/auth/validate", {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${tempToken}`,
     },
@@ -44,30 +44,26 @@ export async function validateLogin(
 
   const data = (await res.json()) as ValidateLoginResponse;
 
-  // Ya no es necesario guardar el token en localStorage, se guarda en cookie httpOnly desde el backend
-
   return data;
 }
 // Obtener perfil del usuario autenticado
-export async function getProfile(tokenBack:string): Promise<User> {
-  // Usa el endpoint proxy correcto
-  const res = await apiClientSession('/auth/getProfile',{
-    method: 'GET',
-    headers: {
+export async function getProfile(tokenBack?: string): Promise<UserAuth> {
+  const res = await apiClientSession("/auth/getProfile", {
+    method: "GET",
+    headers: tokenBack ? {
       Authorization: `Bearer ${tokenBack}`,
-    },
+    } : {}
   });
 
-  // Si el token no es válido o falta, muestra el error
   if (res.status === 401) {
-    throw new Error('No autenticado. Inicia sesión.');
+    throw new Error("No autenticado. Inicia sesión.");
   }
 
   const data = await res.json();
-  // Si la respuesta tiene status y message, devuélvelos
+
   if (data.status && data.message && data.data) {
-    return data.data as User;
+    return data.data as UserAuth;
   }
-  // Si no, devuelve el resultado plano (asumiendo que es User)
-  return data as User;
+
+  return data as UserAuth;
 }
