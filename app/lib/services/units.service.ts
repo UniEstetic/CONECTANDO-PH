@@ -1,58 +1,62 @@
-import { apiClientSession } from '../utils/apiClient';
-import { Agenda } from '../definitions/agenda';
+'use server';
 
-// 🔹 Buscar usuario por ID
-export async function getById(id: string): Promise<Agenda> {
-  const res = await apiClientSession(`/users/${id}`);
+import { apiClientSession } from '../utils/apiClient';
+import { Units, responseListUnits, responseUnits } from '../definitions/units';
+import {removeRegister} from "@/app/lib/definitions/definitions";
+
+// Buscar por ID
+export async function getById(phId: string, id: string): Promise<responseUnits> {
+  const res = await apiClientSession(`/units/get/${phId}/${id}`);
   if (!res.ok) {
-    throw new Error('Error al obtener usuario por ID');
+    throw new Error('Error al obtener registro por ID');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseUnits>;
 }
 
-// 🔹 Eliminar usuario
-export async function remove(id: string) {
-  const res = await apiClientSession(`/users/${id}`, {
+// Eliminar
+export async function remove(phId: string, id: string): Promise<removeRegister>{
+  const res = await apiClientSession(`/units/${phId}/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) {
-    throw new Error('Error al eliminar usuario');
+    throw new Error('Error al eliminar registro.');
   }
-  return res.json();
+  return res.json() as Promise<removeRegister>;
 }
 
-// 🔹 Listar usuarios
-export async function getAll(): Promise<Agenda[]> {
-  const res = await apiClientSession('/users');
+// Listar
+export async function getAll(phId: string): Promise<responseListUnits> {
+  const res = await apiClientSession(`/units/list/${phId}`);
   if (!res.ok) {
-    throw new Error('Error al obtener usuarios');
+    throw new Error('Error al obtener registro.');
   }
-  return res.json() as Promise<Agenda[]>;
+  return res.json() as Promise<responseListUnits>;
 }
 
-// 🔹 Crear usuario
-export async function create(payload: Omit<Agenda, 'id'>): Promise<Agenda> {
-  const res = await apiClientSession('/users/register', {
+// Crear
+export async function create(phId: string, payload: Partial<Units>): Promise<responseUnits> {
+  const res = await apiClientSession(`/units/register/${phId}`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al crear usuario');
+    throw new Error('Error al crear registro');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseUnits>;
 }
 
-// 🔹 Actualizar usuario
+// Actualizar
 export async function update(
+  phId: string,
   id: string,
-  payload: Partial<Agenda>
-): Promise<Agenda> {
-  const res = await apiClientSession(`/users/${id}`, {
+  payload: Partial<Units>
+): Promise<responseUnits> {
+  const res = await apiClientSession(`/units/${phId}/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al actualizar usuario');
+    throw new Error('Error al actualizar registro');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseUnits>;
 }

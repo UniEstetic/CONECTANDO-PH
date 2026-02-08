@@ -1,3 +1,5 @@
+'use server';
+
 import { apiClient, apiClientSession } from "@/app/lib/utils/apiClient";
 import {
   UserAuth,

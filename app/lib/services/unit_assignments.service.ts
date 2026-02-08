@@ -1,58 +1,25 @@
+'use server';
+
 import { apiClientSession } from '../utils/apiClient';
-import { Agenda } from '../definitions/agenda';
+import { UnitAssignments, responseUnitAssignments } from '../definitions/unit_assignments';
 
-// 🔹 Buscar usuario por ID
-export async function getById(id: string): Promise<Agenda> {
-  const res = await apiClientSession(`/users/${id}`);
+// Buscar por ID
+export async function getById(userRolId: string): Promise<responseUnitAssignments> {
+  const res = await apiClientSession(`/unit_assignments/${userRolId}`);
   if (!res.ok) {
-    throw new Error('Error al obtener usuario por ID');
+    throw new Error('Error al obtener registro por ID');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseUnitAssignments>;
 }
 
-// 🔹 Eliminar usuario
-export async function remove(id: string) {
-  const res = await apiClientSession(`/users/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) {
-    throw new Error('Error al eliminar usuario');
-  }
-  return res.json();
-}
-
-// 🔹 Listar usuarios
-export async function getAll(): Promise<Agenda[]> {
-  const res = await apiClientSession('/users');
-  if (!res.ok) {
-    throw new Error('Error al obtener usuarios');
-  }
-  return res.json() as Promise<Agenda[]>;
-}
-
-// 🔹 Crear usuario
-export async function create(payload: Omit<Agenda, 'id'>): Promise<Agenda> {
-  const res = await apiClientSession('/users/register', {
+// Crear
+export async function assign(userRolId: string, payload: Partial<UnitAssignments>): Promise<responseUnitAssignments> {
+  const res = await apiClientSession(`/unit_assignments/assing/${userRolId}`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al crear usuario');
+    throw new Error('Error al crear registro');
   }
-  return res.json() as Promise<Agenda>;
-}
-
-// 🔹 Actualizar usuario
-export async function update(
-  id: string,
-  payload: Partial<Agenda>
-): Promise<Agenda> {
-  const res = await apiClientSession(`/users/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    throw new Error('Error al actualizar usuario');
-  }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseUnitAssignments>;
 }

@@ -1,13 +1,30 @@
 'use client';
 
-import { SetStateAction, useState } from 'react';
+import { SetStateAction, useState, useEffect } from 'react';
 import styles from '@/app/ui/styles/menuAsambleas.module.css';
 import UsuariosHeader from '@/app/usuarios/components/UsuariosHeader';
+import {getAll as listPhs} from "@/app/lib/services/phs.service";
+import { Phs, responseListPhs, responsePhs } from '@/app/lib/definitions/phs';
 
 export default function MenuAsambleas() {
   const [mostrarOpciones, setMostrarOpciones] = useState(false);
   const [tipoSeleccionado, setTipoSeleccionado] = useState('');
+  const [phs, setPhs] = useState<responseListPhs>();
   
+  useEffect(()=>{
+    (async () => {
+      try {
+        const data = await listPhs();
+        setPhs(data);
+      } catch (error) {
+        console.error("Error cargando PHS:", error);
+      }
+    })()
+  }, []);
+
+  useEffect(()=>{
+    console.log(phs);
+  }, [phs]);
   // Estados para los modales
   const [mostrarModalTorre, setMostrarModalTorre] = useState(false);
   const [mostrarModalInmueble, setMostrarModalInmueble] = useState(false);
