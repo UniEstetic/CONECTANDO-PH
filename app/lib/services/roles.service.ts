@@ -1,33 +1,61 @@
+'use server';
+
 import { apiClientSession } from '../utils/apiClient';
+import { Roles, responseListRoles, responseRoles } from '../definitions/roles';
+import {removeRegister} from "@/app/lib/definitions/definitions";
 
-// LISTAR ROLES
-export async function getAll() {
-	const res = await apiClientSession('/roles');
-	return res.json();
+// Buscar por ID
+export async function getById(id: string): Promise<responseRoles> {
+  const res = await apiClientSession(`/roles/${id}`);
+  if (!res.ok) {
+    throw new Error('Error al obtener registro por ID');
+  }
+  return res.json() as Promise<responseRoles>;
 }
 
-// CREAR ROL
-export async function create(payload: any) {
-	const res = await apiClientSession('/roles', {
-		method: 'POST',
-		body: JSON.stringify(payload),
-	});
-	return res.json();
+// Eliminar
+export async function remove(id: string): Promise<removeRegister>{
+  const res = await apiClientSession(`/roles/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    throw new Error('Error al eliminar registro.');
+  }
+  return res.json() as Promise<removeRegister>;
 }
 
-// ACTUALIZAR ROL
-export async function update(id: string, payload: any) {
-	const res = await apiClientSession(`/roles/${id}`, {
-		method: 'PUT',
-		body: JSON.stringify(payload),
-	});
-	return res.json();
+// Listar
+export async function getAll(): Promise<responseListRoles> {
+  const res = await apiClientSession('/roles');
+  if (!res.ok) {
+    throw new Error('Error al obtener registro.');
+  }
+  return res.json() as Promise<responseListRoles>;
 }
 
-// ELIMINAR ROL
-export async function remove(id: string) {
-	const res = await apiClientSession(`/roles/${id}`, {
-		method: 'DELETE',
-	});
-	return res.json();
+// Crear
+export async function create(payload: Partial<Roles>): Promise<responseRoles> {
+  const res = await apiClientSession('/roles', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error('Error al crear registro');
+  }
+  return res.json() as Promise<responseRoles>;
+}
+
+// Actualizar
+export async function update(
+  id: string,
+  payload: Partial<Roles>
+): Promise<responseRoles> {
+  const res = await apiClientSession(`/roles/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error('Error al actualizar registro');
+  }
+  return res.json() as Promise<responseRoles>;
 }

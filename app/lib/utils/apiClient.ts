@@ -1,3 +1,5 @@
+'use server';
+
 import { auth } from "@/app/api/auth/[...nextauth]/auth.config";
 const URL_BACKEND= process?.env?.BACKEND_API_URL ?? "http://localhost:3001/api/v1";
 const CLIENT_ID= process?.env?.AUTH_CLIENT_ID ?? "cliente";
@@ -41,4 +43,4 @@ export async function apiClientSession(
   })
   
   return res;
-}
+} 
