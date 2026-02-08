@@ -1,58 +1,61 @@
-import { apiClientSession } from '../utils/apiClient';
-import { Agenda } from '../definitions/agenda';
+'use server';
 
-// 🔹 Buscar usuario por ID
-export async function getById(id: string): Promise<Agenda> {
-  const res = await apiClientSession(`/users/${id}`);
+import { apiClientSession } from '../utils/apiClient';
+import { QaEntries, responseListQaEntries, responseQaEntries } from '../definitions/qa_entries';
+import {removeRegister} from "@/app/lib/definitions/definitions";
+
+// Buscar por ID
+export async function getById(id: string): Promise<responseQaEntries> {
+  const res = await apiClientSession(`/agenda/${id}`);
   if (!res.ok) {
-    throw new Error('Error al obtener usuario por ID');
+    throw new Error('Error al obtener registro por ID');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseQaEntries>;
 }
 
-// 🔹 Eliminar usuario
-export async function remove(id: string) {
-  const res = await apiClientSession(`/users/${id}`, {
+// Eliminar
+export async function remove(id: string): Promise<removeRegister>{
+  const res = await apiClientSession(`/agenda/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) {
-    throw new Error('Error al eliminar usuario');
+    throw new Error('Error al eliminar registro.');
   }
-  return res.json();
+  return res.json() as Promise<removeRegister>;
 }
 
-// 🔹 Listar usuarios
-export async function getAll(): Promise<Agenda[]> {
-  const res = await apiClientSession('/users');
+// Listar
+export async function getAll(): Promise<responseListQaEntries> {
+  const res = await apiClientSession('/agenda');
   if (!res.ok) {
-    throw new Error('Error al obtener usuarios');
+    throw new Error('Error al obtener registro.');
   }
-  return res.json() as Promise<Agenda[]>;
+  return res.json() as Promise<responseListQaEntries>;
 }
 
-// 🔹 Crear usuario
-export async function create(payload: Omit<Agenda, 'id'>): Promise<Agenda> {
-  const res = await apiClientSession('/users/register', {
+// Crear
+export async function create(payload: Partial<QaEntries>): Promise<responseQaEntries> {
+  const res = await apiClientSession('/agenda', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al crear usuario');
+    throw new Error('Error al crear registro');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseQaEntries>;
 }
 
-// 🔹 Actualizar usuario
+// Actualizar
 export async function update(
   id: string,
-  payload: Partial<Agenda>
-): Promise<Agenda> {
-  const res = await apiClientSession(`/users/${id}`, {
+  payload: Partial<QaEntries>
+): Promise<responseQaEntries> {
+  const res = await apiClientSession(`/agenda/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al actualizar usuario');
+    throw new Error('Error al actualizar registro');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseQaEntries>;
 }
