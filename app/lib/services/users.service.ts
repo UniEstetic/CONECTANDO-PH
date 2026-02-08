@@ -2,7 +2,7 @@
 
 import { apiClientSession } from '../utils/apiClient';
 import { User, responseListUsers, responseUsers } from '../definitions/users';
-import {removeRegister} from "@/app/lib/definitions/definitions";
+import {removeRegister, listFilters} from "@/app/lib/definitions/definitions";
 
 // Buscar usuario por ID
 export async function getById(id: string): Promise<responseUsers> {
@@ -25,8 +25,15 @@ export async function remove(id: string): Promise<removeRegister> {
 }
 
 // Listar usuarios
-export async function getAll(): Promise<responseListUsers> {
-  const res = await apiClientSession('/users');
+export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListUsers> {
+  const queryParams = new URLSearchParams({
+    _fields: fields,
+    _where: where,
+    limit: limit,
+    page: page
+  });
+
+  const res = await apiClientSession(`/users?${queryParams.toString()}`);
   if (!res.ok) {
     throw new Error('Error al obtener usuarios');
   }

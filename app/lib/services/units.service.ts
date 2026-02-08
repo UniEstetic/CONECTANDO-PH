@@ -2,7 +2,7 @@
 
 import { apiClientSession } from '../utils/apiClient';
 import { Units, responseListUnits, responseUnits } from '../definitions/units';
-import {removeRegister} from "@/app/lib/definitions/definitions";
+import {removeRegister, listFilters} from "@/app/lib/definitions/definitions";
 
 // Buscar por ID
 export async function getById(phId: string, id: string): Promise<responseUnits> {
@@ -25,8 +25,15 @@ export async function remove(phId: string, id: string): Promise<removeRegister>{
 }
 
 // Listar
-export async function getAll(phId: string): Promise<responseListUnits> {
-  const res = await apiClientSession(`/units/list/${phId}`);
+export async function getAll(phId: string, {fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListUnits> {
+  const queryParams = new URLSearchParams({
+    _fields: fields,
+    _where: where,
+    limit: limit,
+    page: page
+  });
+
+  const res = await apiClientSession(`/units/list/${phId}?${queryParams.toString()}`);
   if (!res.ok) {
     throw new Error('Error al obtener registro.');
   }
