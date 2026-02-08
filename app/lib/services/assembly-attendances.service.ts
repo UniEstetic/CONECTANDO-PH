@@ -1,58 +1,61 @@
-import { apiClientSession } from '../utils/apiClient';
-import { Agenda } from '../definitions/agenda';
+'use server';
 
-// 🔹 Buscar usuario por ID
-export async function getById(id: string): Promise<Agenda> {
-  const res = await apiClientSession(`/users/${id}`);
+import { apiClientSession } from '../utils/apiClient';
+import { AssemblyAttendances, responseAssemblyAttendances, responseListAssemblyAttendances } from '../definitions/assembly-attendances';
+import {removeRegister} from "@/app/lib/definitions/definitions";
+
+// Buscar por ID
+export async function getById(id: string): Promise<responseAssemblyAttendances> {
+  const res = await apiClientSession(`/assembly-attendances/${id}`);
   if (!res.ok) {
-    throw new Error('Error al obtener usuario por ID');
+    throw new Error('Error al obtener registro por ID');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseAssemblyAttendances>;
 }
 
-// 🔹 Eliminar usuario
-export async function remove(id: string) {
-  const res = await apiClientSession(`/users/${id}`, {
+// Eliminar
+export async function remove(id: string): Promise<removeRegister>{
+  const res = await apiClientSession(`/assembly-attendances/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) {
-    throw new Error('Error al eliminar usuario');
+    throw new Error('Error al eliminar registro.');
   }
-  return res.json();
+  return res.json() as Promise<removeRegister>;
 }
 
-// 🔹 Listar usuarios
-export async function getAll(): Promise<Agenda[]> {
-  const res = await apiClientSession('/users');
+// Listar
+export async function getAll(): Promise<responseListAssemblyAttendances> {
+  const res = await apiClientSession('/assembly-attendances');
   if (!res.ok) {
-    throw new Error('Error al obtener usuarios');
+    throw new Error('Error al obtener registro.');
   }
-  return res.json() as Promise<Agenda[]>;
+  return res.json() as Promise<responseListAssemblyAttendances>;
 }
 
-// 🔹 Crear usuario
-export async function create(payload: Omit<Agenda, 'id'>): Promise<Agenda> {
-  const res = await apiClientSession('/users/register', {
+// Crear
+export async function create(payload: Partial<AssemblyAttendances>): Promise<responseAssemblyAttendances> {
+  const res = await apiClientSession('/assembly-attendances', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al crear usuario');
+    throw new Error('Error al crear registro');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseAssemblyAttendances>;
 }
 
-// 🔹 Actualizar usuario
+// Actualizar
 export async function update(
   id: string,
-  payload: Partial<Agenda>
-): Promise<Agenda> {
-  const res = await apiClientSession(`/users/${id}`, {
+  payload: Partial<AssemblyAttendances>
+): Promise<responseAssemblyAttendances> {
+  const res = await apiClientSession(`/assembly-attendances/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al actualizar usuario');
+    throw new Error('Error al actualizar registro');
   }
-  return res.json() as Promise<Agenda>;
+  return res.json() as Promise<responseAssemblyAttendances>;
 }

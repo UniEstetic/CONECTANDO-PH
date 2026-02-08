@@ -1,5 +1,5 @@
 import { propertiesList } from "@/app/lib/definitions/definitions";
-export interface Users {
+export interface User {
   id?: string;
   first_name: string;
   last_name: string;
