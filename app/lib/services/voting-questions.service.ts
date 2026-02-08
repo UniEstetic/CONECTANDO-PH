@@ -2,11 +2,11 @@
 
 import { apiClientSession } from '../utils/apiClient';
 import { VotingQuestions, responseListVotingQuestions, responseVotingQuestions } from '../definitions/voting-questions';
-import {removeRegister} from "@/app/lib/definitions/definitions";
+import {removeRegister, listFilters} from "@/app/lib/definitions/definitions";
 
 // Buscar por ID
 export async function getById(id: string): Promise<responseVotingQuestions> {
-  const res = await apiClientSession(`/agenda/${id}`);
+  const res = await apiClientSession(`/voting-questions/${id}`);
   if (!res.ok) {
     throw new Error('Error al obtener registro por ID');
   }
@@ -15,7 +15,7 @@ export async function getById(id: string): Promise<responseVotingQuestions> {
 
 // Eliminar
 export async function remove(id: string): Promise<removeRegister>{
-  const res = await apiClientSession(`/agenda/${id}`, {
+  const res = await apiClientSession(`/voting-questions/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) {
@@ -25,8 +25,15 @@ export async function remove(id: string): Promise<removeRegister>{
 }
 
 // Listar
-export async function getAll(): Promise<responseListVotingQuestions> {
-  const res = await apiClientSession('/agenda');
+export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListVotingQuestions> {
+  const queryParams = new URLSearchParams({
+    _fields: fields,
+    _where: where,
+    limit: limit,
+    page: page
+  });
+
+  const res = await apiClientSession(`/voting-questions?${queryParams.toString()}`);
   if (!res.ok) {
     throw new Error('Error al obtener registro.');
   }
@@ -35,7 +42,7 @@ export async function getAll(): Promise<responseListVotingQuestions> {
 
 // Crear
 export async function create(payload: VotingQuestions): Promise<responseVotingQuestions> {
-  const res = await apiClientSession('/agenda', {
+  const res = await apiClientSession('/voting-questions', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -50,7 +57,7 @@ export async function update(
   id: string,
   payload: Partial<VotingQuestions>
 ): Promise<responseVotingQuestions> {
-  const res = await apiClientSession(`/agenda/${id}`, {
+  const res = await apiClientSession(`/voting-questions/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });

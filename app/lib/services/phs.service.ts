@@ -2,7 +2,7 @@
 
 import { apiClientSession } from '../utils/apiClient';
 import { Phs, responseListPhs, responsePhs } from '../definitions/phs';
-import {removeRegister} from "@/app/lib/definitions/definitions";
+import {removeRegister, listFilters} from "@/app/lib/definitions/definitions";
 
 // Buscar por ID
 export async function getById(id: string): Promise<responsePhs> {
@@ -25,8 +25,15 @@ export async function remove(id: string): Promise<removeRegister>{
 }
 
 // Listar
-export async function getAll(): Promise<responseListPhs> {
-  const res = await apiClientSession('/phs');
+export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListPhs> {
+  const queryParams = new URLSearchParams({
+    _fields: fields,
+    _where: where,
+    limit: limit,
+    page: page
+  });
+
+  const res = await apiClientSession(`/phs?${queryParams.toString()}`);
   if (!res.ok) {
     throw new Error('Error al obtener registro.');
   }
