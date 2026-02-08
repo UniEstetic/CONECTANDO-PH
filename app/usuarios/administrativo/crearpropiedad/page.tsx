@@ -3,35 +3,113 @@
 import { SetStateAction, useState, useEffect } from 'react';
 import styles from '@/app/ui/styles/menuAsambleas.module.css';
 import UsuariosHeader from '@/app/usuarios/components/UsuariosHeader';
-import {getAll as listPhs} from "@/app/lib/services/phs.service";
+import { getAll as listPhs, getById as getByIdPhs, create as createPhs, update as updatePhs, remove as removePhs } from "@/app/lib/services/phs.service";
 import { Phs, responseListPhs, responsePhs } from '@/app/lib/definitions/phs';
+import { removeRegister, listFilters } from '@/app/lib/definitions/definitions';
 
 export default function MenuAsambleas() {
   const [mostrarOpciones, setMostrarOpciones] = useState(false);
   const [tipoSeleccionado, setTipoSeleccionado] = useState('');
   const [phs, setPhs] = useState<responseListPhs>();
-  
-  useEffect(()=>{
+  const [rescreateph, setrescreatePh] = useState<responsePhs>();
+  const [resupdateph, setresupdatePh] = useState<responsePhs>();
+  const [resgeteph, setresgetPh] = useState<responsePhs>();
+  const [resremove, setresremove] = useState<removeRegister>();
+
+  useEffect(() => {
     (async () => {
+      // servicio para listar
       try {
-        const data = await listPhs();
+        const filter:listFilters={ fields:"*", where:"", limit:"100", page:"1"}; 
+        const data = await listPhs(filter);
         setPhs(data);
       } catch (error) {
         console.error("Error cargando PHS:", error);
       }
+      // servicio para crear
+      try {
+        const payloadPh: Phs= {
+          "name": "Conjunto Residencial Los Álamos",
+          "tax_id": "900123456-1",
+          "address": "Calle 123 # 45-67, Bogotá",
+          "phone_number": "+576012345678",
+          "email": "administracion@alamos.com",
+          "logo_url": "https://storage.googleapis.com/tu-bucket/logos/logo.png",
+          "legal_representative": "Carlos Mario Restrepo",
+          "city": "Bogotá DC",
+          "state": "Bogotá DC",
+          "country": "Colombia",
+          "stratum": "EXAMPLE_STRATUM",
+          "number_of_towers": "EXAMPLE_NUMBER_OF_TOWERS",
+          "amount_of_real_estate": "EXAMPLE_AMOUNT_OF_REAL_ESTATE",
+          "horizontal_property_regulations": "EXAMPLE_HORIZONTAL_PROPERTY_REGULATIONS",
+          "is_active": true,
+          "created_by": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        };
+        const data = await createPhs(payloadPh);
+        setrescreatePh(data);
+      } catch (error) {
+        console.error("Error create PHS:", error);
+      }
+      // servicio para obtener detalle
+      try {
+        const data = await getByIdPhs("d290f1ee-6c54-4b01-90e6-d701748f0851");
+        setresgetPh(data);
+      } catch (error) {
+        console.error("Error obtener PHS:", error);
+      }
+      // servicio para actualuzar
+      try {
+        const payloadPhUpdate: Phs= {
+          "name": "Conjunto Residencial Los Álamos",
+          "tax_id": "900123456-1",
+          "address": "Calle 123 # 45-67, Bogotá",
+          "phone_number": "+576012345678",
+          "email": "administracion@alamos.com",
+          "logo_url": "https://storage.googleapis.com/tu-bucket/logos/logo.png",
+          "legal_representative": "Carlos Mario Restrepo",
+          "city": "Bogotá DC",
+          "state": "Bogotá DC",
+          "country": "Colombia",
+          "stratum": "EXAMPLE_STRATUM",
+          "number_of_towers": "EXAMPLE_NUMBER_OF_TOWERS",
+          "amount_of_real_estate": "EXAMPLE_AMOUNT_OF_REAL_ESTATE",
+          "horizontal_property_regulations": "EXAMPLE_HORIZONTAL_PROPERTY_REGULATIONS",
+          "is_active": true,
+          "created_by": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        };
+        const data = await updatePhs("d290f1ee-6c54-4b01-90e6-d701748f0851", payloadPhUpdate);
+        setresupdatePh(data);
+      } catch (error) {
+        console.error("Error update PHS:", error);
+      }
+      // servicio para eliminar
+      try {
+        const data = await removePhs("d290f1ee-6c54-4b01-90e6-d701748f0851");
+        setresremove(data);
+      } catch (error) {
+        console.error("Error remove PHS:", error);
+      }
     })()
+
   }, []);
 
-  useEffect(()=>{
-    console.log(phs);
-  }, [phs]);
+  useEffect(() => {
+    console.log('phs', phs);
+    console.log('rescreateph',rescreateph);
+    console.log('resupdateph',resupdateph);
+    console.log('resgeteph',resgeteph);
+    console.log('resremove',resremove);
+  }, [phs,rescreateph,resupdateph, resgeteph, resremove]);
+
+
   // Estados para los modales
   const [mostrarModalTorre, setMostrarModalTorre] = useState(false);
   const [mostrarModalInmueble, setMostrarModalInmueble] = useState(false);
   const [nuevaTorre, setNuevaTorre] = useState('');
   const [torres, setTorres] = useState<string[]>([]);
   const [inmuebles, setInmuebles] = useState<any[]>([]); // 👈 Nuevo estado para guardar inmuebles
-  
+
   // Estados para el formulario de inmueble
   const [inmuebleData, setInmuebleData] = useState({
     responsableFiscal: '',
@@ -44,7 +122,7 @@ export default function MenuAsambleas() {
     coeficiente: '',
     area: ''
   });
-  
+
   // Estados para el formulario
   const [formData, setFormData] = useState({
     nombreConjunto: '',
@@ -62,12 +140,12 @@ export default function MenuAsambleas() {
     reglamento: null as File | null,
     logotipo: null as File | null
   });
-  
+
   const handleSeleccionarTipo = (tipo: SetStateAction<string>) => {
     setTipoSeleccionado(tipo);
     setMostrarOpciones(false);
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -75,7 +153,7 @@ export default function MenuAsambleas() {
       [name]: value
     }));
   };
-  
+
   const handleInmuebleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setInmuebleData(prev => ({
@@ -83,7 +161,7 @@ export default function MenuAsambleas() {
       [name]: value
     }));
   };
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
     const file = e.target.files?.[0] || null;
     setFormData(prev => ({
@@ -91,7 +169,7 @@ export default function MenuAsambleas() {
       [field]: file
     }));
   };
-  
+
   // 👇 FUNCIÓN PRINCIPAL PARA GUARDAR TODO
   const handleGuardarCambios = () => {
     const datosCompletos = {
@@ -100,40 +178,40 @@ export default function MenuAsambleas() {
       inmuebles: inmuebles,
       fechaCreacion: new Date().toISOString()
     };
-    
+
     console.log('📦 Guardando TODOS los cambios:', datosCompletos);
-    
+
     // Aquí iría tu lógica para enviar a la API/backend
     // Ejemplo:
     // await fetch('/api/propiedad-horizontal', {
     //   method: 'POST',
     //   body: JSON.stringify(datosCompletos)
     // });
-    
+
     alert('✅ Cambios guardados exitosamente');
   };
-  
+
   const handleAgregarTorre = () => {
     if (nuevaTorre.trim()) {
       setTorres([...torres, nuevaTorre.trim()]);
       setNuevaTorre('');
     }
   };
-  
+
   const handleEliminarTorre = (index: number) => {
     setTorres(torres.filter((_, i) => i !== index));
   };
-  
+
   const handleGuardarTorres = () => {
     console.log('Torres guardadas:', torres);
     setMostrarModalTorre(false);
   };
-  
+
   const handleGuardarInmueble = () => {
     // 👇 Agregar el inmueble al array de inmuebles
     setInmuebles([...inmuebles, { ...inmuebleData, id: Date.now() }]);
     console.log('Inmueble guardado:', inmuebleData);
-    
+
     // Limpiar el formulario
     setInmuebleData({
       responsableFiscal: '',
@@ -146,27 +224,27 @@ export default function MenuAsambleas() {
       coeficiente: '',
       area: ''
     });
-    
+
     setMostrarModalInmueble(false);
   };
-  
+
   return (
     <div className={styles.container}>
       <main className={styles.containerResidentes}>
         <UsuariosHeader />
-        
+
         <div className={styles.mainContent}>
           <div className={styles.columnLeft}>
             <div className={styles.sectionHeader}>
               Crear Propiedad Horizontal
             </div>
-            
+
             <div className={styles.formContainer}>
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Nombre del conjunto:
                 </label>
-                <input 
+                <input
                   type="text"
                   name="nombreConjunto"
                   value={formData.nombreConjunto}
@@ -174,12 +252,12 @@ export default function MenuAsambleas() {
                   className={styles.formInput}
                 />
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Representante legal:
                 </label>
-                <input 
+                <input
                   type="text"
                   name="representanteLegal"
                   value={formData.representanteLegal}
@@ -187,12 +265,12 @@ export default function MenuAsambleas() {
                   className={styles.formInput}
                 />
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   NIT:
                 </label>
-                <input 
+                <input
                   type="text"
                   name="nit"
                   value={formData.nit}
@@ -200,7 +278,7 @@ export default function MenuAsambleas() {
                   className={styles.formInput}
                 />
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   País:
@@ -217,7 +295,7 @@ export default function MenuAsambleas() {
                   <option value="México">México</option>
                 </select>
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Departamento:
@@ -234,7 +312,7 @@ export default function MenuAsambleas() {
                   <option value="Valle del Cauca">Valle del Cauca</option>
                 </select>
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Ciudad:
@@ -251,12 +329,12 @@ export default function MenuAsambleas() {
                   <option value="Cali">Cali</option>
                 </select>
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Dirección:
                 </label>
-                <input 
+                <input
                   type="text"
                   name="direccion"
                   value={formData.direccion}
@@ -264,12 +342,12 @@ export default function MenuAsambleas() {
                   className={styles.formInput}
                 />
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Teléfono:
                 </label>
-                <input 
+                <input
                   type="text"
                   name="telefono"
                   value={formData.telefono}
@@ -277,12 +355,12 @@ export default function MenuAsambleas() {
                   className={styles.formInput}
                 />
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Email:
                 </label>
-                <input 
+                <input
                   type="email"
                   name="email"
                   value={formData.email}
@@ -290,13 +368,13 @@ export default function MenuAsambleas() {
                   className={styles.formInput}
                 />
               </div>
-              
+
               <div className={styles.formRowDouble}>
                 <div>
                   <label className={styles.formLabelShort}>
                     Cantidad torres/interiores:
                   </label>
-                  <input 
+                  <input
                     type="text"
                     name="cantidadTorres"
                     value={formData.cantidadTorres}
@@ -304,12 +382,12 @@ export default function MenuAsambleas() {
                     className={styles.formInputShort}
                   />
                 </div>
-                
+
                 <div>
                   <label className={styles.formLabelNoMin}>
                     Cantidad de inmuebles:
                   </label>
-                  <input 
+                  <input
                     type="text"
                     name="cantidadInmuebles"
                     value={formData.cantidadInmuebles}
@@ -318,12 +396,12 @@ export default function MenuAsambleas() {
                   />
                 </div>
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Estrato:
                 </label>
-                <input 
+                <input
                   type="text"
                   name="estrato"
                   value={formData.estrato}
@@ -331,7 +409,7 @@ export default function MenuAsambleas() {
                   className={styles.formInputShort}
                 />
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Reglamento:
@@ -345,7 +423,7 @@ export default function MenuAsambleas() {
                   </button>
                 </div>
               </div>
-              
+
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>
                   Logotipo:
@@ -356,44 +434,44 @@ export default function MenuAsambleas() {
               </div>
             </div>
           </div>
-          
+
           <div className={styles.columnRight}>
             <div className={styles.sectionHeader}>
               Configurar Propiedad Horizontal
             </div>
-            
+
             <div className={styles.configContainer}>
-              <button 
+              <button
                 onClick={() => setMostrarModalTorre(true)}
                 className={`${styles.configButton} ${styles.configButtonPurple}`}
               >
                 Crear torre/Interior
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setMostrarModalInmueble(true)}
                 className={`${styles.configButton} ${styles.configButtonBlue}`}
               >
                 Crear inmueble/local
               </button>
-              
+
               <button className={`${styles.configButton} ${styles.configButtonOrange}`}>
                 Crear zonas comunes
               </button>
             </div>
           </div>
         </div>
-        
+
         {/* 👇 BOTÓN GUARDAR CAMBIOS CENTRADO AL FINAL */}
         <div className={styles.saveButtonContainer}>
-          <button 
+          <button
             onClick={handleGuardarCambios}
             className={styles.saveButton}
           >
             Guardar cambios
           </button>
         </div>
-        
+
         {mostrarModalTorre && (
           <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
@@ -405,8 +483,8 @@ export default function MenuAsambleas() {
                   Nombre o número de la nueva torre/Interior:
                 </p>
               </div>
-              
-              <input 
+
+              <input
                 type="text"
                 value={nuevaTorre}
                 onChange={(e) => setNuevaTorre(e.target.value)}
@@ -417,7 +495,7 @@ export default function MenuAsambleas() {
                 }}
                 className={styles.modalInput}
               />
-              
+
               <div className={styles.torresList}>
                 {torres.length === 0 ? (
                   <p className={styles.torresListEmpty}>
@@ -439,9 +517,9 @@ export default function MenuAsambleas() {
                   ))
                 )}
               </div>
-              
+
               <div className={styles.modalButtonContainer}>
-                <button 
+                <button
                   onClick={handleGuardarTorres}
                   className={styles.modalSaveButton}
                 >
@@ -451,27 +529,27 @@ export default function MenuAsambleas() {
             </div>
           </div>
         )}
-        
+
         {mostrarModalInmueble && (
           <div className={styles.modalOverlay}>
             <div className={`${styles.modalContent} ${styles.modalContentWide}`}>
               <h2 className={styles.modalTitleBlue}>
                 Creando inmueble:
               </h2>
-              
+
               <p className={styles.modalSubtitleBlue}>
                 Responsable fiscal del apartamento:
               </p>
-              
+
               <div className={styles.formGroup}>
-                <input 
+                <input
                   type="text"
                   name="responsableFiscal"
                   value={inmuebleData.responsableFiscal}
                   onChange={handleInmuebleInputChange}
                   className={styles.modalInputGray}
                 />
-                
+
                 <select
                   name="tipoDocumento"
                   value={inmuebleData.tipoDocumento}
@@ -484,8 +562,8 @@ export default function MenuAsambleas() {
                   <option value="NIT">NIT</option>
                   <option value="PAS">Pasaporte</option>
                 </select>
-                
-                <input 
+
+                <input
                   type="text"
                   name="numeroDocumento"
                   placeholder="Número de documento:"
@@ -493,8 +571,8 @@ export default function MenuAsambleas() {
                   onChange={handleInmuebleInputChange}
                   className={styles.modalInputGray}
                 />
-                
-                <input 
+
+                <input
                   type="text"
                   name="numeroInmueble"
                   placeholder="Número del inmueble:"
@@ -502,7 +580,7 @@ export default function MenuAsambleas() {
                   onChange={handleInmuebleInputChange}
                   className={styles.modalInputGray}
                 />
-                
+
                 <div className={styles.formGroupRow}>
                   <select
                     name="torreInterior"
@@ -515,8 +593,8 @@ export default function MenuAsambleas() {
                       <option key={index} value={torre}>{torre}</option>
                     ))}
                   </select>
-                  
-                  <input 
+
+                  <input
                     type="text"
                     name="piso"
                     placeholder="Piso:"
@@ -525,7 +603,7 @@ export default function MenuAsambleas() {
                     className={styles.modalInputGray}
                   />
                 </div>
-                
+
                 <div className={styles.formGroupRow}>
                   <select
                     name="tipoInmueble"
@@ -540,8 +618,8 @@ export default function MenuAsambleas() {
                     <option value="Oficina">Oficina</option>
                     <option value="Parqueadero">Parqueadero</option>
                   </select>
-                  
-                  <input 
+
+                  <input
                     type="text"
                     name="coeficiente"
                     placeholder="Coeficiente del inmueble. (%):"
@@ -550,8 +628,8 @@ export default function MenuAsambleas() {
                     className={styles.modalInputGray}
                   />
                 </div>
-                
-                <input 
+
+                <input
                   type="text"
                   name="area"
                   placeholder="Área del inmueble. (m2):"
@@ -560,9 +638,9 @@ export default function MenuAsambleas() {
                   className={styles.modalInputGray}
                 />
               </div>
-              
+
               <div className={styles.modalButtonContainer}>
-                <button 
+                <button
                   onClick={handleGuardarInmueble}
                   className={`${styles.modalSaveButton} ${styles.modalSaveButtonBlue}`}
                 >
@@ -572,7 +650,7 @@ export default function MenuAsambleas() {
             </div>
           </div>
         )}
-        
+
       </main>
     </div>
   );

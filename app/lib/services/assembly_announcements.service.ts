@@ -2,7 +2,7 @@
 
 import { apiClientSession } from '../utils/apiClient';
 import { AssemblyAnnouncements, responseAssemblyAnnouncements, responseListAssemblyAnnouncements } from '../definitions/assembly_announcements';
-import {removeRegister} from "@/app/lib/definitions/definitions";
+import {removeRegister, listFilters} from "@/app/lib/definitions/definitions";
 
 // Buscar por ID
 export async function getById(id: string): Promise<responseAssemblyAnnouncements> {
@@ -25,8 +25,15 @@ export async function remove(id: string): Promise<removeRegister>{
 }
 
 // Listar
-export async function getAll(): Promise<responseListAssemblyAnnouncements> {
-  const res = await apiClientSession('/assembly_announcements');
+export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListAssemblyAnnouncements> {
+  const queryParams = new URLSearchParams({
+    _fields: fields,
+    _where: where,
+    limit: limit,
+    page: page
+  });
+
+  const res = await apiClientSession(`/assembly_announcements?${queryParams.toString()}`);
   if (!res.ok) {
     throw new Error('Error al obtener registro.');
   }
