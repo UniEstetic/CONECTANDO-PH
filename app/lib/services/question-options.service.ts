@@ -2,7 +2,7 @@
 
 import { apiClientSession } from '../utils/apiClient';
 import { QuestionOptions, responseListQuestionOptions, responseQuestionOptions } from '../definitions/question-options';
-import {removeRegister} from "@/app/lib/definitions/definitions";
+import {removeRegister, listFilters} from "@/app/lib/definitions/definitions";
 
 // Buscar por ID
 export async function getById(id: string): Promise<responseQuestionOptions> {
@@ -25,8 +25,15 @@ export async function remove(id: string): Promise<removeRegister>{
 }
 
 // Listar
-export async function getAll(): Promise<responseListQuestionOptions> {
-  const res = await apiClientSession('/question-options');
+export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListQuestionOptions> {
+  const queryParams = new URLSearchParams({
+    _fields: fields,
+    _where: where,
+    limit: limit,
+    page: page
+  });
+
+  const res = await apiClientSession(`/question-options?${queryParams.toString()}`);
   if (!res.ok) {
     throw new Error('Error al obtener registro.');
   }

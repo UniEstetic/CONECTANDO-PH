@@ -53,3 +53,10 @@ export interface removeRegister {
   status: string;
   message: string;
 }
+
+export interface listFilters{
+  fields?: string;
+  where?: string;
+  limit?: string;
+  page?: string;
+}

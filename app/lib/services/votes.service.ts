@@ -2,10 +2,18 @@
 
 import { apiClientSession } from '../utils/apiClient';
 import { Votes, responseListVotes, responseVotes } from '../definitions/votes';
+import { listFilters} from "@/app/lib/definitions/definitions";
 
 // Listar
-export async function getAll(): Promise<responseListVotes> {
-  const res = await apiClientSession('/votes');
+export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListVotes> {
+  const queryParams = new URLSearchParams({
+    _fields: fields,
+    _where: where,
+    limit: limit,
+    page: page
+  });
+
+  const res = await apiClientSession(`/votes?${queryParams.toString()}`);
   if (!res.ok) {
     throw new Error('Error al obtener registro.');
   }
