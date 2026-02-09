@@ -1,67 +1,48 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+'use server';
 
-export interface CreateVoteDto {
-  voting_questions_id: string;
-  questions_options_id: string;
-  coefficient_at_voting: number;
+import { apiClientSession } from '../utils/apiClient';
+import { Votes, responseListVotes, responseVotes } from '../definitions/votes';
+import { listFilters} from "@/app/lib/definitions/definitions";
+
+// Listar
+export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListVotes> {
+  const queryParams = new URLSearchParams({
+    _fields: fields,
+    _where: where,
+    limit: limit,
+    page: page
+  });
+
+  const res = await apiClientSession(`/votes?${queryParams.toString()}`);
+  if (!res.ok) {
+    throw new Error('Error al obtener registro.');
+  }
+  return res.json() as Promise<responseListVotes>;
 }
 
-export interface Vote {
-  id: string;
-  voting_questions_id: string;
-  questions_options_id: string;
-  coefficient_at_voting: number;
-  created_at: Date;
-}
-
-export interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data?: T;
-}
-
-// Crear voto
-export async function createVote(dto: CreateVoteDto): Promise<ApiResponse<Vote>> {
-  const response = await fetch(`${API_URL}/votes`, {
+// Crear
+export async function create(payload: Votes): Promise<responseVotes> {
+  const res = await apiClientSession('/votes', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(dto),
+    body: JSON.stringify(payload),
   });
-
-  if (!response.ok) {
-    throw new Error('Error al crear el voto');
+  if (!res.ok) {
+    throw new Error('Error al crear registro');
   }
-
-  return response.json();
+  return res.json() as Promise<responseVotes>;
 }
 
-// Obtener todos los votos
-export async function getVotes(where?: string): Promise<Vote[]> {
-  const url = new URL(`${API_URL}/votes`);
-  if (where) {
-    url.searchParams.append('where', where);
-  }
-
-  const response = await fetch(url.toString());
-
-  if (!response.ok) {
-    throw new Error('Error al obtener los votos');
-  }
-
-  return response.json();
-}
-
-// Eliminar voto
-export async function deleteVote(id: string): Promise<ApiResponse<void>> {
-  const response = await fetch(`${API_URL}/votes/${id}`, {
-    method: 'DELETE',
+// Actualizar *** PENDIENTE EN EL BACKEND***
+export async function update(
+  id: string,
+  payload: Partial<Votes>
+): Promise<responseVotes> {
+  const res = await apiClientSession(`/votes/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
   });
-
-  if (!response.ok) {
-    throw new Error('Error al eliminar el voto');
+  if (!res.ok) {
+    throw new Error('Error al actualizar registro');
   }
-
-  return response.json();
+  return res.json() as Promise<responseVotes>;
 }
