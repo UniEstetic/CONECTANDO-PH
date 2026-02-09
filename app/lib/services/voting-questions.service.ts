@@ -80,7 +80,6 @@ export async function updateVotingQuestion(
   return response.json();
 }
 
-// Eliminar pregunta
 export async function deleteVotingQuestion(
   id: string
 ): Promise<ApiResponse<void>> {
