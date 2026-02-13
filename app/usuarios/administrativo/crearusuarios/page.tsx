@@ -36,7 +36,6 @@ export default function FormUser() {
     const file = e.target.files?.[0]
     if (file) {
       // Aquí puedes implementar la lógica para subir el archivo
-      // Por ahora solo mostramos el nombre
       console.log('Archivo seleccionado:', file.name)
     }
   }
@@ -76,11 +75,11 @@ export default function FormUser() {
   }
 
   return (
-    <div style={{ 
-      display: 'grid', 
-      gridTemplateColumns: '1fr 1fr', 
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
       gap: '20px',
-      padding: '20px',
+      padding: '15px',
       maxWidth: '1400px',
       margin: '0 auto'
     }}>
@@ -89,36 +88,39 @@ export default function FormUser() {
         <div style={{
           backgroundColor: '#c4a861',
           color: 'white',
-          padding: '12px 20px',
+          padding: '12px 15px',
           borderRadius: '4px',
           marginBottom: '20px',
-          fontWeight: '500'
+          fontWeight: '500',
+          fontSize: '15px'
         }}>
           Crear usuario
         </div>
 
         {message && (
           <div style={{
-            padding: '10px',
+            padding: '10px 12px',
             marginBottom: '20px',
             borderRadius: '4px',
             backgroundColor: message.type === 'success' ? '#d4edda' : '#f8d7da',
             color: message.type === 'success' ? '#155724' : '#721c24',
-            border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`
+            border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+            fontSize: '14px'
           }}>
             {message.text}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
+          {/* Nombre */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Nombre:</span>
+              <span style={{ fontWeight: '500' }}>Nombre:</span>
               <input 
                 type="text" 
                 name="first_name" 
@@ -126,24 +128,26 @@ export default function FormUser() {
                 onChange={handleChange}
                 required
                 style={{ 
-                  flex: 1,
-                  padding: '6px 12px',
+                  width: '100%',
+                  padding: '10px 14px',
                   border: '1px solid #ccc',
-                  borderRadius: '15px',
-                  fontSize: '14px'
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
                 }}
               />
             </label>
           </div>
 
+          {/* Apellido */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Apellido:</span>
+              <span style={{ fontWeight: '500' }}>Apellido:</span>
               <input 
                 type="text" 
                 name="last_name" 
@@ -151,24 +155,26 @@ export default function FormUser() {
                 onChange={handleChange}
                 required
                 style={{ 
-                  flex: 1,
-                  padding: '6px 12px',
+                  width: '100%',
+                  padding: '10px 14px',
                   border: '1px solid #ccc',
-                  borderRadius: '15px',
-                  fontSize: '14px'
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
                 }}
               />
             </label>
           </div>
 
+          {/* Email */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Email:</span>
+              <span style={{ fontWeight: '500' }}>Email:</span>
               <input 
                 type="email" 
                 name="email" 
@@ -176,48 +182,52 @@ export default function FormUser() {
                 onChange={handleChange}
                 required
                 style={{ 
-                  flex: 1,
-                  padding: '6px 12px',
+                  width: '100%',
+                  padding: '10px 14px',
                   border: '1px solid #ccc',
-                  borderRadius: '15px',
-                  fontSize: '14px'
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
                 }}
               />
             </label>
           </div>
 
+          {/* Contraseña */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Contraseña:</span>
+              <span style={{ fontWeight: '500' }}>Contraseña:</span>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 style={{ 
-                  flex: 1,
-                  padding: '6px 12px',
+                  width: '100%',
+                  padding: '10px 14px',
                   border: '1px solid #ccc',
-                  borderRadius: '15px',
-                  fontSize: '14px'
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
                 }}
               />
             </label>
           </div>
 
+          {/* Tipo de documento */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Tipo de documento:</span>
+              <span style={{ fontWeight: '500' }}>Tipo de documento:</span>
               <input 
                 type="text" 
                 name="document_type" 
@@ -225,24 +235,26 @@ export default function FormUser() {
                 onChange={handleChange}
                 required
                 style={{ 
-                  flex: 1,
-                  padding: '6px 12px',
+                  width: '100%',
+                  padding: '10px 14px',
                   border: '1px solid #ccc',
-                  borderRadius: '15px',
-                  fontSize: '14px'
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
                 }}
               />
             </label>
           </div>
 
+          {/* Número de documento */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Número de documento:</span>
+              <span style={{ fontWeight: '500' }}>Número de documento:</span>
               <input 
                 type="text" 
                 name="document_number" 
@@ -250,24 +262,26 @@ export default function FormUser() {
                 onChange={handleChange}
                 required
                 style={{ 
-                  flex: 1,
-                  padding: '6px 12px',
+                  width: '100%',
+                  padding: '10px 14px',
                   border: '1px solid #ccc',
-                  borderRadius: '15px',
-                  fontSize: '14px'
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
                 }}
               />
             </label>
           </div>
 
+          {/* Número celular */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Número celular:</span>
+              <span style={{ fontWeight: '500' }}>Número celular:</span>
               <input 
                 type="tel" 
                 name="phone_number" 
@@ -275,36 +289,39 @@ export default function FormUser() {
                 onChange={handleChange}
                 required
                 style={{ 
-                  flex: 1,
-                  padding: '6px 12px',
+                  width: '100%',
+                  padding: '10px 14px',
                   border: '1px solid #ccc',
-                  borderRadius: '15px',
-                  fontSize: '14px'
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
                 }}
               />
             </label>
           </div>
 
+          {/* Tipo de usuario */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Tipo de usuario:</span>
+              <span style={{ fontWeight: '500' }}>Tipo de usuario:</span>
               <select 
                 name="type_person" 
                 value={formData.type_person}
                 onChange={handleChange}
                 required
                 style={{ 
-                  flex: 1,
-                  padding: '6px 12px',
+                  width: '100%',
+                  padding: '10px 14px',
                   border: '1px solid #ccc',
-                  borderRadius: '15px',
+                  borderRadius: '20px',
                   fontSize: '14px',
-                  backgroundColor: 'white'
+                  backgroundColor: 'white',
+                  boxSizing: 'border-box'
                 }}
               >
                 <option value="">Seleccione</option>
@@ -316,15 +333,16 @@ export default function FormUser() {
             </label>
           </div>
 
+          {/* Imagen de perfil */}
           <div style={{ marginBottom: '25px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ minWidth: '160px', textAlign: 'left' }}>Imagen de perfil:</span>
-              <div style={{ flex: 1 }}>
+              <span style={{ fontWeight: '500' }}>Imagen de perfil:</span>
+              <div>
                 <input 
                   type="file"
                   id="avatar-upload"
@@ -336,12 +354,13 @@ export default function FormUser() {
                   htmlFor="avatar-upload"
                   style={{
                     display: 'inline-block',
-                    padding: '6px 20px',
+                    padding: '10px 24px',
                     backgroundColor: 'white',
                     border: '1px solid #ccc',
-                    borderRadius: '15px',
+                    borderRadius: '20px',
                     cursor: 'pointer',
-                    fontSize: '13px'
+                    fontSize: '14px',
+                    textAlign: 'center'
                   }}
                 >
                   Subir archivo
@@ -350,19 +369,22 @@ export default function FormUser() {
             </label>
           </div>
 
+          {/* Botón de envío */}
           <div style={{ textAlign: 'center', marginTop: '30px' }}>
             <button 
               type="submit" 
               disabled={loading}
               style={{
-                padding: '10px 40px',
+                padding: '12px 50px',
                 backgroundColor: loading ? '#ccc' : 'white',
                 color: '#333',
                 border: '1px solid #ccc',
-                borderRadius: '20px',
+                borderRadius: '25px',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
+                fontSize: '15px',
+                fontWeight: '500',
+                width: '100%',
+                maxWidth: '300px'
               }}
             >
               {loading ? 'Enviando...' : 'Guardar usuario'}
@@ -376,31 +398,41 @@ export default function FormUser() {
         <div style={{
           backgroundColor: '#c4a861',
           color: 'white',
-          padding: '12px 20px',
+          padding: '12px 15px',
           borderRadius: '4px',
           marginBottom: '20px',
-          fontWeight: '500'
+          fontWeight: '500',
+          fontSize: '15px'
         }}>
           Ver usuarios
         </div>
 
+        {/* Filtros */}
         <div style={{ marginBottom: '15px' }}>
           <div style={{ 
-            display: 'flex', 
-            gap: '10px', 
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
             alignItems: 'center',
             fontSize: '14px'
           }}>
-            <span>Filtrar por:</span>
+            <span style={{ 
+              width: '100%',
+              marginBottom: '5px',
+              fontWeight: '500'
+            }}>
+              Filtrar por:
+            </span>
             <button
               onClick={() => setActiveFilter('Nombres')}
               style={{
-                padding: '6px 15px',
+                padding: '8px 16px',
                 backgroundColor: activeFilter === 'Nombres' ? '#e8e8e8' : 'white',
                 border: '1px solid #ccc',
-                borderRadius: '15px',
+                borderRadius: '20px',
                 cursor: 'pointer',
-                fontSize: '13px'
+                fontSize: '13px',
+                whiteSpace: 'nowrap'
               }}
             >
               Nombres
@@ -408,12 +440,13 @@ export default function FormUser() {
             <button
               onClick={() => setActiveFilter('Documento')}
               style={{
-                padding: '6px 15px',
+                padding: '8px 16px',
                 backgroundColor: activeFilter === 'Documento' ? '#e8e8e8' : 'white',
                 border: '1px solid #ccc',
-                borderRadius: '15px',
+                borderRadius: '20px',
                 cursor: 'pointer',
-                fontSize: '13px'
+                fontSize: '13px',
+                whiteSpace: 'nowrap'
               }}
             >
               Documento
@@ -421,12 +454,13 @@ export default function FormUser() {
             <button
               onClick={() => setActiveFilter('Tipo de usuario')}
               style={{
-                padding: '6px 15px',
+                padding: '8px 16px',
                 backgroundColor: activeFilter === 'Tipo de usuario' ? '#e8e8e8' : 'white',
                 border: '1px solid #ccc',
-                borderRadius: '15px',
+                borderRadius: '20px',
                 cursor: 'pointer',
-                fontSize: '13px'
+                fontSize: '13px',
+                whiteSpace: 'nowrap'
               }}
             >
               Tipo de usuario
@@ -434,12 +468,13 @@ export default function FormUser() {
             <button
               onClick={() => setActiveFilter('Correo')}
               style={{
-                padding: '6px 15px',
+                padding: '8px 16px',
                 backgroundColor: activeFilter === 'Correo' ? '#e8e8e8' : 'white',
                 border: '1px solid #ccc',
-                borderRadius: '15px',
+                borderRadius: '20px',
                 cursor: 'pointer',
-                fontSize: '13px'
+                fontSize: '13px',
+                whiteSpace: 'nowrap'
               }}
             >
               Correo
@@ -447,17 +482,19 @@ export default function FormUser() {
           </div>
         </div>
 
+        {/* Área de listado */}
         <div style={{
           border: '1px solid #ccc',
           borderRadius: '4px',
           padding: '40px 20px',
-          minHeight: '400px',
+          minHeight: '300px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#fafafa',
           fontSize: '14px',
-          color: '#666'
+          color: '#666',
+          textAlign: 'center'
         }}>
           En este espacio se listan todos los usuarios
         </div>
