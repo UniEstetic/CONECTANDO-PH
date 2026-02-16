@@ -8,7 +8,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
 
   // 1. Definir qué rutas son de autenticación (donde no quieres que esté si ya entró)
-  const isAuthRoute = nextUrl.pathname.startsWith("/login");
+  const isAuthRoute = nextUrl.pathname.startsWith("/auth/login");
   
   // 2. Permitir siempre las rutas de la API de Auth
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
@@ -25,7 +25,7 @@ export default auth((req) => {
 
   // 4. Si NO está logueado y NO está en login, mandarlo a login
   if (!isLoggedIn && !isAuthRoute) {
-    return NextResponse.redirect(new URL("/login", nextUrl));
+    return NextResponse.redirect(new URL("/auth/login", nextUrl));
   }
 
   return NextResponse.next();
