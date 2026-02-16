@@ -4,7 +4,7 @@ import {
   selectProvider,
   validateLogin,
   getProfile,
-} from "@/app/lib/services/auth.service";
+} from "@/app/services/auth.service";
 const PROVIDER_DEFAULT = process?.env?.AUTH_PROVIDER_DEFAULT ?? "accessEmail";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -49,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   pages: {
-    signIn: "/login",
+    signIn: "/auth/login",
   },
   callbacks: {
     async jwt({ token, user }) {
