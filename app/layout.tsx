@@ -3,7 +3,7 @@ import { Providers } from './components/Providers';
 
 import { montserrat } from './ui/fonts';
 import './ui/global.css';
-import Footer from "@/app/general/footer";
+import Footer from "@/app/components/general/footer";
 
 export default function RootLayout({
   children,
