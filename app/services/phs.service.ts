@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { Phs, responseListPhs, responsePhs } from '../../types/phs';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { Phs, responseListPhs, responsePhs } from '@/app/types/phs';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID

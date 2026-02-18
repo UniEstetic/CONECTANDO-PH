@@ -3,15 +3,17 @@
 import styles from '@/app/ui/styles/usuarios.module.css';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import { useState, useEffect } from 'react'
-import { getAll, remove } from '@/app/services/users.service'
-import { User } from '@/app/types/users'
+import { getAll, remove } from '@/app/services/roles.service'
+import { Roles } from '@/app/types/roles'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
-export default function ListadoUsuariosPage() {
-  const [usuarios, setUsuarios] = useState<User[]>([])
+export default function RolesPage() {
+  const router = useRouter()
+  const [roles, setRoles] = useState<Roles[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState('todos')
+  const [statusFilter, setStatusFilter] = useState('todos')
   const [deleteModal, setDeleteModal] = useState<{ show: boolean; id: string | null; name: string }>({
     show: false,
     id: null,
@@ -19,16 +21,16 @@ export default function ListadoUsuariosPage() {
   })
 
   useEffect(() => {
-    loadUsuarios()
+    loadRoles()
   }, [])
 
-  const loadUsuarios = async () => {
+  const loadRoles = async () => {
     try {
       setLoading(true)
       const response = await getAll()
-      setUsuarios(response.data)
+      setRoles(response.data)
     } catch (error) {
-      console.error('Error al cargar usuarios:', error)
+      console.error('Error al cargar roles:', error)
     } finally {
       setLoading(false)
     }
@@ -38,10 +40,10 @@ export default function ListadoUsuariosPage() {
     try {
       await remove(id)
       setDeleteModal({ show: false, id: null, name: '' })
-      loadUsuarios()
+      loadRoles()
     } catch (error) {
-      console.error('Error al eliminar usuario:', error)
-      alert('Error al eliminar el usuario')
+      console.error('Error al eliminar rol:', error)
+      alert('Error al eliminar el rol')
     }
   }
 
@@ -49,15 +51,14 @@ export default function ListadoUsuariosPage() {
     setDeleteModal({ show: true, id, name })
   }
 
-  // Filtrar usuarios
-  const filteredUsuarios = usuarios.filter(user => {
-    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase()
-    const matchesSearch = fullName.includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.document_number.includes(searchTerm)
-    const matchesRole = roleFilter === 'todos' || 
-                        user.type_person.toLowerCase() === roleFilter.toLowerCase()
-    return matchesSearch && matchesRole
+  // Filtrar roles
+  const filteredRoles = roles.filter(role => {
+    const matchesSearch = role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         role.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'todos' || 
+                         (statusFilter === 'activos' && role.is_active) ||
+                         (statusFilter === 'inactivos' && !role.is_active)
+    return matchesSearch && matchesStatus
   })
 
   return (
@@ -67,8 +68,8 @@ export default function ListadoUsuariosPage() {
 
         <div className={styles.headerActions}>
           <Link href="/admin" className={styles.btnBack}></Link>
-          <Link href="/admin/usuarios/crear" className={styles.btnNew}>
-            Nuevo Usuario
+          <Link href="/admin/roles/crear" className={styles.btnNew}>
+            Nuevo Rol
           </Link>
         </div>
 
@@ -76,72 +77,83 @@ export default function ListadoUsuariosPage() {
         <section className={styles.searchSection}>
           <input 
             type="text" 
-            placeholder="Buscar por nombre, email o documento..." 
+            placeholder="Buscar por nombre o descripción..." 
             className={styles.searchInput}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <select 
             className={styles.filterSelect}
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="todos">Todos los roles</option>
+            <option value="todos">Todos los estados</option>
+            <option value="activos">Activos</option>
+            <option value="inactivos">Inactivos</option>
           </select>
         </section>
 
-        {/* Tabla de Usuarios */}
+        {/* Tabla de Roles */}
         <section className={styles.tableContainer}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Cargando usuarios...</p>
+              <p>Cargando roles...</p>
             </div>
-          ) : filteredUsuarios.length === 0 ? (
+          ) : filteredRoles.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>No se encontraron usuarios</p>
+              <p>No se encontraron roles</p>
             </div>
           ) : (
             <table className={styles.userTable}>
               <thead>
                 <tr>
-                  <th>Usuario</th>
-                  <th>Documento</th>
-                  <th>Rol</th>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Permisos</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsuarios.map((user) => (
-                  <tr key={user.id}>
+                {filteredRoles.map((role) => (
+                  <tr key={role.id}>
                     <td className={styles.userCell}>
                       <div className={styles.avatar}>
-                        {user.first_name.charAt(0).toUpperCase()}
+                        {role.name.charAt(0).toUpperCase()}
                       </div>
                       <div className={styles.userInfo}>
-                        <span className={styles.userName}>{user.first_name} {user.last_name}</span>
-                        <span className={styles.userEmail}>{user.email}</span>
+                        <span className={styles.userName}>{role.name}</span>
                       </div>
                     </td>
-                    <td>{user.document_number || 'N/A'}</td>
+                    <td>{role.description}</td>
                     <td>
-                      <span className={`${styles.roleBadge} ${styles[user.type_person?.toLowerCase() || 'natural']}`}>
-                        {user.type_person || 'Usuario'}
+                      <span style={{ 
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        backgroundColor: '#e9ecef',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        maxWidth: '150px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {role.scopes || 'Sin permisos'}
                       </span>
                     </td>
                     <td>
-                      <span className={user.is_active ? styles.statusActive : styles.statusInactive}>
-                        {user.is_active ? 'Activo' : 'Inactivo'}
+                      <span className={role.is_active ? styles.statusActive : styles.statusInactive}>
+                        {role.is_active ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className={styles.actionsCell}>
-                      <Link href={`/admin/usuarios/editar/${user.id}`}>
+                      <Link href={`/admin/roles/editar/${role.id}`}>
                         <button className={styles.btnIcon} title="Editar">✏️</button>
                       </Link>
                       <button 
                         className={styles.btnIcon} 
                         title="Eliminar"
-                        onClick={() => openDeleteModal(user.id!, `${user.first_name} ${user.last_name}`)}
+                        onClick={() => openDeleteModal(role.id!, role.name)}
                       >🗑️</button>
                     </td>
                   </tr>
@@ -176,7 +188,7 @@ export default function ListadoUsuariosPage() {
           }}>
             <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Confirmar eliminación</h3>
             <p style={{ marginBottom: '20px', color: '#666' }}>
-              ¿Está seguro de que desea eliminar al usuario <strong>{deleteModal.name}</strong>? 
+              ¿Está seguro de que desea eliminar el rol <strong>{deleteModal.name}</strong>? 
               Esta acción no se puede deshacer.
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>

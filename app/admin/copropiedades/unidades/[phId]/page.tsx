@@ -1,34 +1,44 @@
 'use client'
 
 import styles from '@/app/ui/styles/usuarios.module.css';
-import UsuariosHeader from '@/app/components/UsuariosHeader';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react'
-import { getAll, remove } from '@/app/services/users.service'
-import { User } from '@/app/types/users'
-import Link from 'next/link'
+import { getAll, remove } from '@/app/services/units.service'
+import { Units } from '@/app/types/units'
 
-export default function ListadoUsuariosPage() {
-  const [usuarios, setUsuarios] = useState<User[]>([])
+export default function UnidadesPage() {
+  const params = useParams()
+  const phId = params.phId as string
+  
+  const [unidades, setUnidades] = useState<Units[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState('todos')
-  const [deleteModal, setDeleteModal] = useState<{ show: boolean; id: string | null; name: string }>({
+  const [blockFilter, setBlockFilter] = useState('todos')
+  const [blocks, setBlocks] = useState<string[]>([])
+  const [deleteModal, setDeleteModal] = useState<{ show: boolean; id: string | null; unit: string }>({
     show: false,
     id: null,
-    name: ''
+    unit: ''
   })
 
   useEffect(() => {
-    loadUsuarios()
-  }, [])
+    if (phId) {
+      loadUnidades()
+    }
+  }, [phId])
 
-  const loadUsuarios = async () => {
+  const loadUnidades = async () => {
     try {
       setLoading(true)
-      const response = await getAll()
-      setUsuarios(response.data)
+      const response = await getAll(phId)
+      setUnidades(response.data)
+      
+      // Extraer bloques únicos para el filtro
+      const uniqueBlocks = [...new Set(response.data.map(u => u.block).filter(Boolean))]
+      setBlocks(uniqueBlocks as string[])
     } catch (error) {
-      console.error('Error al cargar usuarios:', error)
+      console.error('Error al cargar unidades:', error)
     } finally {
       setLoading(false)
     }
@@ -36,112 +46,120 @@ export default function ListadoUsuariosPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      await remove(id)
-      setDeleteModal({ show: false, id: null, name: '' })
-      loadUsuarios()
+      await remove(phId, id)
+      setDeleteModal({ show: false, id: null, unit: '' })
+      loadUnidades()
     } catch (error) {
-      console.error('Error al eliminar usuario:', error)
-      alert('Error al eliminar el usuario')
+      console.error('Error al eliminar unidad:', error)
+      alert('Error al eliminar la unidad')
     }
   }
 
-  const openDeleteModal = (id: string, name: string) => {
-    setDeleteModal({ show: true, id, name })
+  const openDeleteModal = (id: string, unit: string) => {
+    setDeleteModal({ show: true, id, unit })
   }
 
-  // Filtrar usuarios
-  const filteredUsuarios = usuarios.filter(user => {
-    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase()
-    const matchesSearch = fullName.includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.document_number.includes(searchTerm)
-    const matchesRole = roleFilter === 'todos' || 
-                        user.type_person.toLowerCase() === roleFilter.toLowerCase()
-    return matchesSearch && matchesRole
+  // Filtrar unidades
+  const filteredUnidades = unidades.filter(unit => {
+    const matchesSearch = unit.unit_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         unit.block?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesBlock = blockFilter === 'todos' || unit.block === blockFilter
+    return matchesSearch && matchesBlock
   })
 
   return (
     <div className={styles.blockResidentes}>
       <main className={styles.containerResidentes}>
-        <UsuariosHeader />
-
         <div className={styles.headerActions}>
-          <Link href="/admin" className={styles.btnBack}></Link>
-          <Link href="/admin/usuarios/crear" className={styles.btnNew}>
-            Nuevo Usuario
+          <Link href="/admin/copropiedades" className={styles.btnBack}></Link>
+          <Link href={`/admin/copropiedades/unidades/${phId}/crear`} className={styles.btnNew}>
+            Nueva Unidad
           </Link>
+        </div>
+
+        <div style={{ textAlign: 'center', marginBottom: '25px' }}>
+          <h1 style={{ color: 'white', fontSize: '24px', margin: '0 0 8px 0', fontWeight: '600' }}>Gestión de Unidades</h1>
+          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', margin: 0 }}>Administra las unidades de la copropiedad</p>
         </div>
 
         {/* Buscador y Filtros */}
         <section className={styles.searchSection}>
           <input 
             type="text" 
-            placeholder="Buscar por nombre, email o documento..." 
+            placeholder="Buscar por número de unidad o bloque..." 
             className={styles.searchInput}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <select 
             className={styles.filterSelect}
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            value={blockFilter}
+            onChange={(e) => setBlockFilter(e.target.value)}
           >
-            <option value="todos">Todos los roles</option>
+            <option value="todos">Todos los bloques</option>
+            {blocks.map(block => (
+              <option key={block} value={block}>{block}</option>
+            ))}
           </select>
         </section>
 
-        {/* Tabla de Usuarios */}
+        {/* Tabla de Unidades */}
         <section className={styles.tableContainer}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Cargando usuarios...</p>
+              <p>Cargando unidades...</p>
             </div>
-          ) : filteredUsuarios.length === 0 ? (
+          ) : filteredUnidades.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>No se encontraron usuarios</p>
+              <p>No se encontraron unidades</p>
             </div>
           ) : (
             <table className={styles.userTable}>
               <thead>
                 <tr>
-                  <th>Usuario</th>
-                  <th>Documento</th>
-                  <th>Rol</th>
+                  <th>Unidad</th>
+                  <th>Bloque</th>
+                  <th>Piso</th>
+                  <th>Tipo</th>
+                  <th>Área</th>
+                  <th>Coeficiente</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsuarios.map((user) => (
-                  <tr key={user.id}>
+                {filteredUnidades.map((unit) => (
+                  <tr key={unit.id}>
                     <td className={styles.userCell}>
                       <div className={styles.avatar}>
-                        {user.first_name.charAt(0).toUpperCase()}
+                        {unit.unit_number?.charAt(0).toUpperCase() || 'U'}
                       </div>
                       <div className={styles.userInfo}>
-                        <span className={styles.userName}>{user.first_name} {user.last_name}</span>
-                        <span className={styles.userEmail}>{user.email}</span>
+                        <span className={styles.userName}>{unit.unit_number}</span>
                       </div>
                     </td>
-                    <td>{user.document_number || 'N/A'}</td>
+                    <td>{unit.block || 'N/A'}</td>
+                    <td>{unit.floor || 'N/A'}</td>
                     <td>
-                      <span className={`${styles.roleBadge} ${styles[user.type_person?.toLowerCase() || 'natural']}`}>
-                        {user.type_person || 'Usuario'}
+                      <span className={styles.roleBadge}>
+                        {unit.type || 'Apartamento'}
                       </span>
                     </td>
+                    <td>{unit.area ? `${unit.area} m²` : 'N/A'}</td>
+                    <td>{unit.coefficient || 'N/A'}</td>
                     <td>
-                      <span className={user.is_active ? styles.statusActive : styles.statusInactive}>
-                        {user.is_active ? 'Activo' : 'Inactivo'}
+                      <span className={unit.is_active ? styles.statusActive : styles.statusInactive}>
+                        {unit.is_active ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className={styles.actionsCell}>
-                      <Link href={`/admin/usuarios/editar/${user.id}`}>
+                      <Link href={`/admin/copropiedades/unidades/${phId}/editar/${unit.id}`}>
                         <button className={styles.btnIcon} title="Editar">✏️</button>
                       </Link>
                       <button 
                         className={styles.btnIcon} 
                         title="Eliminar"
-                        onClick={() => openDeleteModal(user.id!, `${user.first_name} ${user.last_name}`)}
+                        onClick={() => openDeleteModal(unit.id!, unit.unit_number || 'Unidad')}
                       >🗑️</button>
                     </td>
                   </tr>
@@ -176,12 +194,12 @@ export default function ListadoUsuariosPage() {
           }}>
             <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Confirmar eliminación</h3>
             <p style={{ marginBottom: '20px', color: '#666' }}>
-              ¿Está seguro de que desea eliminar al usuario <strong>{deleteModal.name}</strong>? 
+              ¿Está seguro de que desea eliminar la unidad <strong>{deleteModal.unit}</strong>? 
               Esta acción no se puede deshacer.
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <button
-                onClick={() => setDeleteModal({ show: false, id: null, name: '' })}
+                onClick={() => setDeleteModal({ show: false, id: null, unit: '' })}
                 style={{
                   padding: '10px 20px',
                   backgroundColor: '#6c757d',

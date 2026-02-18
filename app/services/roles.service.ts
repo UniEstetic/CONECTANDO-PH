@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { Roles, responseListRoles, responseRoles } from '../../types/roles';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { Roles, responseListRoles, responseRoles } from '@/app/types/roles';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID
