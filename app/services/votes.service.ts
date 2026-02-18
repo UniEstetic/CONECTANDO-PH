@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { Votes, responseListVotes, responseVotes } from '../../types/votes';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { Votes, responseListVotes, responseVotes } from '@/app/types/votes';
 import { listFilters} from "@/app/types/definitions";
 
 // Listar

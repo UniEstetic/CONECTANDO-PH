@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { AssemblyAnnouncements, responseAssemblyAnnouncements, responseListAssemblyAnnouncements } from '../../types/assembly_announcements';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { AssemblyAnnouncements, responseAssemblyAnnouncements, responseListAssemblyAnnouncements } from '@/app/types/assembly_announcements';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID

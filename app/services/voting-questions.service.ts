@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { VotingQuestions, responseListVotingQuestions, responseVotingQuestions } from '../../types/voting-questions';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { VotingQuestions, responseListVotingQuestions, responseVotingQuestions } from '@/app/types/voting-questions';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID

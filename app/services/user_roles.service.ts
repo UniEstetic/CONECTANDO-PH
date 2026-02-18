@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { UserRoles, responseUserRoles } from '../../types/user_roles';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { UserRoles, responseUserRoles } from '@/app/types/user_roles';
 
 // Asignar rol a usuario
 export async function assign(userId: string, payload: UserRoles): Promise<responseUserRoles> {
