@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { Agenda, responseAgenda, responseListAgenda } from '../../types/agenda';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { Agenda, responseAgenda, responseListAgenda } from '@/app/types/agenda';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID

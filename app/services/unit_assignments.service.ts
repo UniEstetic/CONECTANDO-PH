@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { UnitAssignments, responseUnitAssignments } from '../../types/unit_assignments';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { UnitAssignments, responseUnitAssignments } from '@/app/types/unit_assignments';
 
 // Buscar por ID
 export async function getById(userRolId: string): Promise<responseUnitAssignments> {
