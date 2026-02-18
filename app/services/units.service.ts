@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { Units, responseListUnits, responseUnits } from '../../types/units';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { Units, responseListUnits, responseUnits } from '@/app/types/units';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID

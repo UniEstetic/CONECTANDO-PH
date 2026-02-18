@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { QuestionOptions, responseListQuestionOptions, responseQuestionOptions } from '../../types/question-options';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { QuestionOptions, responseListQuestionOptions, responseQuestionOptions } from '@/app/types/question-options';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID
