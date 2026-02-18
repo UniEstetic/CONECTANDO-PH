@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { User, responseListUsers, responseUsers } from '../../types/users';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { User, responseListUsers, responseUsers } from '@/app/types/users';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar usuario por ID

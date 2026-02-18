@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { Assembly, responseAssembly, responseListAssembly } from '../../types/assemblies';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { Assembly, responseAssembly, responseListAssembly } from '@/app/types/assemblies';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID

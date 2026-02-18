@@ -1,7 +1,7 @@
 'use server';
 
-import { apiClientSession } from '../utils/apiClient';
-import { QaEntries, responseListQaEntries, responseQaEntries } from '../../types/qa_entries';
+import { apiClientSession } from '@/app/utils/apiClient';
+import { QaEntries, responseListQaEntries, responseQaEntries } from '@/app/types/qa_entries';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID
