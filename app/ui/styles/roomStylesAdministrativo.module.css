@@ -39,6 +39,16 @@
     color: white;
 }
 
+.containerResidentes {
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-bottom: 1rem;
+  @media screen and (max-width: 1024px){
+    width: 90%;
+    margin-bottom: 7rem;
+  }
+}
+
 .explorarBtn {
     padding: 8px 24px;
     background-color: #5b2d4e;
@@ -600,4 +610,11 @@
     .textareaRounded {
         max-width: 100%;
     }
+}
+
+/* Móviles pequeños */
+@media screen and (max-width: 480px) {
+  .containerResidentes {
+    padding: 0 10px;
+  }
 }
