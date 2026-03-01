@@ -101,14 +101,24 @@ export default function CrearAsambleasPage() {
 
     const newItem: AgendaItem = {
       title: currentItem.title,
-      sort_order: agendaItems.length + 1,
+      sort_order: editingAgendaIndex !== null ? editingAgendaIndex + 1 : agendaItems.length + 1,
       is_votable: currentItem.is_votable || false,
       required_quorum: Number(currentItem.required_quorum) || 50,
       type: currentItem.type as 'Encuesta' | 'Documento' | 'Texto',
       votingQuestions: currentItem.type === 'Encuesta' ? [...agendaQuestions] : undefined
     };
 
-    setAgendaItems([...agendaItems, newItem]);
+    if (editingAgendaIndex !== null) {
+      // Actualizar punto existente
+      const updatedItems = [...agendaItems];
+      updatedItems[editingAgendaIndex] = newItem;
+      setAgendaItems(updatedItems);
+      setEditingAgendaIndex(null);
+    } else {
+      // Agregar nuevo punto
+      setAgendaItems([...agendaItems, newItem]);
+    }
+
     setCurrentItem({
       title: '',
       is_votable: false,
@@ -177,6 +187,33 @@ export default function CrearAsambleasPage() {
   const removeOption = (index: number) => {
     const newOptions = (currentQuestion.options || []).filter((_, i) => i !== index);
     setCurrentQuestion({ ...currentQuestion, options: newOptions });
+  };
+
+  // Estado para edición de punto existente
+  const [editingAgendaIndex, setEditingAgendaIndex] = useState<number | null>(null);
+
+  const handleEditAgendaItem = (index: number) => {
+    const item = agendaItems[index];
+    setCurrentItem({
+      title: item.title,
+      is_votable: item.is_votable,
+      required_quorum: item.required_quorum,
+      type: item.type
+    });
+    
+    // Cargar las preguntas si es votable o tipo Encuesta
+    if ((item.is_votable || item.type === 'Encuesta') && item.votingQuestions && item.votingQuestions.length > 0) {
+      setAgendaQuestions(item.votingQuestions);
+      setShowVotingForm(true);
+    } else if (item.type === 'Encuesta') {
+      setAgendaQuestions([]);
+      setShowVotingForm(true);
+    } else {
+      setAgendaQuestions([]);
+      setShowVotingForm(false);
+    }
+    
+    setEditingAgendaIndex(index);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -686,8 +723,37 @@ export default function CrearAsambleasPage() {
                     cursor: 'pointer'
                   }}
                 >
-                  + Agregar punto
+                  {editingAgendaIndex !== null ? 'Actualizar punto' : '+ Agregar punto'}
                 </button>
+                {editingAgendaIndex !== null && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingAgendaIndex(null);
+                      setCurrentItem({
+                        title: '',
+                        is_votable: false,
+                        required_quorum: 50,
+                        type: 'Texto'
+                      });
+                      setAgendaQuestions([]);
+                      setShowVotingForm(false);
+                    }}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: '#6c757d',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '20px',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      marginLeft: '10px'
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                )}
               </div>
 
               {/* Lista de puntos agregados */}
@@ -744,6 +810,22 @@ export default function CrearAsambleasPage() {
                             )}
                           </div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => handleEditAgendaItem(index)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#3498db',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '15px',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            marginRight: '6px'
+                          }}
+                        >
+                          Editar
+                        </button>
                         <button
                           type="button"
                           onClick={() => removeAgendaItem(index)}
