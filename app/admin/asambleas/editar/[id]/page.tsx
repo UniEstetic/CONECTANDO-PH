@@ -10,11 +10,41 @@ import {
   update as updateAgenda,
   remove as removeAgenda 
 } from '@/app/services/agenda.service';
+import { 
+  create as createVotingQuestion, 
+  getAll as getVotingQuestionsByAgenda,
+  update as updateVotingQuestion,
+  remove as removeVotingQuestion
+} from '@/app/services/voting-questions.service';
+import { 
+  create as createQuestionOption, 
+  getAll as getQuestionOptionsByQuestion, 
+  update as updateQuestionOption, 
+  remove as removeQuestionOption 
+} from '@/app/services/question-options.service';
 import { Assembly } from '@/app/types/assemblies';
 import { Agenda } from '@/app/types/agenda';
+import { VotingQuestions } from '@/app/types/voting-questions';
+import { QuestionOptions } from '@/app/types/question-options';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from "next-auth/react";
+
+type Option = {
+  id?: string;
+  text: string;
+};
+
+type VotingQuestion = {
+  id?: string;
+  question_text: string;
+  description: string;
+  type: string;
+  result_type: string;
+  min_selections: number;
+  max_selections: number;
+  options: Option[];
+};
 
 type AgendaItem = {
   id?: string;
@@ -25,9 +55,7 @@ type AgendaItem = {
   required_quorum: number;
   is_active: boolean;
   type: 'Encuesta' | 'Documento' | 'Texto';
-  options?: string[];
-  document_url?: string;
-  content?: string;
+  votingQuestions?: VotingQuestion[];
 };
 
 type AssemblyFormData = Partial<Assembly>
@@ -61,6 +89,19 @@ export default function EditarAsambleasPage() {
     required_quorum: 50,
     type: 'Texto'
   });
+
+  // Estado para preguntas de votación
+  const [showVotingForm, setShowVotingForm] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState<Partial<VotingQuestion>>({
+    question_text: '',
+    description: '',
+    type: 'simple',
+    result_type: 'relative_majority',
+    min_selections: 1,
+    max_selections: 1,
+    options: [{ text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]
+  });
+  const [agendaQuestions, setAgendaQuestions] = useState<VotingQuestion[]>([]);
 
   useEffect(() => {
     if (assemblyId) {
@@ -101,16 +142,70 @@ export default function EditarAsambleasPage() {
       });
       
       if (agendaResponse.data && agendaResponse.data.length > 0) {
-        const items: AgendaItem[] = agendaResponse.data.map(item => ({
-          id: item.id,
-          assembly_id: item.assembly_id,
-          title: item.title,
-          sort_order: item.sort_order,
-          is_votable: item.is_votable,
-          required_quorum: item.required_quorum,
-          is_active: item.is_active,
-          type: 'Texto' as const // Por defecto, se puede expandir después
-        }));
+        const items: AgendaItem[] = [];
+        
+        for (const agendaItem of agendaResponse.data) {
+          const item: AgendaItem = {
+            id: agendaItem.id,
+            assembly_id: agendaItem.assembly_id,
+            title: agendaItem.title,
+            sort_order: agendaItem.sort_order,
+            is_votable: agendaItem.is_votable,
+            required_quorum: agendaItem.required_quorum,
+            is_active: agendaItem.is_active,
+            type: 'Texto'
+          };
+
+          // Cargar preguntas de votación si es votable
+          if (agendaItem.is_votable && agendaItem.id) {
+            try {
+              const questionsResponse = await getVotingQuestionsByAgenda({
+                where: `agenda_id=${agendaItem.id}`,
+                limit: '50'
+              });
+              
+              if (questionsResponse.data && questionsResponse.data.length > 0) {
+                const questions: VotingQuestion[] = [];
+                for (const q of questionsResponse.data) {
+                  // Cargar las opciones de la pregunta
+                  let questionOptions: Option[] = [];
+                  try {
+                    const optionsResponse = await getQuestionOptionsByQuestion({
+                      where: `question_id=${q.id}`,
+                      limit: '50'
+                    });
+                    if (optionsResponse.data) {
+                      questionOptions = optionsResponse.data.map(opt => ({
+                        id: opt.id,
+                        text: opt.option_text
+                      }));
+                    }
+                  } catch (e) {
+                    console.log('No hay opciones para esta pregunta');
+                  }
+
+                  questions.push({
+                    id: q.id,
+                    question_text: q.question_text,
+                    description: q.description || '',
+                    type: q.type || 'simple',
+                    result_type: q.result_type || 'relative_majority',
+                    min_selections: q.min_selections || 1,
+                    max_selections: q.max_selections || 1,
+                    options: questionOptions
+                  });
+                }
+                item.votingQuestions = questions;
+                item.type = 'Encuesta';
+              }
+            } catch (e) {
+              console.log('No hay preguntas para esta agenda');
+            }
+          }
+
+          items.push(item);
+        }
+        
         setAgendaItems(items);
       }
 
@@ -146,7 +241,8 @@ export default function EditarAsambleasPage() {
       is_votable: currentItem.is_votable || false,
       required_quorum: Number(currentItem.required_quorum) || 50,
       is_active: true,
-      type: currentItem.type as 'Encuesta' | 'Documento' | 'Texto'
+      type: currentItem.type as 'Encuesta' | 'Documento' | 'Texto',
+      votingQuestions: currentItem.type === 'Encuesta' ? [...agendaQuestions] : undefined
     };
 
     setAgendaItems([...agendaItems, newItem]);
@@ -156,6 +252,8 @@ export default function EditarAsambleasPage() {
       required_quorum: 50,
       type: 'Texto'
     });
+    setAgendaQuestions([]);
+    setShowVotingForm(false);
   };
 
   const removeAgendaItem = async (index: number) => {
@@ -172,8 +270,63 @@ export default function EditarAsambleasPage() {
       }
     }
     
-    // Eliminar de la lista local
     setAgendaItems(agendaItems.filter((_, i) => i !== index));
+  };
+
+  const addVotingQuestion = () => {
+    if (!currentQuestion.question_text?.trim()) {
+      alert('Por favor ingresa el texto de la pregunta');
+      return;
+    }
+
+    const validOptions = currentQuestion.options?.filter(o => o.text.trim()) || [];
+    if (validOptions.length < 2) {
+      alert('Debes agregar al menos 2 opciones');
+      return;
+    }
+
+    const newQuestion: VotingQuestion = {
+      question_text: currentQuestion.question_text,
+      description: currentQuestion.description || '',
+      type: currentQuestion.type || 'simple',
+      result_type: currentQuestion.result_type || 'relative_majority',
+      min_selections: Number(currentQuestion.min_selections) || 1,
+      max_selections: Number(currentQuestion.max_selections) || 1,
+      options: validOptions
+    };
+
+    setAgendaQuestions([...agendaQuestions, newQuestion]);
+    setCurrentQuestion({
+      question_text: '',
+      description: '',
+      type: 'simple',
+      result_type: 'relative_majority',
+      min_selections: 1,
+      max_selections: 1,
+      options: [{ text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]
+    });
+  };
+
+  const removeVotingQuestion = (index: number) => {
+    setAgendaQuestions(agendaQuestions.filter((_, i) => i !== index));
+  };
+
+  const updateOptionText = (index: number, text: string) => {
+    const newOptions = [...(currentQuestion.options || [])];
+    newOptions[index] = { text };
+    setCurrentQuestion({ ...currentQuestion, options: newOptions });
+  };
+
+  const addOption = () => {
+    setCurrentQuestion({ 
+      ...currentQuestion, 
+      options: [...(currentQuestion.options || []), { text: '' }] 
+    });
+  };
+
+  const removeOption = (index: number) => {
+    const newOptions = (currentQuestion.options || []).filter((_, i) => i !== index);
+    setCurrentQuestion({ ...currentQuestion, options: newOptions });
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -182,7 +335,6 @@ export default function EditarAsambleasPage() {
     setMessage(null);
 
     try {
-      // Combinar fecha y hora
       const scheduledAt = formData.scheduled_at 
         ? new Date(formData.scheduled_at).toISOString()
         : new Date().toISOString();
@@ -196,9 +348,59 @@ export default function EditarAsambleasPage() {
       // Actualizar la asamblea
       await updateAssembly(assemblyId, assemblyPayload);
 
-      // Los nuevos puntos de agenda que no tienen id se crean
+      // Procesar cada punto de agenda
       for (const item of agendaItems) {
-        if (!item.id) {
+        // Si el punto ya existe, actualizarlo
+        if (item.id) {
+          const agendaPayload: Partial<Agenda> = {
+            title: item.title,
+            sort_order: item.sort_order,
+            is_votable: item.is_votable,
+            required_quorum: item.required_quorum,
+            is_active: item.is_active
+          };
+          await updateAgenda(item.id, agendaPayload);
+
+          // Procesar las preguntas de votación existentes
+          if (item.votingQuestions && item.votingQuestions.length > 0) {
+            for (const question of item.votingQuestions) {
+              if (question.id) {
+                // Actualizar pregunta existente
+                const questionPayload: Partial<VotingQuestions> = {
+                  question_text: question.question_text,
+                  description: question.description,
+                  type: question.type,
+                  result_type: question.result_type,
+                  min_selections: question.min_selections,
+                  max_selections: question.max_selections
+                };
+                await updateVotingQuestion(question.id, questionPayload);
+                
+                // Las opciones existentes se mantienen, las nuevas se crean
+                // Por ahora solo procesamos las opciones que vienen en el array
+                for (let i = 0; i < question.options.length; i++) {
+                  const opt = question.options[i];
+                  if (opt.id) {
+                    // Opción existente - actualizar
+                    await updateQuestionOption(opt.id, { 
+                      option_text: opt.text, 
+                      order_index: i 
+                    });
+                  } else if (opt.text.trim()) {
+                    // Nueva opción - crear
+                    await createQuestionOption({
+                      question_id: question.id,
+                      option_text: opt.text,
+                      order_index: i,
+                      is_active: true
+                    });
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          // Nuevo punto - crear
           const agendaPayload: Partial<Agenda> = {
             assembly_id: assemblyId,
             title: item.title,
@@ -207,7 +409,39 @@ export default function EditarAsambleasPage() {
             required_quorum: item.required_quorum,
             is_active: item.is_active
           };
-          await createAgenda(agendaPayload as Agenda);
+          
+          const agendaResponse = await createAgenda(agendaPayload as Agenda);
+          const agendaId = agendaResponse.data.id;
+
+          // Si el punto tiene preguntas de votación, crearlas
+          if (item.votingQuestions && item.votingQuestions.length > 0) {
+            for (const question of item.votingQuestions) {
+              const questionPayload: Partial<VotingQuestions> = {
+                agenda_id: agendaId,
+                question_text: question.question_text,
+                description: question.description,
+                type: question.type,
+                result_type: question.result_type,
+                min_selections: question.min_selections,
+                max_selections: question.max_selections,
+                status: 'pending'
+              };
+
+              const questionResponse = await createVotingQuestion(questionPayload as VotingQuestions);
+              const questionId = questionResponse.data.id;
+
+              // Crear las opciones de la pregunta
+              for (let i = 0; i < question.options.length; i++) {
+                const optionPayload: Partial<QuestionOptions> = {
+                  question_id: questionId,
+                  option_text: question.options[i].text,
+                  order_index: i,
+                  is_active: true
+                };
+                await createQuestionOption(optionPayload);
+              }
+            }
+          }
         }
       }
       
@@ -442,7 +676,10 @@ export default function EditarAsambleasPage() {
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
                   <select
                     value={currentItem.type}
-                    onChange={(e) => setCurrentItem({ ...currentItem, type: e.target.value as any })}
+                    onChange={(e) => {
+                      setCurrentItem({ ...currentItem, type: e.target.value as any });
+                      setShowVotingForm(e.target.value === 'Encuesta');
+                    }}
                     style={{
                       padding: '8px 12px',
                       borderRadius: '15px',
@@ -489,6 +726,183 @@ export default function EditarAsambleasPage() {
                   )}
                 </div>
 
+                {/* Formulario de preguntas de votación */}
+                {showVotingForm && (
+                  <div style={{ 
+                    marginTop: '15px', 
+                    padding: '12px', 
+                    backgroundColor: '#e8f4f8', 
+                    borderRadius: '10px',
+                    border: '1px solid #3498db'
+                  }}>
+                    <div style={{ fontWeight: 600, color: '#2c3e50', marginBottom: '10px' }}>
+                      Preguntas de Votación
+                    </div>
+
+                    {agendaQuestions.length > 0 && (
+                      <div style={{ marginBottom: '12px' }}>
+                        {agendaQuestions.map((q, idx) => (
+                          <div key={idx} style={{
+                            backgroundColor: 'white',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            marginBottom: '6px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <div style={{ fontWeight: 500, fontSize: '13px' }}>{q.question_text}</div>
+                              <div style={{ fontSize: '11px', color: '#666' }}>
+                                {q.options.length} opciones
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeVotingQuestion(idx)}
+                              style={{
+                                padding: '4px 8px',
+                                backgroundColor: '#e74c3c',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '10px',
+                                fontSize: '11px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              X
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div style={{ marginBottom: '10px' }}>
+                      <input 
+                        type="text"
+                        value={currentQuestion.question_text}
+                        onChange={(e) => setCurrentQuestion({ ...currentQuestion, question_text: e.target.value })}
+                        placeholder="Texto de la pregunta"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '15px',
+                          fontSize: '13px',
+                          marginBottom: '8px',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      <textarea
+                        value={currentQuestion.description}
+                        onChange={(e) => setCurrentQuestion({ ...currentQuestion, description: e.target.value })}
+                        placeholder="Descripción (opcional)"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '15px',
+                          fontSize: '13px',
+                          marginBottom: '8px',
+                          minHeight: '50px',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                        <select
+                          value={currentQuestion.type}
+                          onChange={(e) => setCurrentQuestion({ ...currentQuestion, type: e.target.value })}
+                          style={{ padding: '6px 10px', borderRadius: '12px', fontSize: '12px' }}
+                        >
+                          <option value="simple">Simple</option>
+                          <option value="multiple">Múltiple</option>
+                        </select>
+                        <select
+                          value={currentQuestion.result_type}
+                          onChange={(e) => setCurrentQuestion({ ...currentQuestion, result_type: e.target.value })}
+                          style={{ padding: '6px 10px', borderRadius: '12px', fontSize: '12px' }}
+                        >
+                          <option value="relative_majority">Mayoría relativa</option>
+                          <option value="absolute_majority">Mayoría absoluta</option>
+                          <option value="two_thirds">2/3 partes</option>
+                        </select>
+                      </div>
+                      <div style={{ fontSize: '12px', fontWeight: 500, marginBottom: '6px', color: '#2c3e50' }}>
+                        Opciones de respuesta:
+                      </div>
+                      {currentQuestion.options?.map((opt, idx) => (
+                        <div key={idx} style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                          <input
+                            type="text"
+                            value={opt.text}
+                            onChange={(e) => updateOptionText(idx, e.target.value)}
+                            placeholder={`Opción ${idx + 1}`}
+                            style={{
+                              flex: 1,
+                              padding: '6px 10px',
+                              border: '1px solid #ccc',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                          {(currentQuestion.options?.length || 0) > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => removeOption(idx)}
+                              style={{
+                                padding: '4px 8px',
+                                backgroundColor: '#e74c3c',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '11px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              X
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={addOption}
+                        style={{
+                          marginTop: '6px',
+                          padding: '6px 12px',
+                          backgroundColor: '#27ae60',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        + Agregar opción
+                      </button>
+                      <button
+                        type="button"
+                        onClick={addVotingQuestion}
+                        style={{
+                          marginTop: '8px',
+                          padding: '8px 16px',
+                          backgroundColor: '#3498db',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '15px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        + Agregar pregunta
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   type="button"
                   onClick={addAgendaItem}
@@ -507,7 +921,7 @@ export default function EditarAsambleasPage() {
                 </button>
               </div>
 
-              {/* Lista de puntos agregados */}
+              {/* Lista de puntos */}
               {agendaItems.length > 0 && (
                 <div style={{ marginBottom: '20px' }}>
                   <h4 style={{ 
@@ -525,60 +939,70 @@ export default function EditarAsambleasPage() {
                         backgroundColor: '#fff2d6',
                         padding: '12px',
                         borderRadius: '10px',
-                        marginBottom: '10px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start'
+                        marginBottom: '10px'
                       }}
                     >
-                      <div style={{ flex: 1 }}>
-                        <div style={{ 
-                          fontWeight: 600, 
-                          color: '#6b5b3e',
-                          marginBottom: '4px'
-                        }}>
-                          {index + 1}. {item.title}
-                          {item.id && (
-                            <span style={{
-                              fontSize: '10px',
-                              backgroundColor: '#3498db',
-                              color: 'white',
-                              padding: '2px 6px',
-                              borderRadius: '8px',
-                              marginLeft: '8px'
-                            }}>
-                              Guardado
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#6b5b3e' }}>
-                          <span style={{ 
-                            backgroundColor: item.is_votable ? '#27ae60' : '#95a5a6',
-                            color: 'white',
-                            padding: '2px 8px',
-                            borderRadius: '10px',
-                            marginRight: '8px'
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ 
+                            fontWeight: 600, 
+                            color: '#6b5b3e',
+                            marginBottom: '4px'
                           }}>
-                            {item.type}
-                          </span>
-                          {item.is_votable && `Quorum: ${item.required_quorum}%`}
+                            {index + 1}. {item.title}
+                            {item.id && (
+                              <span style={{
+                                fontSize: '10px',
+                                backgroundColor: '#3498db',
+                                color: 'white',
+                                padding: '2px 6px',
+                                borderRadius: '8px',
+                                marginLeft: '8px'
+                              }}>
+                                Guardado
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#6b5b3e' }}>
+                            <span style={{ 
+                              backgroundColor: item.is_votable ? '#27ae60' : '#95a5a6',
+                              color: 'white',
+                              padding: '2px 8px',
+                              borderRadius: '10px',
+                              marginRight: '8px'
+                            }}>
+                              {item.type}
+                            </span>
+                            {item.is_votable && `Quorum: ${item.required_quorum}%`}
+                            {item.votingQuestions && item.votingQuestions.length > 0 && (
+                              <span style={{ 
+                                backgroundColor: '#3498db',
+                                color: 'white',
+                                padding: '2px 8px',
+                                borderRadius: '10px',
+                                marginLeft: '8px'
+                              }}>
+                                {item.votingQuestions.length} pregunta(s)
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => removeAgendaItem(index)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#e74c3c',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '15px',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Eliminar
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => removeAgendaItem(index)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#e74c3c',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '15px',
-                          fontSize: '12px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Eliminar
-                      </button>
                     </div>
                   ))}
                 </div>
