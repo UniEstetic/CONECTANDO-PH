@@ -6,6 +6,7 @@ import { Units } from '@/app/types/units'
 import { create } from '@/app/services/units.service'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
+import UsuariosHeader from '@/app/components/UsuariosHeader';
 
 type UnitFormData = Omit<Units, 'id' | 'created_at'>
 
@@ -65,10 +66,10 @@ export default function CrearUnidadPage() {
   return (
     <div className={styles.blockResidentes}>
       <main className={styles.containerResidentes}>
+        <UsuariosHeader />
+
         <div className={styles.headerActions}>
-          <Link href={`/admin/copropiedades/unidades/${phId}`} className={styles.btnBack}>
-            Volver
-          </Link>
+          <Link href={`/admin/copropiedades/unidades/${phId}`} className={styles.btnBack}></Link>
         </div>
 
         <div className={styles.formSectionTitle}>
