@@ -40,6 +40,7 @@ export async function getTokenViewer(
     method: "POST",
     body: JSON.stringify(payload),
   });
+  
   if (!res.ok) {
     throw new Error("Error al obtener token viewer.");
   }

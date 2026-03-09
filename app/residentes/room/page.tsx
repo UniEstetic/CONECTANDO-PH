@@ -52,7 +52,7 @@ import { WordRequestNotifications } from "./components/WordRequestNotifications"
 // Componente interno que usa hooks de LiveKit
 function AssemblyInterface() {
   const { data: session } = useSession();
-  const firstName = session?.user?.userProfile?.firstName || 'Usuario';
+  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
   const participants = useParticipants();
   const { localParticipant } = useLocalParticipant();
   const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone]);
@@ -185,7 +185,7 @@ function AssemblyInterface() {
 
     const newMessage: Message = {
       id: Date.now().toString(),
-      author: firstName,
+      author: userName,
       text: message,
       time: getCurrentTime(),
       isRead: true,
@@ -1633,14 +1633,14 @@ function AssemblyInterface() {
           <p className="saludo">
             Hola, 
           </p>
-          <strong className={styles.saludoName}>{firstName}</strong>
+          <strong className={styles.saludoName}>{userName}</strong>
         </div>
       </div>
 
       <div className="assembly-main">
         {/* COLUMNA IZQUIERDA - Video + Archivos + Mensajes */}
         <div className="main-content">
-          <h1 className="greeting">Hola, {firstName}</h1>
+          <h1 className="greeting">Hola, {userName}</h1>
           <div className="text-center mobile-title-section">
             <p className="assembly-title">
               Primera Asamblea General 2026 Conjunto Los Robles
@@ -1651,7 +1651,7 @@ function AssemblyInterface() {
           <div className="desktop-video-wrapper">
             <div className="video-section">
               <div className="current-speaker">
-                Amelia Diaz, apto 505, torre B
+                {userName}, apto 505, torre B
               </div>
 
               <RecordingIndicator />
