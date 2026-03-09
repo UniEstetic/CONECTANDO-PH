@@ -14,7 +14,7 @@ import LogoUsuarios from '@/app/components/logo_usuarios';
 import styles from '@/app/ui/styles/roomResidentes.module.css';
 import { Track, RoomEvent } from "livekit-client";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Home,
   Bell,
@@ -2390,7 +2390,8 @@ function AssemblyInterface() {
 
 export default function RoomPage() {
   const params = useSearchParams();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
   // Get user data from session
   const userProfile = session?.user?.userProfile;
@@ -2407,6 +2408,14 @@ export default function RoomPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Get room from URL query parameter 'r'
+  useEffect(() => {
+    const roomParam = params.get("r");
+    if (roomParam) {
+      setRoom(roomParam);
+    }
+  }, [params]);
+
   // Auto-fill name from session
   useEffect(() => {
     if (userName && !name) {
@@ -2414,62 +2423,113 @@ export default function RoomPage() {
     }
   }, [userName, name]);
 
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const r = params.get("room");
-    const n = params.get("name");
-    if (r && n) {
-      setRoom(r);
-      setName(n);
+    if (status === "unauthenticated") {
+      router.push("/auth/login");
     }
-  }, [params]);
+  }, [status, router]);
 
-  async function joinRoom() {
-    if (!room) {
-      setError("Por favor ingresa el nombre de la sala");
-      return;
-    }
+  // Auto-join room when session is loaded and room is available
+  useEffect(() => {
+    const autoJoin = async () => {
+      if (status === "authenticated" && room && userName) {
+        const identity = userId || userEmail || name;
+        const displayName = name || userName;
 
-    // Use session data for identity and name
-    const identity = userId || userEmail || name;
-    const displayName = name || userName;
+        if (!identity) {
+          setError("No se pudo obtener la información del usuario.");
+          return;
+        }
 
-    // Determine role based on user profile
-    const userRole = userRoles.includes('admin') ? 'ADMIN' : 
-                     userRoles.includes('moderator') ? 'MODERATOR' : 'USER';
-    
-    // Regular users can only subscribe (view-only), admins and moderators can publish
-    const canPublish = userRole === 'ADMIN' || userRole === 'MODERATOR';
+        // Determine role based on user profile
+        const userRole = userRoles.includes('admin') ? 'ADMIN' : 
+                         userRoles.includes('moderator') ? 'MODERATOR' : 'USER';
+        
+        // Regular users can only subscribe (view-only), admins and moderators can publish
+        const canPublish = userRole === 'ADMIN' || userRole === 'MODERATOR';
 
-    if (!identity) {
-      setError("No se pudo obtener la información del usuario. Por favor inicia sesión nuevamente.");
-      return;
-    }
+        setIsLoading(true);
+        setError("");
 
-    setIsLoading(true);
-    setError("");
+        try {
+          const result: LiveKitResponse = canPublish 
+            ? await getLivekitToken(room, identity, displayName)
+            : await getViewerToken(room, identity, displayName);
 
-    try {
-      // Using the LiveKit service via server action
-      const result: LiveKitResponse = canPublish 
-        ? await getLivekitToken(room, identity, displayName)
-        : await getViewerToken(room, identity, displayName);
+          if (!result.accessToken) {
+            throw new Error("Error al obtener el token de LiveKit");
+          }
 
-      if (!result.accessToken) {
-        throw new Error("Error al obtener el token de LiveKit");
+          setToken(result.accessToken);
+          if (result.url) {
+            setServerUrl(result.url);
+          }
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : "Error al unirse a la sala"
+          );
+          console.error(err);
+        } finally {
+          setIsLoading(false);
+        }
       }
+    };
 
-      setToken(result.accessToken);
-      if (result.url) {
-        setServerUrl(result.url);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Error al unirse a la sala"
-      );
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+    autoJoin();
+  }, [status, room, userName, userId, userEmail, name, userRoles]);
+
+  // Show loading while checking auth or joining room
+  if (status === "loading" || isLoading) {
+    return (
+      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white p-8 rounded-lg shadow-md w-96">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-600">Conectando a la sala...</p>
+            {room && <p className="text-sm text-gray-500 mt-2">Sala: {room}</p>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if room is missing
+  if (!room) {
+    return (
+      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white p-8 rounded-lg shadow-md w-96">
+          <h1 className="text-2xl font-bold mb-4 text-center text-red-600">
+            Error
+          </h1>
+          <p className="text-gray-600 text-center">
+            No se ha especificado la sala de video.
+          </p>
+          <p className="text-sm text-gray-500 text-center mt-4">
+            Usa el formato: /residentes/room?r=nombre-sala
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white p-8 rounded-lg shadow-md w-96">
+          <h1 className="text-2xl font-bold mb-4 text-center text-red-600">
+            Error al conectarse
+          </h1>
+          <p className="text-gray-600 text-center mb-4">
+            {error}
+          </p>
+          <p className="text-sm text-gray-500 text-center">
+            Por favor intenta nuevamente o contacta al administrador.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (!token) {
@@ -2482,7 +2542,6 @@ export default function RoomPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              joinRoom();
             }}
             className="flex flex-col gap-4"
           >
