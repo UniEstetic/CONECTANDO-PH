@@ -1,0 +1,1050 @@
+/* Assembly Room Styles */
+
+.logoWrapper {
+  justify-content: center;
+  display: flex;
+}
+
+.blockName {
+  font-size: 24px;
+  margin-top: 1rem;
+  gap: 7px;
+  display: flex;
+}
+
+.text-center {
+  padding-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.assemblyContainer {
+  min-height: 100vh;
+  background: linear-gradient(#f3deaa 0%, #b68c3a 24%, #9c7b2f 100%);
+  padding: 0;
+}
+
+.assemblyHeader {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  background: #d4af6e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.logoPh {
+  color: #d4af6e;
+}
+
+.assemblyMain {
+  padding: 0 1.5rem 6rem;
+}
+
+.greeting {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: white;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.assemblyTitle {
+  font-size: 1rem;
+  color: #1a1a1a;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.assemblySubtitle {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.videoSection {
+  background: #1a1a1a;
+  border-radius: 20px;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  min-height: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.videoContainer {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  position: relative;
+}
+
+.livekitVideoTrack {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.currentSpeaker {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background: white;
+  border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  color: #333;
+  z-index: 10;
+}
+
+.videoControls {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  z-index: 0;
+}
+
+.controlBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
+.controlBtnActive {
+  background: #7cb342;
+}
+
+.controlBtnInactive {
+  background: #f44336;
+}
+
+.controlBtnRecording {
+  background: #ff4444;
+  animation: pulseButton 2s infinite;
+}
+
+.controlBtnHandRaised {
+  background: #9c27b0;
+  animation: pulseHand 2s infinite;
+}
+
+.controlBtn:hover {
+  transform: scale(1.05);
+}
+
+.controlBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes pulseHand {
+  0%, 100% {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 2px 20px rgba(156, 39, 176, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseButton {
+  0%, 100% { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); }
+  50% { box-shadow: 0 2px 20px rgba(255, 68, 68, 0.6); }
+}
+
+.recordingIndicator {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  z-index: 10;
+}
+
+.recordingDot {
+  width: 10px;
+  height: 10px;
+  background: #ff4444;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Notifications */
+.messageNotifications {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 380px;
+}
+
+.notificationToast {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  animation: slideIn 0.3s ease-out;
+  border-left: 4px solid #f44336;
+}
+
+.notificationToastNotificationHand {
+  border-left-color: #9c27b0;
+}
+
+.notificationHandTitle {
+  color: #9c27b0 !important;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notificationContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notificationHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.notificationTitle {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #f44336;
+}
+
+.notificationClose {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.notificationClose:hover {
+  background: #f5f5f5;
+}
+
+.notificationAuthor {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.notificationText {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.notificationTime {
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 0.25rem;
+}
+
+/* Info Cards */
+.infoCard {
+  background: #2a2a2a;
+  border-radius: 15px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.infoCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+
+.infoCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.infoCardIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconAttendance { background: #7cb342; }
+.iconAgenda { background: #ff9800; }
+.iconWordRequest { background: #9c27b0; }
+.iconConnected { background: #ffd740; }
+.iconFiles { background: #e91e63; }
+.iconMessages { background: #f44336; }
+
+/* Attendance */
+.attendanceGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.attendanceItem {
+  text-align: center;
+}
+
+.attendanceLabel {
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 0.25rem;
+}
+
+.attendanceValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+.attendanceValueQuorum {
+  background: #7cb342;
+  padding: 0.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+/* Agenda */
+.agendaItem {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.agendaHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.agendaNumber {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+}
+
+.agendaDetails {
+  flex: 1;
+}
+
+.agendaTitleText {
+  color: #ccc;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.agendaStatus {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.agendaStatusClosed { color: #999; }
+.agendaStatusActive { color: #7cb342; }
+.agendaStatusPending { color: #999; }
+
+.votingOptions {
+  margin-top: 0.75rem;
+}
+
+.votingLabel {
+  color: #999;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.optionRadio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #666;
+  border-radius: 50%;
+  position: relative;
+}
+
+.optionRadioSelected {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.2);
+}
+
+.optionRadioSelected::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #ff9800;
+  border-radius: 50%;
+}
+
+.optionName {
+  flex: 1;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.optionVotes {
+  color: #999;
+  font-size: 0.875rem;
+  min-width: 30px;
+  text-align: right;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.btnVote {
+  flex: 1;
+  background: #666;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnVote:hover {
+  background: #777;
+}
+
+.btnView {
+  flex: 1;
+  background: #ff9800;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnView:hover {
+  background: #fb8c00;
+}
+
+/* Lists */
+.wordRequestItem,
+.connectedItem,
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.wordRequestInfo,
+.connectedInfo,
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wordRequestAvatar,
+.connectedAvatar {
+  width: 44px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.wordRequestAvatar {
+  background: #9c27b0;
+}
+
+.connectedAvatar {
+  background: #ffd740;
+  color: #333;
+}
+
+.wordRequestName,
+.connectedName,
+.fileName {
+  color: white;
+  font-size: 0.875rem;
+}
+
+.connectedStatus {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.statusIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #555;
+  transition: all 0.2s;
+}
+
+.statusIconActive {
+  background: #7cb342;
+}
+
+.statusIcon:hover {
+  transform: scale(1.1);
+}
+
+.fileIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fileActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.fileActionBtn,
+.wordRequestAction {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #e91e63;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.wordRequestAction {
+  background: #9c27b0;
+}
+
+.wordRequestTime {
+  color: #999;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.noRequests {
+  text-align: center;
+  color: #999;
+  padding: 1.5rem;
+  font-size: 0.875rem;
+}
+
+/* Messages */
+.messagesContainer {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 0.75rem;
+}
+
+.messageItem {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.messageAuthor {
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.messageTime {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.messageText {
+  color: #ccc;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.messageReply {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.messageReplyAuthor {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.messageReplyText {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.messageInputContainer {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.messageInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.messageInput::placeholder {
+  color: #999;
+}
+
+.messageSendBtn {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #f44336;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.messageSendBtn:hover {
+  background: #e53935;
+  transform: scale(1.05);
+}
+
+.messageSendBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile */
+.mobileAttendanceCard {
+  display: block;
+}
+
+.desktopAttendanceCard {
+  display: none;
+}
+
+.desktopBottomPanels {
+  display: none;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navItem:hover {
+  transform: translateY(-2px);
+}
+
+.navIcon {
+  color: #d4af6e;
+}
+
+.navLabel {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Vote Modal */
+.voteModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.voteModal {
+  background: #fff;
+  width: 520px;
+  max-width: 90%;
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.voteHeader h3 {
+  margin-top: 10px;
+  font-size: 18px;
+  color: black;
+}
+
+.voteStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: black;
+}
+
+.statusDotGreen {
+  width: 12px;
+  height: 12px;
+  background: #4caf50;
+  border-radius: 50%;
+}
+
+.voteOptions {
+  margin-top: 20px;
+}
+
+.voteOptionItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.voteOptionItem:hover {
+  background: #e8e8e8;
+}
+
+.voteOptionItemSelected {
+  background: rgba(255, 152, 0, 0.15);
+  border: 2px solid #ff9800;
+}
+
+.voteRadio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #999;
+  border-radius: 50%;
+  position: relative;
+}
+
+.voteRadioSelected {
+  border-color: #ff9800;
+}
+
+.voteRadioSelected::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #ff9800;
+  border-radius: 50%;
+}
+
+.voteOptionName {
+  flex: 1;
+  color: #222;
+  font-weight: 500;
+}
+
+.voteActions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.voteCancel {
+  flex: 1;
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 12px;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.voteSubmit {
+  flex: 1;
+  background: #c9a461;
+  color: #000;
+  border: none;
+  padding: 12px;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Results Modal */
+.resultsModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.resultsModal {
+  background: #fff;
+  width: 750px;
+  max-width: 95%;
+  border-radius: 20px;
+  padding: 24px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.resultsHeader {
+  margin-bottom: 20px;
+}
+
+.resultsStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #4caf50;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.resultsStatusDot {
+  width: 10px;
+  height: 10px;
+  background: #4caf50;
+  border-radius: 50%;
+}
+
+.resultsTitle {
+  font-size: 16px;
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.resultsStats {
+  display: flex;
+  gap: 12px;
+  background: #66c04a;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.resultsStat {
+  flex: 1;
+  text-align: center;
+}
+
+.resultsStatLabel {
+  font-size: 14px;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.resultsStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.resultsLink {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.resultsLink a {
+  color: #c9a461;
+  font-size: 14px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.resultsTable {
+  margin-bottom: 20px;
+}
+
+.resultsTableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 10px;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #666;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 10px;
+}
+
+.resultsRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 10px;
+  padding: 10px 12px;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.resultsOptionName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #222;
+}
+
+.resultsRadioDot {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #999;
+  border-radius: 50%;
+}
+
+.resultsVotes {
+  font-size: 14px;
+  color: #222;
+  font-weight: 600;
+}
+
+.resultsPercentage {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .mobileAttendanceCard {
+    display: none;
+  }
+
+  .desktopAttendanceCard {
+    display: block;
+  }
+
+  .desktopBottomPanels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
