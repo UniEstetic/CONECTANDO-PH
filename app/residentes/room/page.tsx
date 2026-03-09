@@ -36,8 +36,13 @@ import {
   Circle,
   X,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { LiveKitResponse } from "@/app/types/livekit";
 
-// Import types and components from separate files
+// Import server actions
+import { getLivekitToken, getViewerToken, getHostToken } from "@/app/actions/livekit";
+
+// Import types and components from separate files 
 import { Message, WordRequest } from "./components/types";
 import { RecordingIndicator } from "./components/RecordingIndicator";
 import { RecordingControls } from "./components/RecordingControls";
@@ -46,6 +51,8 @@ import { WordRequestNotifications } from "./components/WordRequestNotifications"
 
 // Componente interno que usa hooks de LiveKit
 function AssemblyInterface() {
+  const { data: session } = useSession();
+  const firstName = session?.user?.userProfile?.firstName || 'Usuario';
   const participants = useParticipants();
   const { localParticipant } = useLocalParticipant();
   const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone]);
@@ -178,7 +185,7 @@ function AssemblyInterface() {
 
     const newMessage: Message = {
       id: Date.now().toString(),
-      author: 'Andrés (Tú)',
+      author: firstName,
       text: message,
       time: getCurrentTime(),
       isRead: true,
@@ -1626,14 +1633,14 @@ function AssemblyInterface() {
           <p className="saludo">
             Hola, 
           </p>
-          <strong className={styles.saludoName}>Andrés</strong>
+          <strong className={styles.saludoName}>{firstName}</strong>
         </div>
       </div>
 
       <div className="assembly-main">
         {/* COLUMNA IZQUIERDA - Video + Archivos + Mensajes */}
         <div className="main-content">
-          <h1 className="greeting">Hola, Felipe</h1>
+          <h1 className="greeting">Hola, {firstName}</h1>
           <div className="text-center mobile-title-section">
             <p className="assembly-title">
               Primera Asamblea General 2026 Conjunto Los Robles
@@ -2383,12 +2390,29 @@ function AssemblyInterface() {
 
 export default function RoomPage() {
   const params = useSearchParams();
+  const { data: session } = useSession();
+
+  // Get user data from session
+  const userProfile = session?.user?.userProfile;
+  const userId = session?.user?.userId;
+  const userName = userProfile ? `${userProfile.firstName} ${userProfile.lastName}`.trim() : "";
+  const userEmail = userProfile?.email || "";
+  const userRoles = userProfile?.roles || [];
+  const ownership = session?.user?.ownership?.[0];
 
   const [room, setRoom] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState(userName);
   const [token, setToken] = useState("");
+  const [serverUrl, setServerUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Auto-fill name from session
+  useEffect(() => {
+    if (userName && !name) {
+      setName(userName);
+    }
+  }, [userName, name]);
 
   useEffect(() => {
     const r = params.get("room");
@@ -2400,8 +2424,24 @@ export default function RoomPage() {
   }, [params]);
 
   async function joinRoom() {
-    if (!room || !name) {
-      setError("Por favor ingresa nombre de sala y tu nombre");
+    if (!room) {
+      setError("Por favor ingresa el nombre de la sala");
+      return;
+    }
+
+    // Use session data for identity and name
+    const identity = userId || userEmail || name;
+    const displayName = name || userName;
+
+    // Determine role based on user profile
+    const userRole = userRoles.includes('admin') ? 'ADMIN' : 
+                     userRoles.includes('moderator') ? 'MODERATOR' : 'USER';
+    
+    // Regular users can only subscribe (view-only), admins and moderators can publish
+    const canPublish = userRole === 'ADMIN' || userRole === 'MODERATOR';
+
+    if (!identity) {
+      setError("No se pudo obtener la información del usuario. Por favor inicia sesión nuevamente.");
       return;
     }
 
@@ -2409,17 +2449,19 @@ export default function RoomPage() {
     setError("");
 
     try {
-      const res = await fetch(
-        `/api/get-participant-token?room=${encodeURIComponent(room)}&username=${encodeURIComponent(name)}`
-      );
+      // Using the LiveKit service via server action
+      const result: LiveKitResponse = canPublish 
+        ? await getLivekitToken(room, identity, displayName)
+        : await getViewerToken(room, identity, displayName);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Error al obtener el token");
+      if (!result.accessToken) {
+        throw new Error("Error al obtener el token de LiveKit");
       }
 
-      setToken(data.token);
+      setToken(result.accessToken);
+      if (result.url) {
+        setServerUrl(result.url);
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Error al unirse a la sala"
@@ -2456,6 +2498,18 @@ export default function RoomPage() {
                 disabled={isLoading}
               />
             </div>
+            {session ? (
+              <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+                <p className="text-sm text-blue-700">
+                  <span className="font-medium">Conectado como:</span> {userName}
+                </p>
+                {ownership && (
+                  <p className="text-xs text-blue-600">
+                    <span className="font-medium">Propiedad:</span> {ownership.name}
+                  </p>
+                )}
+              </div>
+            ) : null}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Tu nombre
@@ -2465,7 +2519,7 @@ export default function RoomPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
+                disabled={isLoading || !!userName}
               />
             </div>
             {error && (
@@ -2489,10 +2543,11 @@ export default function RoomPage() {
   return (
     <LiveKitRoom
       token={token}
-      serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
+      serverUrl={serverUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL}
       data-lk-theme="default"
       onDisconnected={() => {
         setToken("");
+        setServerUrl("");
         setRoom("");
         setName("");
       }}
