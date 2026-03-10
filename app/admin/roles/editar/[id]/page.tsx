@@ -13,7 +13,7 @@ type RoleFormData = Omit<Roles, 'id' | 'created_at'>
 export default function EditarRolPage() {
   const router = useRouter()
   const params = useParams()
-  const roleId = params.id as string
+  const roleId = Array.isArray(params.id) ? params.id[0] : params.id
 
   const [formData, setFormData] = useState<RoleFormData>({
     name: '',
@@ -39,7 +39,7 @@ export default function EditarRolPage() {
       const role = response.data
       setFormData({
         name: role.name,
-        description: role.description,
+        description: role.description || '',
         scopes: role.scopes || '',
         is_active: role.is_active
       })
@@ -68,7 +68,17 @@ export default function EditarRolPage() {
     setMessage(null)
 
     try {
-      await update(roleId, formData)
+      if (!roleId) {
+        throw new Error('Rol inválido')
+      }
+
+      const payload = {
+        name: formData.name.trim(),
+        ...(formData.description?.trim() ? { description: formData.description.trim() } : {}),
+        ...(formData.scopes?.trim() ? { scopes: formData.scopes.trim() } : {}),
+      }
+
+      await update(roleId, payload)
       
       setMessage({ type: 'success', text: 'Rol actualizado exitosamente' })
       
@@ -132,12 +142,11 @@ export default function EditarRolPage() {
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
-              <span>Descripción: <span className={styles.required}>*</span></span>
+              <span>Descripción:</span>
               <textarea 
                 name="description" 
                 value={formData.description}
                 onChange={handleChange}
-                required
                 rows={3}
                 placeholder="Describe las funciones de este rol"
                 className={styles.formTextarea}
@@ -158,21 +167,6 @@ export default function EditarRolPage() {
               />
               <span className={styles.formHint}>Ingrese los permisos separados por comas</span>
             </label>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.formCheckbox}>
-              <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
-              />
-              <span className={styles.formCheckboxLabel}>Rol activo</span>
-            </label>
-            <span className={styles.formHint} style={{ marginLeft: '28px' }}>
-              Los roles inactivos no podrán ser asignados a usuarios
-            </span>
           </div>
 
           <div className={styles.formButtons}>

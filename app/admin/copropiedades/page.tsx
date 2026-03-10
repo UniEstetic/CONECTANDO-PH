@@ -26,9 +26,20 @@ export default function CopropiedadesPage() {
     try {
       setLoading(true)
       const response = await getAll()
-      setCopropiedades(response.data)
+      const rawData = (response as any)?.data
+
+      const normalizedCopropiedades: Phs[] = Array.isArray(rawData)
+        ? rawData
+        : Array.isArray(rawData?.data)
+          ? rawData.data
+          : Array.isArray(rawData?.items)
+            ? rawData.items
+            : []
+
+      setCopropiedades(normalizedCopropiedades)
     } catch (error) {
       console.error('Error al cargar copropiedades:', error)
+      setCopropiedades([])
     } finally {
       setLoading(false)
     }
@@ -47,6 +58,11 @@ export default function CopropiedadesPage() {
 
   const openDeleteModal = (id: string, name: string) => {
     setDeleteModal({ show: true, id, name })
+  }
+
+  const getPhId = (ph: Phs) => {
+    const rawId = (ph as any)?.id ?? (ph as any)?._id ?? (ph as any)?.ph_id
+    return rawId ? String(rawId) : ''
   }
 
   // Filtrar copropiedades
@@ -95,8 +111,11 @@ export default function CopropiedadesPage() {
           </div>
         ) : (
           <section className={styles.gridCopropiedades}>
-            {filteredCopropiedades.map((ph) => (
-              <div key={ph.id} className={styles.phCard}>
+            {filteredCopropiedades.map((ph) => {
+              const phId = getPhId(ph)
+
+              return (
+              <div key={phId || `${ph.name}-${ph.address}`} className={styles.phCard}>
                 <div className={styles.imageWrapper}>
                   {/* Imagen de la copropiedad o placeholder */}
                   <div className={styles.placeholderImg}>
@@ -128,23 +147,24 @@ export default function CopropiedadesPage() {
 
                   {/* Botones de acción */}
                   <div className={styles.cardActions}>
-                    <Link href={`/admin/copropiedades/editar/${ph.id}`} className={styles.btnEdit}>
+                    <Link href={phId ? `/admin/copropiedades/editar/${phId}` : '/admin/copropiedades'} className={styles.btnEdit}>
                       ✏️ Editar
                     </Link>
                     <button 
                       className={styles.btnDelete}
-                      onClick={() => openDeleteModal(ph.id!, ph.name)}
+                      disabled={!phId}
+                      onClick={() => phId && openDeleteModal(phId, ph.name)}
                     >
                       🗑️ Eliminar
                     </button>
                   </div>
 
-                  <Link href={`/admin/copropiedades/unidades/${ph.id}`} className={styles.btnEnter}>
+                  <Link href={phId ? `/admin/copropiedades/unidades/${phId}` : '/admin/copropiedades'} className={styles.btnEnter}>
                     Gestionar Copropiedad
                   </Link>
                 </div>
               </div>
-            ))}
+            )})}
 
             {/* Botón para agregar nueva copropiedad */}
             <Link href="/admin/copropiedades/crear" className={styles.btnAddPH}>

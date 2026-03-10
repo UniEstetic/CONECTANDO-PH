@@ -36,7 +36,13 @@ export default function CrearRolPage() {
     setMessage(null)
 
     try {
-      await create(formData)
+      const payload = {
+        name: formData.name.trim(),
+        ...(formData.description?.trim() ? { description: formData.description.trim() } : {}),
+        ...(formData.scopes?.trim() ? { scopes: formData.scopes.trim() } : {}),
+      }
+
+      await create(payload)
       
       setMessage({ type: 'success', text: 'Rol creado exitosamente' })
       
@@ -131,12 +137,11 @@ export default function CrearRolPage() {
               gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ fontWeight: '500' }}>Descripción: <span style={{ color: 'red' }}>*</span></span>
+              <span style={{ fontWeight: '500' }}>Descripción:</span>
               <textarea 
                 name="description" 
                 value={formData.description}
                 onChange={handleChange}
-                required
                 rows={3}
                 placeholder="Describe las funciones de este rol"
                 style={{ 
@@ -183,29 +188,6 @@ export default function CrearRolPage() {
                 Ingrese los permisos separados por comas
               </span>
             </label>
-          </div>
-
-          {/* Estado */}
-          <div style={{ marginBottom: '25px' }}>
-            <label style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>
-              <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
-                style={{ width: '18px', height: '18px' }}
-              />
-              <span style={{ fontWeight: '500' }}>Rol activo</span>
-            </label>
-            <span style={{ fontSize: '12px', color: '#666', marginLeft: '28px', display: 'block' }}>
-              Los roles inactivos no podrán ser asignados a usuarios
-            </span>
           </div>
 
           {/* Botones */}

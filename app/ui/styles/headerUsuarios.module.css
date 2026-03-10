@@ -7,6 +7,36 @@
     flex-direction: column;
     gap: 1rem; 
 }
+
+.topActionsRow {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.backButtonTop {
+  background: white;
+  color: #111827;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  text-decoration: none;
+}
+
+.backButtonTop::before {
+  content: '<';
+  font-size: 16px;
+  line-height: 1;
+}
+
+.backButtonTop:hover {
+  opacity: 0.9;
+}
 .blockName{
   display: flex;
 }
@@ -26,9 +56,10 @@
 }
 
 .logogut{
-  width: 95%;
+  width: 100%;
   display: flex;
   justify-content: flex-end;
+  align-self: stretch;
   color: black;
   font-weight: 500;
 }
@@ -39,4 +70,20 @@
   font-size: 13px;
   padding: 0.5rem;
   border-radius: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .topActionsRow {
+    gap: 0.5rem;
+  }
+
+  .backButtonTop,
+  .logogutButton {
+    font-size: 12px;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .backButtonTop {
+    padding: 0.45rem 0.75rem;
+  }
 }
