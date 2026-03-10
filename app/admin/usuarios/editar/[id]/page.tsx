@@ -13,6 +13,7 @@ import { getById as getUnitAssignments, assign as assignUnitAssignments } from '
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
+import { useSession } from "next-auth/react";
 
 type UserFormData = Omit<User, 'id' | 'created_at'>
 
@@ -24,10 +25,12 @@ interface RoleWithUnits {
 }
 
 export default function EditarUsuarioPage() {
+  const { data: session } = useSession();
   const router = useRouter()
   const params = useParams()
   const userId = params.id as string
-  const phId = '1' // Por defecto, se puede cambiar según el contexto
+  const phId = session?.user?.ownership?.id; // Lista Unidades
+
 
   const [formData, setFormData] = useState<UserFormData>({
     first_name: '',
@@ -62,10 +65,15 @@ export default function EditarUsuarioPage() {
     if (userId) {
       loadUser(userId)
       loadRoles()
-      loadUnits()
       loadUserRoles(userId)
     }
   }, [userId])
+
+  useEffect(() => {
+    if (phId) {
+      loadUnits()
+    }
+  }, [phId])
 
   const loadUser = async (id: string) => {
     try {

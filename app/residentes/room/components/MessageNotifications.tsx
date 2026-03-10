@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageCircle, X } from "lucide-react";
-import { Message } from "./types";
+import { Message } from "../types";
 
 interface MessageNotificationsProps {
   messages: Message[];
