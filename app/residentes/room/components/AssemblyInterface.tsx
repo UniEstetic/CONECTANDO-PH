@@ -29,7 +29,7 @@ import {
 import { useSession } from "next-auth/react";
 
 // Import types and components from separate files 
-import { Message, WordRequest } from "./types";
+import { Message, WordRequest } from "../types";
 import { RecordingIndicator } from "./RecordingIndicator";
 import { RecordingControls } from "./RecordingControls";
 import { MessageNotifications } from "./MessageNotifications";
