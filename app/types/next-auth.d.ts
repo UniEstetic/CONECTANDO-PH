@@ -3,18 +3,28 @@ import NextAuth, { DefaultSession } from "next-auth";
 declare module "next-auth" {
   interface Session {
     accessToken?: string;
+    userId?: string;
     user: {
+      userId?: string;
       userProfile?: {
         firstName: string;
         lastName: string;
         email: string;
         roles: string[];
         avatar: string;
+        document?: string;
+        documentType?: string;
+        phone?: string;
       };
       ownership?: {
         name: string;
         id: string;
-      };
+        tax_id?: string;
+        address?: string;
+        city?: string;
+        country?: string;
+        state?: string;
+      }[];
     } & DefaultSession["user"];
   }
 
@@ -22,6 +32,7 @@ declare module "next-auth" {
     userProfile?: any;
     ownership?: any;
     accessToken?: string;
+    userId?: string;
   }
 }
 

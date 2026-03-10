@@ -1,15 +1,34 @@
 'use client'
 
 import styles from '@/app/ui/styles/usuarios.module.css';
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { User } from '@/app/types/users'
+import { Roles } from '@/app/types/roles'
+import { Units } from '@/app/types/units'
 import { create } from '@/app/services/users.service'
+import { getAll as getAllRoles } from '@/app/services/roles.service'
+import { getAll as getAllUnits } from '@/app/services/units.service'
+import { assign as assignUserRoles } from '@/app/services/user_roles.service'
+import { assign as assignUnitAssignments } from '@/app/services/unit_assignments.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useSession } from "next-auth/react";
 
-// Omitir campos que genera el backend
-type UserFormData = Omit<User, 'id' | 'is_active' | 'created_at'>
+type UserFormData = Omit<User, 'id' | 'created_at'>
 
-export default function FormUser() {
+// Tipos para las asignaciones de unidades por rol
+interface RoleWithUnits {
+  roleId: string
+  roleName: string
+  selectedUnits: string[]
+}
+
+export default function CrearUsuarioPage() {
+  const { data: session } = useSession();
+  const router = useRouter()
+  const phId = session?.user?.ownership?.id; // Lista Unidades
+
   const [formData, setFormData] = useState<UserFormData>({
     first_name: '',
     last_name: '',
@@ -19,306 +38,282 @@ export default function FormUser() {
     email: '',
     document_type: 'CC',
     document_number: '',
-    phone_number: ''
+    phone_number: '',
+    is_active: true
   })
 
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
-  const [activeFilter, setActiveFilter] = useState('Nombres')
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Roles
+  const [allRoles, setAllRoles] = useState<Roles[]>([])
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [rolesLoading, setRolesLoading] = useState(true)
+
+  // Unidades
+  const [allUnits, setAllUnits] = useState<Units[]>([])
+  const [unitsLoading, setUnitsLoading] = useState(true)
+  const [roleUnitAssignments, setRoleUnitAssignments] = useState<RoleWithUnits[]>([])
+  const [expandedRoles, setExpandedRoles] = useState<string[]>([])
+
+  useEffect(() => {
+    loadRoles()
+  }, [])
+
+  useEffect(() => {
+    if (phId) {
+      loadUnits()
+    }
+  }, [phId])
+
+  const loadRoles = async () => {
+    try {
+      const response = await getAllRoles()
+      setAllRoles(response.data.filter((role: Roles) => role.is_active))
+    } catch (error) {
+      console.error('Error al cargar roles:', error)
+    } finally {
+      setRolesLoading(false)
+    }
+  }
+
+  const loadUnits = async () => {
+    try {
+      const response = await getAllUnits(phId)
+      setAllUnits(response.data)
+    } catch (error) {
+      console.error('Error al cargar unidades:', error)
+    } finally {
+      setUnitsLoading(false)
+    }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     })
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      // Aquí puedes implementar la lógica para subir el archivo
-      console.log('Archivo seleccionado:', file.name)
-    }
+  const handleRoleChange = (roleId: string) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(roleId)) {
+        setRoleUnitAssignments(prev => prev.filter(a => a.roleId !== roleId))
+        setExpandedRoles(prev => prev.filter(id => id !== roleId))
+        return prev.filter(id => id !== roleId)
+      } else {
+        return [...prev, roleId]
+      }
+    })
+  }
+
+  const toggleRoleUnits = (roleId: string) => {
+    setExpandedRoles(prev => 
+      prev.includes(roleId) 
+        ? prev.filter(id => id !== roleId)
+        : [...prev, roleId]
+    )
+  }
+
+  const handleUnitChange = (roleId: string, unitId: string) => {
+    setRoleUnitAssignments(prev => {
+      const existing = prev.find(a => a.roleId === roleId)
+      if (existing) {
+        if (existing.selectedUnits.includes(unitId)) {
+          return prev.map(a => 
+            a.roleId === roleId 
+              ? { ...a, selectedUnits: a.selectedUnits.filter(id => id !== unitId) }
+              : a
+          )
+        } else {
+          return prev.map(a => 
+            a.roleId === roleId 
+              ? { ...a, selectedUnits: [...a.selectedUnits, unitId] }
+              : a
+          )
+        }
+      } else {
+        const role = allRoles.find(r => r.id === roleId)
+        return [...prev, {
+          roleId,
+          roleName: role?.name || 'Rol',
+          selectedUnits: [unitId]
+        }]
+      }
+    })
+  }
+
+  const getUnitsForRole = (roleId: string) => {
+    const assignment = roleUnitAssignments.find(a => a.roleId === roleId)
+    return assignment?.selectedUnits || []
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setLoading(true)
+    setSaving(true)
     setMessage(null)
 
     try {
-      const response = await create(formData)
+      const userData = {
+        ...formData,
+        ...(password && { password })
+      }
       
-      setMessage({ type: 'success', text: 'Usuario registrado exitosamente' })
+      const response = await create(userData)
+      const userId = response.data.id
+
+      // Asignar roles al usuario
+      if (selectedRoles.length > 0) {
+        await assignUserRoles(userId, { roles: selectedRoles })
+        
+        // Asignar unidades por rol
+        for (const assignment of roleUnitAssignments) {
+          const userRolId = `${userId}_${assignment.roleId}`
+          await assignUnitAssignments(userRolId, { units: assignment.selectedUnits })
+        }
+      }
       
-      // Limpiar formulario
-      setFormData({
-        first_name: '',
-        last_name: '',
-        type_person: 'Natural',
-        gender: 'F',
-        avatar_url: '',
-        email: '',
-        document_type: 'CC',
-        document_number: '',
-        phone_number: ''
-      })
-      setPassword('')
+      setMessage({ type: 'success', text: 'Usuario creado exitosamente' })
+      
+      setTimeout(() => {
+        router.push('/admin/usuarios')
+      }, 1500)
 
     } catch (error) {
       setMessage({ 
         type: 'error', 
-        text: error instanceof Error ? error.message : 'Error al enviar datos' 
+        text: error instanceof Error ? error.message : 'Error al crear el usuario' 
       })
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
 
   return (
     <div className={styles.blockResidentes}>
-      {/* Panel izquierdo - Crear usuario */}
       <main className={styles.containerResidentes}>
         <UsuariosHeader />
-        <div style={{
-          backgroundColor: '#c4a861',
-          color: 'white',
-          padding: '12px 15px',
-          borderRadius: '4px',
-          marginBottom: '20px',
-          fontWeight: '500',
-          fontSize: '15px'
-        }}>
+        
+        <div className={styles.formSectionTitle}>
           Crear usuario
         </div>
 
         {message && (
-          <div style={{
-            padding: '10px 12px',
-            marginBottom: '20px',
-            borderRadius: '4px',
-            backgroundColor: message.type === 'success' ? '#d4edda' : '#f8d7da',
-            color: message.type === 'success' ? '#155724' : '#721c24',
-            border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
-            fontSize: '14px'
-          }}>
+          <div className={`${styles.alert} ${message.type === 'success' ? styles.alertSuccess : styles.alertError}`}>
             {message.text}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Nombre */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Nombre:</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              <span>Nombre: <span className={styles.required}>*</span></span>
               <input 
                 type="text" 
                 name="first_name" 
                 value={formData.first_name}
                 onChange={handleChange}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.formInput}
               />
             </label>
           </div>
 
-          {/* Apellido */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Apellido:</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              <span>Apellido: <span className={styles.required}>*</span></span>
               <input 
                 type="text" 
                 name="last_name" 
                 value={formData.last_name}
                 onChange={handleChange}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.formInput}
               />
             </label>
           </div>
 
-          {/* Email */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Email:</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              <span>Email: <span className={styles.required}>*</span></span>
               <input 
                 type="email" 
                 name="email" 
                 value={formData.email}
                 onChange={handleChange}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.formInput}
               />
             </label>
           </div>
 
-          {/* Contraseña */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Contraseña:</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              <span>Contraseña: <span className={styles.required}>*</span></span>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.formInput}
               />
             </label>
           </div>
 
-          {/* Tipo de documento */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Tipo de documento:</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              <span>Tipo de documento: <span className={styles.required}>*</span></span>
               <input 
                 type="text" 
                 name="document_type" 
                 value={formData.document_type}
                 onChange={handleChange}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.formInput}
               />
             </label>
           </div>
 
-          {/* Número de documento */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Número de documento:</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              <span>Número de documento: <span className={styles.required}>*</span></span>
               <input 
                 type="text" 
                 name="document_number" 
                 value={formData.document_number}
                 onChange={handleChange}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.formInput}
               />
             </label>
           </div>
 
-          {/* Número celular */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Número celular:</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              <span>Número celular: <span className={styles.required}>*</span></span>
               <input 
                 type="tel" 
                 name="phone_number" 
                 value={formData.phone_number}
                 onChange={handleChange}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.formInput}
               />
             </label>
           </div>
 
-          {/* Tipo de usuario */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Tipo de usuario:</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              <span>Tipo de usuario: <span className={styles.required}>*</span></span>
               <select 
                 name="type_person" 
                 value={formData.type_person}
                 onChange={handleChange}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.formSelect}
               >
                 <option value="">Seleccione</option>
                 <option value="Natural">Natural</option>
@@ -329,61 +324,119 @@ export default function FormUser() {
             </label>
           </div>
 
-          {/* Imagen de perfil */}
-          <div style={{ marginBottom: '25px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Imagen de perfil:</span>
-              <div>
-                <input 
-                  type="file"
-                  id="avatar-upload"
-                  onChange={handleFileUpload}
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                />
-                <label 
-                  htmlFor="avatar-upload"
-                  style={{
-                    display: 'inline-block',
-                    padding: '10px 24px',
-                    backgroundColor: 'white',
-                    border: '1px solid #ccc',
-                    borderRadius: '20px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    textAlign: 'center'
-                  }}
-                >
-                  Subir archivo
-                </label>
+          {/* Roles del usuario */}
+          <div className={styles.selectionSection}>
+            <span className={styles.selectionTitle}>Roles asignados:</span>
+            
+            {rolesLoading ? (
+              <p className={styles.loading}>Cargando roles...</p>
+            ) : allRoles.length === 0 ? (
+              <p className={styles.empty}>No hay roles disponibles</p>
+            ) : (
+              <div className={styles.selectionGrid}>
+                {allRoles.map((role) => (
+                  <label 
+                    key={role.id} 
+                    className={`${styles.checkboxCard} ${selectedRoles.includes(role.id!) ? styles.checked : ''}`}
+                  >
+                    <input 
+                      type="checkbox" 
+                      checked={selectedRoles.includes(role.id!)}
+                      onChange={() => handleRoleChange(role.id!)}
+                    />
+                    <div className={styles.checkboxCardContent}>
+                      <span className={styles.checkboxCardTitle}>{role.name}</span>
+                      <p className={styles.checkboxCardDescription}>{role.description}</p>
+                    </div>
+                  </label>
+                ))}
               </div>
-            </label>
+            )}
+            <span className={styles.selectionHint}>Seleccione los roles que tendrá este usuario</span>
           </div>
 
-          {/* Botón de envío */}
-          <div style={{ textAlign: 'center', marginTop: '30px' }}>
+          {/* Unidades por rol */}
+          {selectedRoles.length > 0 && !unitsLoading && allUnits.length > 0 && (
+            <div className={styles.selectionSection}>
+              <span className={styles.selectionTitle}>Unidades por rol:</span>
+              <p className={styles.selectionHint}>Selecciona las unidades que tendrá el usuario para cada rol</p>
+              
+              {selectedRoles.map(roleId => {
+                const role = allRoles.find(r => r.id === roleId)
+                const isExpanded = expandedRoles.includes(roleId)
+                const selectedUnits = getUnitsForRole(roleId)
+                
+                return (
+                  <div key={roleId} className={styles.accordion}>
+                    <button
+                      type="button"
+                      onClick={() => toggleRoleUnits(roleId)}
+                      className={`${styles.accordionHeader} ${isExpanded ? styles.active : ''}`}
+                    >
+                      <span className={styles.accordionTitle}>
+                        {role?.name}
+                        {selectedUnits.length > 0 && (
+                          <span className={styles.accordionBadge}>{selectedUnits.length}</span>
+                        )}
+                      </span>
+                      <span className={styles.accordionIcon}>{isExpanded ? '▲' : '▼'}</span>
+                    </button>
+                    
+                    {isExpanded && (
+                      <div className={styles.accordionContent}>
+                        <div className={styles.unitsGrid}>
+                          {allUnits.map(unit => (
+                            <label
+                              key={unit.id}
+                              className={`${styles.unitCheckbox} ${selectedUnits.includes(unit.id!) ? styles.checked : ''}`}
+                            >
+                              <input 
+                                type="checkbox"
+                                checked={selectedUnits.includes(unit.id!)}
+                                onChange={() => handleUnitChange(roleId, unit.id!)}
+                              />
+                              <div className={styles.unitCheckboxInfo}>
+                                <span className={styles.unitCheckboxNumber}>{unit.unit_number}</span>
+                                <span className={styles.unitCheckboxDetail}>{unit.block} - Piso {unit.floor}</span>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Estado */}
+          <div className={styles.formGroup}>
+            <label className={styles.formCheckbox}>
+              <input 
+                type="checkbox" 
+                name="is_active" 
+                checked={formData.is_active}
+                onChange={handleChange}
+              />
+              <span className={styles.formCheckboxLabel}>Usuario activo</span>
+            </label>
+            <span className={styles.formHint} style={{ marginLeft: '28px' }}>
+              Los usuarios inactivos no podrán iniciar sesión
+            </span>
+          </div>
+
+          {/* Botones */}
+          <div className={styles.formButtons}>
+            <Link href="/admin/usuarios" className={styles.btnCancel}>
+              Cancelar
+            </Link>
             <button 
               type="submit" 
-              disabled={loading}
-              style={{
-                padding: '12px 50px',
-                backgroundColor: loading ? '#ccc' : 'white',
-                color: '#333',
-                border: '1px solid #ccc',
-                borderRadius: '25px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '15px',
-                fontWeight: '500',
-                width: '100%',
-                maxWidth: '300px'
-              }}
+              disabled={saving}
+              className={styles.btnSubmit}
             >
-              {loading ? 'Enviando...' : 'Guardar usuario'}
+              {saving ? 'Guardando...' : 'Guardar usuario'}
             </button>
           </div>
         </form>
