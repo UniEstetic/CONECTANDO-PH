@@ -36,7 +36,8 @@ export async function getToken(
 export async function getTokenViewer(
   payload: RoomParticipant,
 ): Promise<RoomParticipant> {
-  const res = await apiClientSession(`/video/token/viewer`, {
+  //const res = await apiClientSession(`/video/token/viewer`, {
+  const res = await apiClientSession(`/video/token/host`, {
     method: "POST",
     body: JSON.stringify(payload),
   });

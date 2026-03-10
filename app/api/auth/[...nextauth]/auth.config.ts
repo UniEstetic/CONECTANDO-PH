@@ -6,9 +6,18 @@ import {
   getProfile,
 } from "@/app/services/auth.service";
 const PROVIDER_DEFAULT = process?.env?.AUTH_PROVIDER_DEFAULT ?? "accessEmail";
+const SESSION_TIMEOUT = parseInt(process?.env?.NEXTAUTH_SESSION_TIMEOUT ?? "3600", 10);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.NEXTAUTH_SECRET || "clave_super_secreta_de_emergencia",
+  session: {
+    strategy: "jwt",
+    maxAge: SESSION_TIMEOUT,
+    updateAge: 60,
+  },
+  jwt: {
+    maxAge: SESSION_TIMEOUT,
+  },
   providers: [
     Credentials({
       name: "Credentials",
@@ -52,7 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/auth/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) { 
         token.accessToken = (user as any).accessToken;
         token.profile = {
@@ -62,6 +71,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
            scope: (user as any).scope
         };
       }
+      // Set expiration time
+      const now = Math.floor(Date.now() / 1000);
+      token.exp = now + SESSION_TIMEOUT;
       return token;
     },
     async session({ session, token }) {
