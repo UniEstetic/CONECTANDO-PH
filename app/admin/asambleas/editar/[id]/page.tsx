@@ -1,18 +1,33 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import styles from '@/app/ui/styles/roomStylesAdministrativo.module.css';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
-import { create as createAssembly } from '@/app/services/assemblies.service';
-import { create as createAgenda, getAll as getAgendaByAssembly } from '@/app/services/agenda.service';
-import { create as createVotingQuestion, getAll as getVotingQuestionsByAgenda } from '@/app/services/voting-questions.service';
-import { create as createQuestionOption } from '@/app/services/question-options.service';
+import { getById as getAssemblyById, update as updateAssembly } from '@/app/services/assemblies.service';
+import { 
+  create as createAgenda, 
+  getAll as getAgendaByAssembly, 
+  update as updateAgenda,
+  remove as removeAgenda 
+} from '@/app/services/agenda.service';
+import { 
+  create as createVotingQuestion, 
+  getAll as getVotingQuestionsByAgenda,
+  update as updateVotingQuestion,
+  remove as removeVotingQuestion
+} from '@/app/services/voting-questions.service';
+import { 
+  create as createQuestionOption, 
+  getAll as getQuestionOptionsByQuestion, 
+  update as updateQuestionOption, 
+  remove as removeQuestionOption 
+} from '@/app/services/question-options.service';
 import { Assembly } from '@/app/types/assemblies';
 import { Agenda } from '@/app/types/agenda';
 import { VotingQuestions } from '@/app/types/voting-questions';
 import { QuestionOptions } from '@/app/types/question-options';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useSession } from "next-auth/react";
 
 type Option = {
@@ -33,23 +48,26 @@ type VotingQuestion = {
 
 type AgendaItem = {
   id?: string;
+  assembly_id: string;
   title: string;
   sort_order: number;
   is_votable: boolean;
   required_quorum: number;
+  is_active: boolean;
   type: 'Encuesta' | 'Documento' | 'Texto';
-  document_url?: string;
-  content?: string;
   votingQuestions?: VotingQuestion[];
 };
 
 type AssemblyFormData = Partial<Assembly>
 
-export default function CrearAsambleasPage() {
+export default function EditarAsambleasPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const params = useParams();
+  const assemblyId = params.id as string;
   
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const [formData, setFormData] = useState<AssemblyFormData>({
@@ -60,7 +78,7 @@ export default function CrearAsambleasPage() {
     scheduled_at: '',
     quorum_requirement: 50,
     is_active: true,
-    phs_id: session?.user?.ownership?.id || ''
+    phs_id: ''
   });
 
   // Estado para los puntos de agenda
@@ -72,7 +90,7 @@ export default function CrearAsambleasPage() {
     type: 'Texto'
   });
 
-  // Estado para preguntas de votación (cuando el tipo es Encuesta)
+  // Estado para preguntas de votación
   const [showVotingForm, setShowVotingForm] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Partial<VotingQuestion>>({
     question_text: '',
@@ -84,6 +102,123 @@ export default function CrearAsambleasPage() {
     options: [{ text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]
   });
   const [agendaQuestions, setAgendaQuestions] = useState<VotingQuestion[]>([]);
+
+  useEffect(() => {
+    if (assemblyId) {
+      loadAssembly(assemblyId);
+    }
+  }, [assemblyId]);
+
+  const loadAssembly = async (id: string) => {
+    try {
+      setLoading(true);
+      
+      // Cargar datos de la asamblea
+      const assemblyResponse = await getAssemblyById(id);
+      const assembly = assemblyResponse.data;
+      
+      // Convertir la fecha para el input datetime-local
+      let scheduledAt = '';
+      if (assembly.scheduled_at) {
+        const date = new Date(assembly.scheduled_at);
+        scheduledAt = date.toISOString().slice(0, 16);
+      }
+
+      setFormData({
+        name: assembly.name || '',
+        description: assembly.description || '',
+        type: assembly.type || 'Ordinaria',
+        status: assembly.status || 'scheduled',
+        scheduled_at: scheduledAt,
+        quorum_requirement: assembly.quorum_requirement || 50,
+        is_active: assembly.is_active ?? true,
+        phs_id: assembly.phs_id || ''
+      });
+
+      // Cargar los puntos de agenda
+      const agendaResponse = await getAgendaByAssembly({ 
+        where: `assembly_id=${id}`, 
+        limit: '100' 
+      });
+      
+      if (agendaResponse.data && agendaResponse.data.length > 0) {
+        const items: AgendaItem[] = [];
+        
+        for (const agendaItem of agendaResponse.data) {
+          const item: AgendaItem = {
+            id: agendaItem.id,
+            assembly_id: agendaItem.assembly_id,
+            title: agendaItem.title,
+            sort_order: agendaItem.sort_order,
+            is_votable: agendaItem.is_votable,
+            required_quorum: agendaItem.required_quorum,
+            is_active: agendaItem.is_active,
+            type: 'Texto'
+          };
+
+          // Cargar preguntas de votación si es votable
+          if (agendaItem.is_votable && agendaItem.id) {
+            try {
+              const questionsResponse = await getVotingQuestionsByAgenda({
+                where: `agenda_id=${agendaItem.id}`,
+                limit: '50'
+              });
+              
+              if (questionsResponse.data && questionsResponse.data.length > 0) {
+                const questions: VotingQuestion[] = [];
+                for (const q of questionsResponse.data) {
+                  // Cargar las opciones de la pregunta
+                  let questionOptions: Option[] = [];
+                  try {
+                    const optionsResponse = await getQuestionOptionsByQuestion({
+                      where: `question_id=${q.id}`,
+                      limit: '50'
+                    });
+                    if (optionsResponse.data) {
+                      questionOptions = optionsResponse.data.map(opt => ({
+                        id: opt.id,
+                        text: opt.option_text
+                      }));
+                    }
+                  } catch (e) {
+                    console.log('No hay opciones para esta pregunta');
+                  }
+
+                  questions.push({
+                    id: q.id,
+                    question_text: q.question_text,
+                    description: q.description || '',
+                    type: q.type || 'simple',
+                    result_type: q.result_type || 'relative_majority',
+                    min_selections: q.min_selections || 1,
+                    max_selections: q.max_selections || 1,
+                    options: questionOptions
+                  });
+                }
+                item.votingQuestions = questions;
+                item.type = 'Encuesta';
+              }
+            } catch (e) {
+              console.log('No hay preguntas para esta agenda');
+            }
+          }
+
+          items.push(item);
+        }
+        
+        setAgendaItems(items);
+      }
+
+    } catch (error) {
+      console.error('Error al cargar la asamblea:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Error al cargar los datos de la asamblea' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -100,10 +235,12 @@ export default function CrearAsambleasPage() {
     }
 
     const newItem: AgendaItem = {
+      assembly_id: assemblyId,
       title: currentItem.title,
       sort_order: editingAgendaIndex !== null ? editingAgendaIndex + 1 : agendaItems.length + 1,
       is_votable: currentItem.is_votable || false,
       required_quorum: Number(currentItem.required_quorum) || 50,
+      is_active: true,
       type: currentItem.type as 'Encuesta' | 'Documento' | 'Texto',
       votingQuestions: currentItem.type === 'Encuesta' ? [...agendaQuestions] : undefined
     };
@@ -118,7 +255,7 @@ export default function CrearAsambleasPage() {
       // Agregar nuevo punto
       setAgendaItems([...agendaItems, newItem]);
     }
-
+    
     setCurrentItem({
       title: '',
       is_votable: false,
@@ -129,7 +266,20 @@ export default function CrearAsambleasPage() {
     setShowVotingForm(false);
   };
 
-  const removeAgendaItem = (index: number) => {
+  const removeAgendaItem = async (index: number) => {
+    const item = agendaItems[index];
+    
+    // Si el item ya existe en el backend (tiene id), eliminarlo
+    if (item.id) {
+      try {
+        await removeAgenda(item.id);
+      } catch (error) {
+        console.error('Error al eliminar punto de agenda:', error);
+        alert('Error al eliminar el punto de agenda');
+        return;
+      }
+    }
+    
     setAgendaItems(agendaItems.filter((_, i) => i !== index));
   };
 
@@ -203,9 +353,11 @@ export default function CrearAsambleasPage() {
     
     // Cargar las preguntas si es votable o tipo Encuesta
     if ((item.is_votable || item.type === 'Encuesta') && item.votingQuestions && item.votingQuestions.length > 0) {
+      // Cargar las preguntas en el formulario de edición
       setAgendaQuestions(item.votingQuestions);
       setShowVotingForm(true);
     } else if (item.type === 'Encuesta') {
+      // Es Encuesta pero no tiene preguntas, inicializar vacío
       setAgendaQuestions([]);
       setShowVotingForm(true);
     } else {
@@ -218,11 +370,10 @@ export default function CrearAsambleasPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     setMessage(null);
 
     try {
-      // Combinar fecha y hora
       const scheduledAt = formData.scheduled_at 
         ? new Date(formData.scheduled_at).toISOString()
         : new Date().toISOString();
@@ -230,61 +381,139 @@ export default function CrearAsambleasPage() {
       const assemblyPayload: Partial<Assembly> = {
         ...formData,
         scheduled_at: scheduledAt,
-        phs_id: session?.user?.ownership?.id || formData.phs_id || '',
-        livekit_room_name: `asembly-${Date.now()}`,
         quorum_requirement: Number(formData.quorum_requirement) || 50
       };
 
-      // Crear la asamblea
-      const assemblyResponse = await createAssembly(assemblyPayload);
-      const assemblyId = assemblyResponse.data.id;
+      // Actualizar la asamblea
+      await updateAssembly(assemblyId, assemblyPayload);
 
-      // Crear los puntos de agenda y sus preguntas de votación
+      // Procesar cada punto de agenda
       for (const item of agendaItems) {
-        const agendaPayload: Partial<Agenda> = {
-          assembly_id: assemblyId,
-          title: item.title,
-          sort_order: item.sort_order,
-          is_votable: item.is_votable,
-          required_quorum: item.required_quorum,
-          is_active: true
-        };
-        
-        const agendaResponse = await createAgenda(agendaPayload as Agenda);
-        const agendaId = agendaResponse.data.id;
+        // Si el punto ya existe, actualizarlo
+        if (item.id) {
+          const agendaPayload: Partial<Agenda> = {
+            title: item.title,
+            sort_order: item.sort_order,
+            is_votable: item.is_votable,
+            required_quorum: item.required_quorum,
+            is_active: item.is_active
+          };
+          await updateAgenda(item.id, agendaPayload);
 
-        // Si el punto tiene preguntas de votación, crearlas
-        if (item.votingQuestions && item.votingQuestions.length > 0) {
-          for (const question of item.votingQuestions) {
-            const questionPayload: Partial<VotingQuestions> = {
-              agenda_id: agendaId,
-              question_text: question.question_text,
-              description: question.description,
-              type: question.type,
-              result_type: question.result_type,
-              min_selections: question.min_selections,
-              max_selections: question.max_selections,
-              status: 'pending'
-            };
+          // Procesar las preguntas de votación existentes
+          if (item.votingQuestions && item.votingQuestions.length > 0) {
+            for (const question of item.votingQuestions) {
+              let questionId = question.id;
+              
+              if (question.id) {
+                // Actualizar pregunta existente
+                const questionPayload: Partial<VotingQuestions> = {
+                  question_text: question.question_text,
+                  description: question.description,
+                  type: question.type,
+                  result_type: question.result_type,
+                  min_selections: question.min_selections,
+                  max_selections: question.max_selections
+                };
+                await updateVotingQuestion(question.id, questionPayload);
+                
+                // Las opciones existentes se mantienen, las nuevas se crean
+                // Por ahora solo procesamos las opciones que vienen en el array
+                for (let i = 0; i < question.options.length; i++) {
+                  const opt = question.options[i];
+                  if (opt.id) {
+                    // Opción existente - actualizar
+                    await updateQuestionOption(opt.id, { 
+                      option_text: opt.text, 
+                      order_index: i 
+                    });
+                  } else if (opt.text.trim()) {
+                    // Nueva opción - crear
+                    await createQuestionOption({
+                      question_id: question.id,
+                      option_text: opt.text,
+                      order_index: i,
+                      is_active: true
+                    });
+                  }
+                }
+              } else {
+                // Nueva pregunta - crear
+                const questionPayload: Partial<VotingQuestions> = {
+                  agenda_id: item.id,
+                  question_text: question.question_text,
+                  description: question.description,
+                  type: question.type,
+                  result_type: question.result_type,
+                  min_selections: question.min_selections,
+                  max_selections: question.max_selections,
+                  status: 'pending'
+                };
+                const questionResponse = await createVotingQuestion(questionPayload as VotingQuestions);
+                questionId = questionResponse.data.id;
+                
+                // Crear las opciones de la nueva pregunta
+                for (let i = 0; i < question.options.length; i++) {
+                  const opt = question.options[i];
+                  if (opt.text.trim()) {
+                    await createQuestionOption({
+                      question_id: questionId,
+                      option_text: opt.text,
+                      order_index: i,
+                      is_active: true
+                    });
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          // Nuevo punto - crear
+          const agendaPayload: Partial<Agenda> = {
+            assembly_id: assemblyId,
+            title: item.title,
+            sort_order: item.sort_order,
+            is_votable: item.is_votable,
+            required_quorum: item.required_quorum,
+            is_active: item.is_active
+          };
+          
+          const agendaResponse = await createAgenda(agendaPayload as Agenda);
+          const agendaId = agendaResponse.data.id;
 
-            const questionResponse = await createVotingQuestion(questionPayload as VotingQuestions);
-            const questionId = questionResponse.data.id;
-
-            // Crear las opciones de la pregunta
-            for (let i = 0; i < question.options.length; i++) {
-              const optionPayload: Partial<QuestionOptions> = {
-                question_id: questionId,
-                option_text: question.options[i].text,
-                order_index: i,
-                is_active: true
+          // Si el punto tiene preguntas de votación, crearlas
+          if (item.votingQuestions && item.votingQuestions.length > 0) {
+            for (const question of item.votingQuestions) {
+              const questionPayload: Partial<VotingQuestions> = {
+                agenda_id: agendaId,
+                question_text: question.question_text,
+                description: question.description,
+                type: question.type,
+                result_type: question.result_type,
+                min_selections: question.min_selections,
+                max_selections: question.max_selections,
+                status: 'pending'
               };
-              await createQuestionOption(optionPayload);
+
+              const questionResponse = await createVotingQuestion(questionPayload as VotingQuestions);
+              const questionId = questionResponse.data.id;
+
+              // Crear las opciones de la pregunta
+              for (let i = 0; i < question.options.length; i++) {
+                const optionPayload: Partial<QuestionOptions> = {
+                  question_id: questionId,
+                  option_text: question.options[i].text,
+                  order_index: i,
+                  is_active: true
+                };
+                await createQuestionOption(optionPayload);
+              }
             }
           }
         }
       }
       
-      setMessage({ type: 'success', text: 'Asambleas creada exitosamente' });
+      setMessage({ type: 'success', text: 'Asamblea actualizada exitosamente' });
       
       setTimeout(() => {
         router.push('/admin/asambleas');
@@ -293,16 +522,35 @@ export default function CrearAsambleasPage() {
     } catch (error) {
       setMessage({ 
         type: 'error', 
-        text: error instanceof Error ? error.message : 'Error al crear la asamblea' 
+        text: error instanceof Error ? error.message : 'Error al actualizar la asamblea' 
       });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <main className={styles.containerResidentes}>
+          <UsuariosHeader />
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px', 
+            color: 'white',
+            fontWeight: 500,
+            fontSize: '18px'
+          }}>
+            Cargando datos de la asamblea...
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
-      <main className={styles.containerResidentes} >
+      <main className={styles.containerResidentes}>
         <UsuariosHeader />
         
         {message && (
@@ -326,7 +574,7 @@ export default function CrearAsambleasPage() {
             {/* Sección izquierda - Información General */}
             <div className={styles.infoGeneralSection}>
               <div className={styles.sectionHeader}>
-                <h2>Información General de Asamblea</h2>
+                <h2>Editar Asamblea</h2>
               </div>
               
               <div className={styles.formGroup}>
@@ -380,6 +628,22 @@ export default function CrearAsambleasPage() {
                 >
                   <option value="Ordinaria">Ordinaria</option>
                   <option value="Extraordinaria">Extraordinaria</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="status">Estado:</label>
+                <select 
+                  id="status" 
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className={styles.formSelect}
+                >
+                  <option value="scheduled">Programada</option>
+                  <option value="in_progress">En progreso</option>
+                  <option value="completed">Completada</option>
+                  <option value="cancelled">Cancelada</option>
                 </select>
               </div>
               
@@ -543,7 +807,6 @@ export default function CrearAsambleasPage() {
                       Preguntas de Votación
                     </div>
 
-                    {/* Lista de preguntas agregadas */}
                     {agendaQuestions.length > 0 && (
                       <div style={{ marginBottom: '12px' }}>
                         {agendaQuestions.map((q, idx) => (
@@ -582,7 +845,6 @@ export default function CrearAsambleasPage() {
                       </div>
                     )}
 
-                    {/* Formulario para nueva pregunta */}
                     <div style={{ marginBottom: '10px' }}>
                       <input 
                         type="text"
@@ -756,7 +1018,7 @@ export default function CrearAsambleasPage() {
                 )}
               </div>
 
-              {/* Lista de puntos agregados */}
+              {/* Lista de puntos */}
               {agendaItems.length > 0 && (
                 <div style={{ marginBottom: '20px' }}>
                   <h4 style={{ 
@@ -764,7 +1026,7 @@ export default function CrearAsambleasPage() {
                     marginBottom: '10px',
                     fontSize: '14px'
                   }}>
-                    Puntos agregados ({agendaItems.length}):
+                    Puntos en la agenda ({agendaItems.length}):
                   </h4>
                   
                   {agendaItems.map((item, index) => (
@@ -785,6 +1047,18 @@ export default function CrearAsambleasPage() {
                             marginBottom: '4px'
                           }}>
                             {index + 1}. {item.title}
+                            {item.id && (
+                              <span style={{
+                                fontSize: '10px',
+                                backgroundColor: '#3498db',
+                                color: 'white',
+                                padding: '2px 6px',
+                                borderRadius: '8px',
+                                marginLeft: '8px'
+                              }}>
+                                Guardado
+                              </span>
+                            )}
                           </div>
                           <div style={{ fontSize: '12px', color: '#6b5b3e' }}>
                             <span style={{ 
@@ -887,19 +1161,19 @@ export default function CrearAsambleasPage() {
             </Link>
             <button 
               type="submit"
-              disabled={loading}
+              disabled={saving}
               style={{
                 padding: '12px 30px',
-                backgroundColor: loading ? '#95a5a6' : '#5b2d4e',
+                backgroundColor: saving ? '#95a5a6' : '#5b2d4e',
                 color: 'white',
                 border: 'none',
                 borderRadius: '25px',
                 fontSize: '15px',
                 fontWeight: 600,
-                cursor: loading ? 'not-allowed' : 'pointer'
+                cursor: saving ? 'not-allowed' : 'pointer'
               }}
             >
-              {loading ? 'Guardando...' : 'Crear Asamblea'}
+              {saving ? 'Guardando...' : 'Actualizar Asamblea'}
             </button>
           </div>
         </form>

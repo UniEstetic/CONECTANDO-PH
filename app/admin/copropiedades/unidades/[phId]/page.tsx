@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react'
 import { getAll, remove } from '@/app/services/units.service'
 import { Units } from '@/app/types/units'
+import UsuariosHeader from '@/app/components/UsuariosHeader';
 
 export default function UnidadesPage() {
   const params = useParams()
@@ -70,6 +71,8 @@ export default function UnidadesPage() {
   return (
     <div className={styles.blockResidentes}>
       <main className={styles.containerResidentes}>
+        <UsuariosHeader />
+
         <div className={styles.headerActions}>
           <Link href="/admin/copropiedades" className={styles.btnBack}></Link>
           <Link href={`/admin/copropiedades/unidades/${phId}/crear`} className={styles.btnNew}>

@@ -39,6 +39,16 @@
     color: white;
 }
 
+.containerResidentes {
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-bottom: 1rem;
+  @media screen and (max-width: 1024px){
+    width: 90%;
+    margin-bottom: 7rem;
+  }
+}
+
 .explorarBtn {
     padding: 8px 24px;
     background-color: #5b2d4e;
@@ -147,12 +157,26 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 12px;
     font-size: 14px;
     color: #6b5b3e;
     background-color: #fff2d6;
     border-radius: 10px;
     font-weight: 600;
+    gap: 12px;
+}
+
+.assambleasItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    font-size: 14px;
+    color: #6b5b3e;
+    background-color: #fff2d6;
+    border-radius: 10px;
+    font-weight: 600;
+    gap: 12px;
 }
 
 .radioGroup {
@@ -586,4 +610,11 @@
     .textareaRounded {
         max-width: 100%;
     }
+}
+
+/* Móviles pequeños */
+@media screen and (max-width: 480px) {
+  .containerResidentes {
+    padding: 0 10px;
+  }
 }
