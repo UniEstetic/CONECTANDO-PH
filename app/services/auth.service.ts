@@ -23,7 +23,7 @@ export async function selectProvider(providerName: string) {
 
   return res.json() as Promise<SelectProviderResponse>;
 }
-// Validar login
+// Validar login 
 export async function validateLogin(
   tempToken: string,
   email: string,
@@ -37,7 +37,7 @@ export async function validateLogin(
     body: JSON.stringify({
       fields: { email, password },
     }),
-  });
+  }); 
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
@@ -45,7 +45,7 @@ export async function validateLogin(
   }
 
   const data = (await res.json()) as ValidateLoginResponse;
-
+  
   return data;
 }
 // Obtener perfil del usuario autenticado

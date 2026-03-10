@@ -3,6 +3,7 @@
 import { useRoomContext } from "@livekit/components-react";
 import { RoomEvent } from "livekit-client";
 import { useEffect, useState } from "react";
+import styles from '@/app/ui/styles/roomResidentes.module.css';
 
 // Componente para el indicador de grabación
 export function RecordingIndicator() {
@@ -56,8 +57,8 @@ export function RecordingIndicator() {
   if (!isRecording) return null;
 
   return (
-    <div className="recording-indicator">
-      <div className="recording-dot"></div>
+    <div className={styles["recording-indicator"]}>
+      <div className={styles["recording-dot"]}></div>
       <span>Tiempo de grabación asamblea</span>
       <span style={{ fontWeight: "700" }}>{formatDuration(recordingDuration)}</span>
     </div>

@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
-
 import { auth } from "@/app/api/auth/[...nextauth]/auth.config";
 
 export default auth((req) => {
