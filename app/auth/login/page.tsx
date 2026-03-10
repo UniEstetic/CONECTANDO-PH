@@ -17,6 +17,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const resolveAuthErrorMessage = (result: unknown) => {
+    const payload = (result || {}) as { error?: string; code?: string };
+    if (!payload.error) return null;
+
+    if (payload.error === 'CredentialsSignin') {
+      return payload.code && payload.code !== 'credentials'
+        ? payload.code
+        : 'Email o contrasena incorrectos';
+    }
+
+    return payload.error;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -29,11 +42,11 @@ export default function LoginPage() {
       redirect: false,
     });
     
-    if (result?.error) {
-      // Auth.js devuelve "CredentialsSignin" por defecto
-      setError("Email o contraseña incorrectos");
+    const authError = resolveAuthErrorMessage(result);
+    if (authError) {
+      setError(authError || "Email o contrasena incorrectos");
       setLoading(false);
-      setTimeout(setError, 3000)
+      setTimeout(() => setError(null), 3000)
     } else {
       // Si todo sale bien, redirigimos manualmente
       router.push('/');

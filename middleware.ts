@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
+import { NextResponse } from 'next/server'
 
 import { auth } from "@/app/api/auth/[...nextauth]/auth.config";
 
 export default auth((req) => {
   const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
+  const hasAccessToken = !!req.auth?.accessToken;
+  const hasSessionError = !!req.auth?.error;
+  const isLoggedIn = !!req.auth && hasAccessToken && !hasSessionError;
 
   // 1. Definir qué rutas son de autenticación (donde no quieres que esté si ya entró)
   const isAuthRoute = nextUrl.pathname.startsWith("/auth/login");

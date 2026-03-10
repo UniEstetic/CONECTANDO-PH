@@ -1,657 +1,277 @@
-'use client';
+'use client'
 
-import { SetStateAction, useState, useEffect } from 'react';
-import styles from '@/app/ui/styles/menuAsambleas.module.css';
-import UsuariosHeader from '@/app/components/UsuariosHeader';
-import { getAll as listPhs, getById as getByIdPhs, create as createPhs, update as updatePhs, remove as removePhs } from "@/app/services/phs.service";
-import { Phs, responseListPhs, responsePhs } from '@/app/types/phs';
-import { removeRegister, listFilters } from '@/app/types/definitions';
+import { FormEvent, useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
-export default function MenuAsambleas() {
-  const [mostrarOpciones, setMostrarOpciones] = useState(false);
-  const [tipoSeleccionado, setTipoSeleccionado] = useState('');
-  const [phs, setPhs] = useState<responseListPhs>();
-  const [rescreateph, setrescreatePh] = useState<responsePhs>();
-  const [resupdateph, setresupdatePh] = useState<responsePhs>();
-  const [resgeteph, setresgetPh] = useState<responsePhs>();
-  const [resremove, setresremove] = useState<removeRegister>();
+import styles from '@/app/ui/styles/usuarios.module.css'
+import pageStyles from './crear-copropiedad.module.css'
+import UsuariosHeader from '@/app/components/UsuariosHeader'
+import { create } from '@/app/services/phs.service'
 
-  useEffect(() => {
-    (async () => {
-      // servicio para listar
-      try {
-        const filter:listFilters={ fields:"*", where:"", limit:"100", page:"1"}; 
-        const data = await listPhs(filter);
-        setPhs(data);
-      } catch (error) {
-        console.error("Error cargando PHS:", error);
-      }
-      // servicio para crear
-      try {
-        const payloadPh: Phs= {
-          "name": "Conjunto Residencial Los Álamos",
-          "tax_id": "900123456-1",
-          "address": "Calle 123 # 45-67, Bogotá",
-          "phone_number": "+576012345678",
-          "email": "administracion@alamos.com",
-          "logo_url": "https://storage.googleapis.com/tu-bucket/logos/logo.png",
-          "legal_representative": "Carlos Mario Restrepo",
-          "city": "Bogotá DC",
-          "state": "Bogotá DC",
-          "country": "Colombia",
-          "stratum": "EXAMPLE_STRATUM",
-          "number_of_towers": "EXAMPLE_NUMBER_OF_TOWERS",
-          "amount_of_real_estate": "EXAMPLE_AMOUNT_OF_REAL_ESTATE",
-          "horizontal_property_regulations": "EXAMPLE_HORIZONTAL_PROPERTY_REGULATIONS",
-          "is_active": true,
-          "created_by": "d290f1ee-6c54-4b01-90e6-d701748f0851"
-        };
-        const data = await createPhs(payloadPh);
-        setrescreatePh(data);
-      } catch (error) {
-        console.error("Error create PHS:", error);
-      }
-      // servicio para obtener detalle
-      try {
-        const data = await getByIdPhs("d290f1ee-6c54-4b01-90e6-d701748f0851");
-        setresgetPh(data);
-      } catch (error) {
-        console.error("Error obtener PHS:", error);
-      }
-      // servicio para actualuzar
-      try {
-        const payloadPhUpdate: Phs= {
-          "name": "Conjunto Residencial Los Álamos",
-          "tax_id": "900123456-1",
-          "address": "Calle 123 # 45-67, Bogotá",
-          "phone_number": "+576012345678",
-          "email": "administracion@alamos.com",
-          "logo_url": "https://storage.googleapis.com/tu-bucket/logos/logo.png",
-          "legal_representative": "Carlos Mario Restrepo",
-          "city": "Bogotá DC",
-          "state": "Bogotá DC",
-          "country": "Colombia",
-          "stratum": "EXAMPLE_STRATUM",
-          "number_of_towers": "EXAMPLE_NUMBER_OF_TOWERS",
-          "amount_of_real_estate": "EXAMPLE_AMOUNT_OF_REAL_ESTATE",
-          "horizontal_property_regulations": "EXAMPLE_HORIZONTAL_PROPERTY_REGULATIONS",
-          "is_active": true,
-          "created_by": "d290f1ee-6c54-4b01-90e6-d701748f0851"
-        };
-        const data = await updatePhs("d290f1ee-6c54-4b01-90e6-d701748f0851", payloadPhUpdate);
-        setresupdatePh(data);
-      } catch (error) {
-        console.error("Error update PHS:", error);
-      }
-      // servicio para eliminar
-      try {
-        const data = await removePhs("d290f1ee-6c54-4b01-90e6-d701748f0851");
-        setresremove(data);
-      } catch (error) {
-        console.error("Error remove PHS:", error);
-      }
-    })()
+type CreatePhFormState = {
+  name: string
+  tax_id: string
+  address: string
+  phone_number: string
+  email: string
+  logo_url: string
+  legal_representative: string
+  city: string
+  state: string
+  country: string
+  stratum: string
+  number_of_towers: string
+  amount_of_real_estate: string
+  horizontal_property_regulations: string
+}
 
-  }, []);
+type UploadKind = 'logo' | 'regulation'
 
-  useEffect(() => {
-    console.log('phs', phs);
-    console.log('rescreateph',rescreateph);
-    console.log('resupdateph',resupdateph);
-    console.log('resgeteph',resgeteph);
-    console.log('resremove',resremove);
-  }, [phs,rescreateph,resupdateph, resgeteph, resremove]);
+export default function CrearCopropiedadPage() {
+  const router = useRouter()
 
-
-  // Estados para los modales
-  const [mostrarModalTorre, setMostrarModalTorre] = useState(false);
-  const [mostrarModalInmueble, setMostrarModalInmueble] = useState(false);
-  const [nuevaTorre, setNuevaTorre] = useState('');
-  const [torres, setTorres] = useState<string[]>([]);
-  const [inmuebles, setInmuebles] = useState<any[]>([]); // 👈 Nuevo estado para guardar inmuebles
-
-  // Estados para el formulario de inmueble
-  const [inmuebleData, setInmuebleData] = useState({
-    responsableFiscal: '',
-    tipoDocumento: '',
-    numeroDocumento: '',
-    numeroInmueble: '',
-    torreInterior: '',
-    piso: '',
-    tipoInmueble: '',
-    coeficiente: '',
-    area: ''
-  });
-
-  // Estados para el formulario
-  const [formData, setFormData] = useState({
-    nombreConjunto: '',
-    representanteLegal: '',
-    nit: '',
-    pais: '',
-    departamento: '',
-    ciudad: '',
-    direccion: '',
-    telefono: '',
+  const [formData, setFormData] = useState<CreatePhFormState>({
+    name: '',
+    tax_id: '',
+    address: '',
+    phone_number: '',
     email: '',
-    cantidadTorres: '',
-    cantidadInmuebles: '',
-    estrato: '',
-    reglamento: null as File | null,
-    logotipo: null as File | null
-  });
+    logo_url: '',
+    legal_representative: '',
+    city: '',
+    state: '',
+    country: '',
+    stratum: '',
+    number_of_towers: '',
+    amount_of_real_estate: '',
+    horizontal_property_regulations: '',
+  })
 
-  const handleSeleccionarTipo = (tipo: SetStateAction<string>) => {
-    setTipoSeleccionado(tipo);
-    setMostrarOpciones(false);
-  };
+  const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState<UploadKind | null>(null)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
-  const handleInmuebleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setInmuebleData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const uploadFile = async (file: File, field: 'logo_url' | 'horizontal_property_regulations', kind: UploadKind) => {
+    setUploading(kind)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const file = e.target.files?.[0] || null;
-    setFormData(prev => ({
-      ...prev,
-      [field]: file
-    }));
-  };
+    try {
+      const data = new FormData()
+      data.append('file', file)
 
-  // 👇 FUNCIÓN PRINCIPAL PARA GUARDAR TODO
-  const handleGuardarCambios = () => {
-    const datosCompletos = {
-      ...formData,
-      torres: torres,
-      inmuebles: inmuebles,
-      fechaCreacion: new Date().toISOString()
-    };
+      const res = await fetch('/api/uploads', {
+        method: 'POST',
+        body: data,
+      })
 
-    console.log('📦 Guardando TODOS los cambios:', datosCompletos);
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(json?.message || 'No se pudo subir el archivo')
+      }
 
-    // Aquí iría tu lógica para enviar a la API/backend
-    // Ejemplo:
-    // await fetch('/api/propiedad-horizontal', {
-    //   method: 'POST',
-    //   body: JSON.stringify(datosCompletos)
-    // });
-
-    alert('✅ Cambios guardados exitosamente');
-  };
-
-  const handleAgregarTorre = () => {
-    if (nuevaTorre.trim()) {
-      setTorres([...torres, nuevaTorre.trim()]);
-      setNuevaTorre('');
+      setFormData((prev) => ({
+        ...prev,
+        [field]: json.url || '',
+      }))
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Error subiendo archivo',
+      })
+    } finally {
+      setUploading(null)
     }
-  };
+  }
 
-  const handleEliminarTorre = (index: number) => {
-    setTorres(torres.filter((_, i) => i !== index));
-  };
+  const handleFileInput = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: 'logo_url' | 'horizontal_property_regulations',
+    kind: UploadKind,
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  const handleGuardarTorres = () => {
-    console.log('Torres guardadas:', torres);
-    setMostrarModalTorre(false);
-  };
+    await uploadFile(file, field, kind)
+    e.target.value = ''
+  }
 
-  const handleGuardarInmueble = () => {
-    // 👇 Agregar el inmueble al array de inmuebles
-    setInmuebles([...inmuebles, { ...inmuebleData, id: Date.now() }]);
-    console.log('Inmueble guardado:', inmuebleData);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage(null)
 
-    // Limpiar el formulario
-    setInmuebleData({
-      responsableFiscal: '',
-      tipoDocumento: '',
-      numeroDocumento: '',
-      numeroInmueble: '',
-      torreInterior: '',
-      piso: '',
-      tipoInmueble: '',
-      coeficiente: '',
-      area: ''
-    });
+    try {
+      const towers = formData.number_of_towers.trim() ? Number(formData.number_of_towers) : undefined
+      const estates = formData.amount_of_real_estate.trim() ? Number(formData.amount_of_real_estate) : undefined
 
-    setMostrarModalInmueble(false);
-  };
+      if (towers !== undefined && Number.isNaN(towers)) {
+        throw new Error('La cantidad de torres debe ser numerica')
+      }
+
+      if (estates !== undefined && Number.isNaN(estates)) {
+        throw new Error('La cantidad de inmuebles debe ser numerica')
+      }
+
+      const payload = {
+        name: formData.name.trim(),
+        tax_id: formData.tax_id.trim(),
+        horizontal_property_regulations: formData.horizontal_property_regulations.trim(),
+        ...(formData.address.trim() ? { address: formData.address.trim() } : {}),
+        ...(formData.phone_number.trim() ? { phone_number: formData.phone_number.trim() } : {}),
+        ...(formData.email.trim() ? { email: formData.email.trim() } : {}),
+        ...(formData.logo_url.trim() ? { logo_url: formData.logo_url.trim() } : {}),
+        ...(formData.legal_representative.trim()
+          ? { legal_representative: formData.legal_representative.trim() }
+          : {}),
+        ...(formData.city.trim() ? { city: formData.city.trim() } : {}),
+        ...(formData.state.trim() ? { state: formData.state.trim() } : {}),
+        ...(formData.country.trim() ? { country: formData.country.trim() } : {}),
+        ...(formData.stratum.trim() ? { stratum: formData.stratum.trim() } : {}),
+        ...(towers !== undefined ? { number_of_towers: towers } : {}),
+        ...(estates !== undefined ? { amount_of_real_estate: estates } : {}),
+      }
+
+      const response = await create(payload as any)
+
+      setMessage({
+        type: 'success',
+        text: response?.message || 'Copropiedad creada exitosamente',
+      })
+
+      setTimeout(() => {
+        router.push('/admin/copropiedades')
+      }, 1400)
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Error al crear copropiedad',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.blockResidentes}>
       <main className={styles.containerResidentes}>
         <UsuariosHeader />
 
-        <div className={styles.mainContent}>
-          <div className={styles.columnLeft}>
-            <div className={styles.sectionHeader}>
-              Crear Propiedad Horizontal
-            </div>
-
-            <div className={styles.formContainer}>
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Nombre del conjunto:
-                </label>
-                <input
-                  type="text"
-                  name="nombreConjunto"
-                  value={formData.nombreConjunto}
-                  onChange={handleInputChange}
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Representante legal:
-                </label>
-                <input
-                  type="text"
-                  name="representanteLegal"
-                  value={formData.representanteLegal}
-                  onChange={handleInputChange}
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  NIT:
-                </label>
-                <input
-                  type="text"
-                  name="nit"
-                  value={formData.nit}
-                  onChange={handleInputChange}
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  País:
-                </label>
-                <select
-                  name="pais"
-                  value={formData.pais}
-                  onChange={handleInputChange}
-                  className={styles.formSelect}
-                >
-                  <option value="">Seleccionar país</option>
-                  <option value="Colombia">Colombia</option>
-                  <option value="Argentina">Argentina</option>
-                  <option value="México">México</option>
-                </select>
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Departamento:
-                </label>
-                <select
-                  name="departamento"
-                  value={formData.departamento}
-                  onChange={handleInputChange}
-                  className={styles.formSelect}
-                >
-                  <option value="">Seleccionar departamento</option>
-                  <option value="Cundinamarca">Cundinamarca</option>
-                  <option value="Antioquia">Antioquia</option>
-                  <option value="Valle del Cauca">Valle del Cauca</option>
-                </select>
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Ciudad:
-                </label>
-                <select
-                  name="ciudad"
-                  value={formData.ciudad}
-                  onChange={handleInputChange}
-                  className={styles.formSelect}
-                >
-                  <option value="">Seleccionar ciudad</option>
-                  <option value="Bogotá">Bogotá</option>
-                  <option value="Medellín">Medellín</option>
-                  <option value="Cali">Cali</option>
-                </select>
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Dirección:
-                </label>
-                <input
-                  type="text"
-                  name="direccion"
-                  value={formData.direccion}
-                  onChange={handleInputChange}
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Teléfono:
-                </label>
-                <input
-                  type="text"
-                  name="telefono"
-                  value={formData.telefono}
-                  onChange={handleInputChange}
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Email:
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formRowDouble}>
-                <div>
-                  <label className={styles.formLabelShort}>
-                    Cantidad torres/interiores:
-                  </label>
-                  <input
-                    type="text"
-                    name="cantidadTorres"
-                    value={formData.cantidadTorres}
-                    onChange={handleInputChange}
-                    className={styles.formInputShort}
-                  />
-                </div>
-
-                <div>
-                  <label className={styles.formLabelNoMin}>
-                    Cantidad de inmuebles:
-                  </label>
-                  <input
-                    type="text"
-                    name="cantidadInmuebles"
-                    value={formData.cantidadInmuebles}
-                    onChange={handleInputChange}
-                    className={styles.formInputShort}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Estrato:
-                </label>
-                <input
-                  type="text"
-                  name="estrato"
-                  value={formData.estrato}
-                  onChange={handleInputChange}
-                  className={styles.formInputShort}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Reglamento:
-                </label>
-                <div className={styles.buttonGroup}>
-                  <button className={styles.buttonUpload}>
-                    Subir archivo
-                  </button>
-                  <button className={styles.buttonUpload}>
-                    Copiar texto
-                  </button>
-                </div>
-              </div>
-
-              <div className={styles.formRow}>
-                <label className={styles.formLabel}>
-                  Logotipo:
-                </label>
-                <button className={styles.buttonUpload}>
-                  Subir archivo
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.columnRight}>
-            <div className={styles.sectionHeader}>
-              Configurar Propiedad Horizontal
-            </div>
-
-            <div className={styles.configContainer}>
-              <button
-                onClick={() => setMostrarModalTorre(true)}
-                className={`${styles.configButton} ${styles.configButtonPurple}`}
-              >
-                Crear torre/Interior
-              </button>
-
-              <button
-                onClick={() => setMostrarModalInmueble(true)}
-                className={`${styles.configButton} ${styles.configButtonBlue}`}
-              >
-                Crear inmueble/local
-              </button>
-
-              <button className={`${styles.configButton} ${styles.configButtonOrange}`}>
-                Crear zonas comunes
-              </button>
-            </div>
-          </div>
+        <div className={styles.headerActions}>
+          <Link href='/admin/copropiedades' className={styles.btnBack}></Link>
         </div>
 
-        {/* 👇 BOTÓN GUARDAR CAMBIOS CENTRADO AL FINAL */}
-        <div className={styles.saveButtonContainer}>
-          <button
-            onClick={handleGuardarCambios}
-            className={styles.saveButton}
-          >
-            Guardar cambios
-          </button>
+        <div className={pageStyles.titleBanner}>
+          Crear copropiedad
         </div>
 
-        {mostrarModalTorre && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-              <div className={styles.modalHeader}>
-                <h2 className={styles.modalTitle}>
-                  Creando torre/Interior:
-                </h2>
-                <p className={styles.modalSubtitle}>
-                  Nombre o número de la nueva torre/Interior:
-                </p>
-              </div>
+        {message && (
+          <div className={message.type === 'error'
+            ? 'flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-md border border-red-200'
+            : 'flex items-center space-x-2 text-green-700 bg-green-50 p-3 rounded-md border border-green-200'}>
+            <p className='text-sm font-medium'>{message.text}</p>
+          </div>
+        )}
 
+        <form onSubmit={handleSubmit} className={pageStyles.form}>
+          <div className={pageStyles.formGrid}>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Nombre de la copropiedad: *</span>
+              <input name='name' value={formData.name} onChange={handleChange} required placeholder='Ej: Conjunto Los Pinos' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>NIT: *</span>
+              <input name='tax_id' value={formData.tax_id} onChange={handleChange} required placeholder='Ej: 900123456-1' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Representante legal:</span>
+              <input name='legal_representative' value={formData.legal_representative} onChange={handleChange} placeholder='Nombre del representante legal' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Dirección:</span>
+              <input   name='address' value={formData.address} onChange={handleChange} placeholder='Ej: Calle 10 # 25-30' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Teléfono:</span>
+              <input name='phone_number' value={formData.phone_number} onChange={handleChange} placeholder='Ej: 6011234567' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Correo electrónico:</span>
+              <input name='email' value={formData.email} onChange={handleChange} type='email' placeholder='Ej: admin@copropiedad.com' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>País:</span>
+              <input name='country' value={formData.country} onChange={handleChange} placeholder='Ej: Colombia' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Departamento / Estado:</span>
+              <input name='state' value={formData.state} onChange={handleChange} placeholder='Ej: Cundinamarca' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Ciudad:</span>
+              <input name='city' value={formData.city} onChange={handleChange} placeholder='Ej: Bogota' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Estrato:</span>
+              <input name='stratum' value={formData.stratum} onChange={handleChange} placeholder='Ej: 4' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Cantidad de torres/interiores:</span>
+              <input name='number_of_towers' value={formData.number_of_towers} onChange={handleChange} type='number' min='0' placeholder='Ej: 3' className={pageStyles.input} />
+            </label>
+
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Cantidad de inmuebles:</span>
+              <input name='amount_of_real_estate' value={formData.amount_of_real_estate} onChange={handleChange} type='number' min='0' placeholder='Ej: 120' className={pageStyles.input} />
+            </label>
+
+            <div className={pageStyles.uploadRow}>
+              <label className={pageStyles.uploadLabel}>Logotipo</label>
+              <input id='logo-upload' type='file' accept='image/*' onChange={(e) => handleFileInput(e, 'logo_url', 'logo')} className={pageStyles.hiddenFileInput} />
+              <label htmlFor='logo-upload' className={pageStyles.uploadButton}>
+                {uploading === 'logo' ? 'Subiendo...' : 'Subir logotipo'}
+              </label>
+              <input name='logo_url' value={formData.logo_url} onChange={handleChange} placeholder='URL del logotipo (se llena al subir)' className={pageStyles.input} />
+            </div>
+
+            <div className={pageStyles.uploadRow}>
+              <label className={pageStyles.uploadLabel}>Reglamento</label>
+              <input id='regulation-upload' type='file' accept='.pdf,.doc,.docx,.txt' onChange={(e) => handleFileInput(e, 'horizontal_property_regulations', 'regulation')} className={pageStyles.hiddenFileInput} />
+              <label htmlFor='regulation-upload' className={pageStyles.uploadButton}>
+                {uploading === 'regulation' ? 'Subiendo...' : 'Subir reglamento'}
+              </label>
               <input
-                type="text"
-                value={nuevaTorre}
-                onChange={(e) => setNuevaTorre(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAgregarTorre();
-                  }
-                }}
-                className={styles.modalInput}
+                name='horizontal_property_regulations'
+                value={formData.horizontal_property_regulations}
+                onChange={handleChange}
+                placeholder='URL o referencia del reglamento (se llena al subir)'
+                className={pageStyles.input}
               />
-
-              <div className={styles.torresList}>
-                {torres.length === 0 ? (
-                  <p className={styles.torresListEmpty}>
-                    No hay torres creadas aún
-                  </p>
-                ) : (
-                  torres.map((torre, index) => (
-                    <div key={index} className={styles.torreItem}>
-                      <label className={styles.torreLabel}>
-                        {torre}
-                      </label>
-                      <button
-                        onClick={() => handleEliminarTorre(index)}
-                        className={styles.deleteButton}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className={styles.modalButtonContainer}>
-                <button
-                  onClick={handleGuardarTorres}
-                  className={styles.modalSaveButton}
-                >
-                  Guardar cambios
-                </button>
-              </div>
             </div>
           </div>
-        )}
 
-        {mostrarModalInmueble && (
-          <div className={styles.modalOverlay}>
-            <div className={`${styles.modalContent} ${styles.modalContentWide}`}>
-              <h2 className={styles.modalTitleBlue}>
-                Creando inmueble:
-              </h2>
-
-              <p className={styles.modalSubtitleBlue}>
-                Responsable fiscal del apartamento:
-              </p>
-
-              <div className={styles.formGroup}>
-                <input
-                  type="text"
-                  name="responsableFiscal"
-                  value={inmuebleData.responsableFiscal}
-                  onChange={handleInmuebleInputChange}
-                  className={styles.modalInputGray}
-                />
-
-                <select
-                  name="tipoDocumento"
-                  value={inmuebleData.tipoDocumento}
-                  onChange={handleInmuebleInputChange}
-                  className={styles.modalSelect}
-                >
-                  <option value="">Tipo de documento responsable fiscal:</option>
-                  <option value="CC">Cédula de Ciudadanía</option>
-                  <option value="CE">Cédula de Extranjería</option>
-                  <option value="NIT">NIT</option>
-                  <option value="PAS">Pasaporte</option>
-                </select>
-
-                <input
-                  type="text"
-                  name="numeroDocumento"
-                  placeholder="Número de documento:"
-                  value={inmuebleData.numeroDocumento}
-                  onChange={handleInmuebleInputChange}
-                  className={styles.modalInputGray}
-                />
-
-                <input
-                  type="text"
-                  name="numeroInmueble"
-                  placeholder="Número del inmueble:"
-                  value={inmuebleData.numeroInmueble}
-                  onChange={handleInmuebleInputChange}
-                  className={styles.modalInputGray}
-                />
-
-                <div className={styles.formGroupRow}>
-                  <select
-                    name="torreInterior"
-                    value={inmuebleData.torreInterior}
-                    onChange={handleInmuebleInputChange}
-                    className={styles.modalSelect}
-                  >
-                    <option value="">Torre/Interior:</option>
-                    {torres.map((torre, index) => (
-                      <option key={index} value={torre}>{torre}</option>
-                    ))}
-                  </select>
-
-                  <input
-                    type="text"
-                    name="piso"
-                    placeholder="Piso:"
-                    value={inmuebleData.piso}
-                    onChange={handleInmuebleInputChange}
-                    className={styles.modalInputGray}
-                  />
-                </div>
-
-                <div className={styles.formGroupRow}>
-                  <select
-                    name="tipoInmueble"
-                    value={inmuebleData.tipoInmueble}
-                    onChange={handleInmuebleInputChange}
-                    className={styles.modalSelect}
-                  >
-                    <option value="">Tipo de inmueble:</option>
-                    <option value="Apartamento">Apartamento</option>
-                    <option value="Casa">Casa</option>
-                    <option value="Local">Local</option>
-                    <option value="Oficina">Oficina</option>
-                    <option value="Parqueadero">Parqueadero</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    name="coeficiente"
-                    placeholder="Coeficiente del inmueble. (%):"
-                    value={inmuebleData.coeficiente}
-                    onChange={handleInmuebleInputChange}
-                    className={styles.modalInputGray}
-                  />
-                </div>
-
-                <input
-                  type="text"
-                  name="area"
-                  placeholder="Área del inmueble. (m2):"
-                  value={inmuebleData.area}
-                  onChange={handleInmuebleInputChange}
-                  className={styles.modalInputGray}
-                />
-              </div>
-
-              <div className={styles.modalButtonContainer}>
-                <button
-                  onClick={handleGuardarInmueble}
-                  className={`${styles.modalSaveButton} ${styles.modalSaveButtonBlue}`}
-                >
-                  Guardar cambios
-                </button>
-              </div>
-            </div>
+          <div className={pageStyles.actions}>
+            <Link href='/admin/copropiedades' className={pageStyles.cancelButton}>Cancelar</Link>
+            <button type='submit' disabled={loading || !!uploading} className={pageStyles.submitButton}>
+              {loading ? 'Guardando...' : 'Guardar copropiedad'}
+            </button>
           </div>
-        )}
-
+        </form>
       </main>
     </div>
-  );
+  )
 }

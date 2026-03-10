@@ -48,7 +48,12 @@ export default function FormUser() {
     setMessage(null)
 
     try {
-      const response = await create(formData)
+      const payload: UserFormData = {
+        ...formData,
+        ...(password.trim() ? { password: password.trim() } : {}),
+      }
+
+      await create(payload)
       
       setMessage({ type: 'success', text: 'Usuario registrado exitosamente' })
       
@@ -197,12 +202,11 @@ export default function FormUser() {
               gap: '6px',
               fontSize: '14px'
             }}>
-              <span style={{ fontWeight: '500' }}>Contraseña:</span>
+              <span style={{ fontWeight: '500' }}>Contraseña (opcional):</span>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
                 style={{ 
                   width: '100%',
                   padding: '10px 14px',

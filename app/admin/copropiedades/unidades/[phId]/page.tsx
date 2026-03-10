@@ -9,7 +9,7 @@ import { Units } from '@/app/types/units'
 
 export default function UnidadesPage() {
   const params = useParams()
-  const phId = params.phId as string
+  const phId = Array.isArray(params.phId) ? params.phId[0] : params.phId
   
   const [unidades, setUnidades] = useState<Units[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,22 +23,38 @@ export default function UnidadesPage() {
   })
 
   useEffect(() => {
-    if (phId) {
-      loadUnidades()
+    if (phId && phId !== 'undefined' && phId !== 'null') {
+      loadUnidades(phId)
+    } else {
+      setUnidades([])
+      setBlocks([])
+      setLoading(false)
     }
   }, [phId])
 
-  const loadUnidades = async () => {
+  const loadUnidades = async (currentPhId: string) => {
     try {
       setLoading(true)
-      const response = await getAll(phId)
-      setUnidades(response.data)
+      const response = await getAll(currentPhId)
+      const rawData = (response as any)?.data
+
+      const normalizedUnidades: Units[] = Array.isArray(rawData)
+        ? rawData
+        : Array.isArray(rawData?.data)
+          ? rawData.data
+          : Array.isArray(rawData?.items)
+            ? rawData.items
+            : []
+
+      setUnidades(normalizedUnidades)
       
       // Extraer bloques únicos para el filtro
-      const uniqueBlocks = [...new Set(response.data.map(u => u.block).filter(Boolean))]
+      const uniqueBlocks = [...new Set(normalizedUnidades.map((u) => u.block).filter(Boolean))]
       setBlocks(uniqueBlocks as string[])
     } catch (error) {
       console.error('Error al cargar unidades:', error)
+      setUnidades([])
+      setBlocks([])
     } finally {
       setLoading(false)
     }
@@ -46,9 +62,13 @@ export default function UnidadesPage() {
 
   const handleDelete = async (id: string) => {
     try {
+      if (!phId || phId === 'undefined' || phId === 'null') {
+        throw new Error('Copropiedad inválida')
+      }
+
       await remove(phId, id)
       setDeleteModal({ show: false, id: null, unit: '' })
-      loadUnidades()
+      loadUnidades(phId)
     } catch (error) {
       console.error('Error al eliminar unidad:', error)
       alert('Error al eliminar la unidad')

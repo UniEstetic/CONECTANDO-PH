@@ -12,7 +12,7 @@ type UnitFormData = Omit<Units, 'id' | 'created_at'>
 export default function CrearUnidadPage() {
   const router = useRouter()
   const params = useParams()
-  const phId = params.phId as string
+  const phId = Array.isArray(params.phId) ? params.phId[0] : params.phId
 
   const [formData, setFormData] = useState<UnitFormData>({
     block: '',
@@ -44,7 +44,45 @@ export default function CrearUnidadPage() {
     setMessage(null)
 
     try {
-      await create(phId, formData)
+      if (!phId) {
+        throw new Error('Copropiedad inválida para crear la unidad')
+      }
+
+      if (!formData.floor?.toString().trim()) {
+        throw new Error('El campo Piso es obligatorio')
+      }
+
+      const floor = Number(formData.floor)
+      const coefficient = formData.coefficient?.toString().trim()
+        ? Number(formData.coefficient.toString().replace(',', '.'))
+        : undefined
+      const area = formData.area?.toString().trim()
+        ? Number(formData.area.toString().replace(',', '.'))
+        : undefined
+
+      if (Number.isNaN(floor)) {
+        throw new Error('El campo Piso debe ser numérico')
+      }
+      if (coefficient !== undefined && Number.isNaN(coefficient)) {
+        throw new Error('El campo Coeficiente debe ser numérico')
+      }
+      if (area !== undefined && Number.isNaN(area)) {
+        throw new Error('El campo Área debe ser numérico')
+      }
+
+      const payload = {
+        block: formData.block,
+        unit_number: formData.unit_number,
+        type: formData.type,
+        floor,
+        ...(coefficient !== undefined ? { coefficient } : {}),
+        ...(area !== undefined ? { area } : {}),
+        ...(formData.tax_responsible?.trim() ? { tax_responsible: formData.tax_responsible.trim() } : {}),
+        ...(formData.tax_responsible_document_type?.trim() ? { tax_responsible_document_type: formData.tax_responsible_document_type.trim() } : {}),
+        ...(formData.tax_responsible_document?.trim() ? { tax_responsible_document: formData.tax_responsible_document.trim() } : {}),
+      }
+
+      await create(phId, payload)
       
       setMessage({ type: 'success', text: 'Unidad creada exitosamente' })
       
@@ -114,12 +152,14 @@ export default function CrearUnidadPage() {
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
-              <span>Piso:</span>
+              <span>Piso: <span className={styles.required}>*</span></span>
               <input 
-                type="text" 
+                type="number"
                 name="floor" 
                 value={formData.floor}
                 onChange={handleChange}
+                required
+                min="0"
                 placeholder="Ej: 4, 5"
                 className={styles.formInput}
               />
@@ -149,10 +189,12 @@ export default function CrearUnidadPage() {
             <label className={styles.formLabel}>
               <span>Área (m²):</span>
               <input 
-                type="text" 
+                type="number"
                 name="area" 
                 value={formData.area}
                 onChange={handleChange}
+                min="0"
+                step="any"
                 placeholder="Ej: 85"
                 className={styles.formInput}
               />
@@ -163,10 +205,12 @@ export default function CrearUnidadPage() {
             <label className={styles.formLabel}>
               <span>Coeficiente:</span>
               <input 
-                type="text" 
+                type="number"
                 name="coefficient" 
                 value={formData.coefficient}
                 onChange={handleChange}
+                min="0"
+                step="any"
                 placeholder="Ej: 0.015"
                 className={styles.formInput}
               />
@@ -215,18 +259,6 @@ export default function CrearUnidadPage() {
                 placeholder="Número de identificación"
                 className={styles.formInput}
               />
-            </label>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.formCheckbox}>
-              <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
-              />
-              <span className={styles.formCheckboxLabel}>Unidad activa</span>
             </label>
           </div>
 
