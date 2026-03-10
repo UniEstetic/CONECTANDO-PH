@@ -1,7 +1,7 @@
 "use client";
 
 import { Hand, X } from "lucide-react";
-import { WordRequest } from "./types";
+import { WordRequest } from "../types";
 
 interface WordRequestNotificationsProps {
   requests: WordRequest[];
