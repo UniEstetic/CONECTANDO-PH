@@ -5,9 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import styles from '@/app/ui/styles/usuarios.module.css'
-import pageStyles from './crear-copropiedad.module.css'
+import pageStyles from '@/app/ui/styles/EntityForm.module.css'
 import UsuariosHeader from '@/app/components/UsuariosHeader'
 import { create } from '@/app/services/phs.service'
+import ToastNotice from '@/app/components/general/ToastNotice'
 
 type CreatePhFormState = {
   name: string
@@ -169,13 +170,7 @@ export default function CrearCopropiedadPage() {
           Crear copropiedad
         </div>
 
-        {message && (
-          <div className={message.type === 'error'
-            ? 'flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-md border border-red-200'
-            : 'flex items-center space-x-2 text-green-700 bg-green-50 p-3 rounded-md border border-green-200'}>
-            <p className='text-sm font-medium'>{message.text}</p>
-          </div>
-        )}
+        <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
         <form onSubmit={handleSubmit} className={pageStyles.form}>
           <div className={pageStyles.formGrid}>

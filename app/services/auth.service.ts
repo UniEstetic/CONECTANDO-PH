@@ -84,15 +84,24 @@ export async function revokeRefreshToken(refreshToken: string): Promise<void> {
 
 // Obtener perfil del usuario autenticado
 export async function getProfile(tokenBack?: string): Promise<UserAuth> {
-  const res = await apiClientSession("/users/profile", {
-    method: "GET",
-    headers: tokenBack ? {
-      Authorization: `Bearer ${tokenBack}`,
-    } : {}
-  });
+  const res = tokenBack
+    ? await apiClient("/users/profile", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${tokenBack}`,
+        },
+      })
+    : await apiClientSession("/users/profile", {
+        method: "GET",
+      });
 
   if (res.status === 401) {
     throw new Error("No autenticado. Inicia sesión.");
+  }
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || `Error al obtener perfil (${res.status})`);
   }
 
   const data = await res.json().catch(() => ({}));

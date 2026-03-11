@@ -1,6 +1,7 @@
 'use client'
 
 import styles from '@/app/ui/styles/usuarios.module.css';
+import pageStyles from '@/app/ui/styles/EntityForm.module.css';
 import { useState, FormEvent, useEffect } from 'react'
 import { User } from '@/app/types/users'
 import { Roles } from '@/app/types/roles'
@@ -11,6 +12,9 @@ import { getAll as getAllUnits } from '@/app/services/units.service'
 import { getById as getUserRoles, assign as assignUserRoles } from '@/app/services/user_roles.service'
 import { getById as getUnitAssignments, assign as assignUnitAssignments } from '@/app/services/unit_assignments.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import StatusToggle from '@/app/components/general/StatusToggle'
+import ToastNotice from '@/app/components/general/ToastNotice'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 
@@ -26,8 +30,9 @@ interface RoleWithUnits {
 export default function EditarUsuarioPage() {
   const router = useRouter()
   const params = useParams()
-  const userId = params.id as string
-  const phId = '1' // Por defecto, se puede cambiar según el contexto
+  const { data: session } = useSession()
+  const userId = Array.isArray(params.id) ? params.id[0] : params.id
+  const phId = (session?.user as any)?.ownership?.id as string | undefined
 
   const [formData, setFormData] = useState<UserFormData>({
     first_name: '',
@@ -62,10 +67,20 @@ export default function EditarUsuarioPage() {
     if (userId) {
       loadUser(userId)
       loadRoles()
-      loadUnits()
+      if (phId) {
+        loadUnits(phId)
+      } else {
+        setUnitsLoading(false)
+        setAllUnits([])
+      }
+    }
+  }, [userId, phId])
+
+  useEffect(() => {
+    if (userId && !rolesLoading) {
       loadUserRoles(userId)
     }
-  }, [userId])
+  }, [userId, rolesLoading])
 
   const loadUser = async (id: string) => {
     try {
@@ -98,7 +113,15 @@ export default function EditarUsuarioPage() {
   const loadRoles = async () => {
     try {
       const response = await getAllRoles()
-      setAllRoles(response.data.filter((role: Roles) => role.is_active))
+      const rawData = (response as any)?.data
+      const normalizedRoles: Roles[] = Array.isArray(rawData)
+        ? rawData
+        : Array.isArray(rawData?.data)
+          ? rawData.data
+          : Array.isArray(rawData?.items)
+            ? rawData.items
+            : []
+      setAllRoles(normalizedRoles.filter((role: Roles) => role.is_active))
     } catch (error) {
       console.error('Error al cargar roles:', error)
     } finally {
@@ -106,10 +129,18 @@ export default function EditarUsuarioPage() {
     }
   }
 
-  const loadUnits = async () => {
+  const loadUnits = async (currentPhId: string) => {
     try {
-      const response = await getAllUnits(phId)
-      setAllUnits(response.data)
+      const response = await getAllUnits(currentPhId)
+      const rawData = (response as any)?.data
+      const normalizedUnits: Units[] = Array.isArray(rawData)
+        ? rawData
+        : Array.isArray(rawData?.data)
+          ? rawData.data
+          : Array.isArray(rawData?.items)
+            ? rawData.items
+            : []
+      setAllUnits(normalizedUnits)
     } catch (error) {
       console.error('Error al cargar unidades:', error)
     } finally {
@@ -210,8 +241,13 @@ export default function EditarUsuarioPage() {
     setMessage(null)
 
     try {
-      const payload = password 
-        ? { ...formData, password } 
+      if (!userId) {
+        throw new Error('Usuario invalido')
+      }
+
+      const trimmedPassword = password.trim()
+      const payload = trimmedPassword
+        ? { ...formData, password: trimmedPassword }
         : formData
       
       await update(userId, payload)
@@ -261,125 +297,117 @@ export default function EditarUsuarioPage() {
     <div className={styles.blockResidentes}>
       <main className={styles.containerResidentes}>
         <UsuariosHeader />
+
+        <div className={styles.headerActions}>
+          <Link href='/admin/usuarios' className={styles.btnBack}></Link>
+        </div>
         
-        <div className={styles.formSectionTitle}>
+        <div className={pageStyles.titleBanner}>
           Editar usuario
         </div>
 
-        {message && (
-          <div className={`${styles.alert} ${message.type === 'success' ? styles.alertSuccess : styles.alertError}`}>
-            {message.text}
-          </div>
-        )}
+        <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Nombre: <span className={styles.required}>*</span></span>
+        <form onSubmit={handleSubmit} className={pageStyles.form}>
+          <div className={pageStyles.formGrid}>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Nombre: *</span>
               <input 
                 type="text" 
                 name="first_name" 
                 value={formData.first_name}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Apellido: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Apellido: *</span>
               <input 
                 type="text" 
                 name="last_name" 
                 value={formData.last_name}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Email: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Email: *</span>
               <input 
                 type="email" 
                 name="email" 
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Nueva contraseña:</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Nueva contrasena:</span>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Dejar en blanco para mantener la actual"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
-              <span className={styles.formHint}>Complete solo si desea cambiar la contraseña</span>
+              <span className={styles.formHint}>Complete solo si desea cambiar la contrasena</span>
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Tipo de documento: <span className={styles.required}>*</span></span>
-              <input 
-                type="text" 
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Tipo de documento: *</span>
+              <select
                 name="document_type" 
                 value={formData.document_type}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
-              />
+                className={pageStyles.input}
+              >
+                <option value="">Seleccione</option>
+                <option value="CC">Cedula de ciudadania (CC)</option>
+                <option value="CE">Cedula de extranjeria (CE)</option>
+                <option value="TI">Tarjeta de identidad (TI)</option>
+                <option value="NIT">NIT</option>
+                <option value="PAS">Pasaporte</option>
+              </select>
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Número de documento: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Numero de documento: *</span>
               <input 
                 type="text" 
                 name="document_number" 
                 value={formData.document_number}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Número celular: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Numero celular: *</span>
               <input 
                 type="tel" 
                 name="phone_number" 
                 value={formData.phone_number}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Tipo de usuario: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Tipo de usuario: *</span>
               <select 
                 name="type_person" 
                 value={formData.type_person}
                 onChange={handleChange}
                 required
-                className={styles.formSelect}
+                className={pageStyles.input}
               >
                 <option value="">Seleccione</option>
                 <option value="Natural">Natural</option>
@@ -388,6 +416,18 @@ export default function EditarUsuarioPage() {
                 <option value="Empleado">Empleado</option>
               </select>
             </label>
+
+            <div className={pageStyles.uploadRow}>
+              <label className={pageStyles.uploadLabel}>Imagen de perfil:</label>
+              <input
+                type='text'
+                name='avatar_url'
+                value={formData.avatar_url}
+                onChange={handleChange}
+                placeholder='URL de la imagen de perfil'
+                className={pageStyles.input}
+              />
+            </div>
           </div>
 
           {/* Roles del usuario */}
@@ -476,33 +516,21 @@ export default function EditarUsuarioPage() {
             </div>
           )}
 
-          {/* Estado */}
-          <div className={styles.formGroup}>
-            <label className={styles.formCheckbox}>
-              <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
-              />
-              <span className={styles.formCheckboxLabel}>Usuario activo</span>
-            </label>
-            <span className={styles.formHint} style={{ marginLeft: '28px' }}>
-              Los usuarios inactivos no podrán iniciar sesión
-            </span>
-          </div>
+          <StatusToggle
+            entityLabel='Usuario'
+            checked={!!formData.is_active}
+            onChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
+            hint='Los usuarios desactivados no podran iniciar sesion'
+          />
 
-          {/* Botones */}
-          <div className={styles.formButtons}>
-            <Link href="/admin/usuarios">
-              <button type="button" className={styles.btnCancel}>
-                Cancelar
-              </button>
+          <div className={pageStyles.actions}>
+            <Link href="/admin/usuarios" className={pageStyles.cancelButton}>
+              Cancelar
             </Link>
             <button 
               type="submit" 
               disabled={saving}
-              className={styles.btnSubmit}
+              className={pageStyles.submitButton}
             >
               {saving ? 'Guardando...' : 'Actualizar usuario'}
             </button>
