@@ -7,11 +7,13 @@ import UsuariosHeader from '@/app/components/UsuariosHeader';
 import { useState, useEffect } from 'react'
 import { getAll, remove } from '@/app/services/phs.service'
 import { Phs } from '@/app/types/phs'
+import ToastNotice from '@/app/components/general/ToastNotice'
 
 export default function CopropiedadesPage() {
   const [copropiedades, setCopropiedades] = useState<Phs[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [deleteModal, setDeleteModal] = useState<{ show: boolean; id: string | null; name: string }>({
     show: false,
     id: null,
@@ -39,6 +41,10 @@ export default function CopropiedadesPage() {
       setCopropiedades(normalizedCopropiedades)
     } catch (error) {
       console.error('Error al cargar copropiedades:', error)
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Error al cargar copropiedades',
+      })
       setCopropiedades([])
     } finally {
       setLoading(false)
@@ -52,7 +58,10 @@ export default function CopropiedadesPage() {
       loadCopropiedades()
     } catch (error) {
       console.error('Error al eliminar copropiedad:', error)
-      alert('Error al eliminar la copropiedad')
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Error al eliminar la copropiedad',
+      })
     }
   }
 

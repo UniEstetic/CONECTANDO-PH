@@ -1,11 +1,13 @@
 'use client'
 
 import styles from '@/app/ui/styles/usuarios.module.css';
-import pageStyles from '../../crear/crear-copropiedad.module.css';
+import pageStyles from '@/app/ui/styles/EntityForm.module.css';
 import { useState, FormEvent, useEffect } from 'react'
 import { Phs } from '@/app/types/phs'
 import { getById, update } from '@/app/services/phs.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import StatusToggle from '@/app/components/general/StatusToggle'
+import ToastNotice from '@/app/components/general/ToastNotice'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 
@@ -289,11 +291,7 @@ export default function EditarCopropiedadPage() {
           Editar copropiedad
         </div>
 
-        {message && (
-          <div className={`${styles.alert} ${message.type === 'success' ? styles.alertSuccess : styles.alertError}`}>
-            {message.text}
-          </div>
-        )}
+        <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
         <form onSubmit={handleSubmit} className={pageStyles.form}>
           <div className={pageStyles.formGrid}>
@@ -479,20 +477,12 @@ export default function EditarCopropiedadPage() {
           </div>
           </div>
 
-          <div className={`${styles.formGroup} ${pageStyles.spacerSm}`}>
-            <label className={styles.formCheckbox}>
-              <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
-              />
-              <span className={styles.formCheckboxLabel}>Copropiedad activa</span>
-            </label>
-            <span className={styles.formHint} style={{ marginLeft: '28px' }}>
-              Las copropiedades inactivas no serán visibles para los usuarios
-            </span>
-          </div>
+          <StatusToggle
+            entityLabel='Copropiedad'
+            checked={formData.is_active}
+            onChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
+            hint='Las copropiedades desactivadas no seran visibles para los usuarios'
+          />
 
           <div className={`${pageStyles.actions} ${pageStyles.spacerMd}`}>
             <Link href="/admin/copropiedades" className={pageStyles.cancelButton}>
