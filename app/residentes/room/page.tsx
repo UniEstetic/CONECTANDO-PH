@@ -8,7 +8,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { LiveKitResponse } from "@/app/types/livekit";
-import { Video, Calendar, Clock, Users, ArrowRight, Building2 } from "lucide-react";
+import { Video, Calendar, Clock, Users, ArrowRight } from "lucide-react";
+import styles from '@/app/ui/styles/usuarios.module.css';
+import UsuariosHeader from '@/app/components/UsuariosHeader';
 
 // Import server actions
 import { getLivekitToken, getViewerToken, getHostToken } from "@/app/actions/livekit";
@@ -68,13 +70,14 @@ export default function RoomPage() {
   // Load assemblies for user's PH
   useEffect(() => {
     const loadAssemblies = async () => {
-      if (status !== "authenticated" || !ownership?.id || room) return;
+      //if (status !== "authenticated" || !ownership?.id || room) return;
       
       setIsLoadingAssemblies(true);
       setAssembliesError("");
       
       try {
-        const response = await getByPh(ownership.id);
+        const response = await getByPh("48a0acf8-32d0-4340-9712-1e890529e932");//ownership.id);
+        console.log('response', response);
         if (response.data) {
           setAssemblies(response.data);
         }
@@ -141,30 +144,32 @@ export default function RoomPage() {
   // Show loading while checking auth or joining room
   if (status === "loading" || isLoading) {
     return (
-      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-md w-96">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+      <div className={styles.blockResidentes}>
+        <main className={styles.containerResidentes}>
+          <UsuariosHeader />
+          <div className="flex flex-col gap-4 items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             <p className="text-gray-600">Conectando a la sala...</p>
             {room && <p className="text-sm text-gray-500 mt-2">Sala: {room}</p>}
           </div>
-        </div>
+        </main>
       </div>
     );
   }
 
-  // Show assemblies list when no room parameter
+  // Show assemblies list when no room parameter - using same layout as other resident pages
   if (!room) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-              <Building2 className="w-8 h-8 text-blue-600" />
+      <div className={styles.blockResidentes}>
+        <main className={styles.containerResidentes}>
+          <UsuariosHeader />
+          
+          <div className="px-4 py-6">
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
               Asambleas de tu Propiedad
             </h1>
             {ownership && (
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-600 mb-6">
                 Propiedad: <span className="font-medium">{ownership.name}</span>
               </p>
             )}
@@ -177,69 +182,72 @@ export default function RoomPage() {
           )}
 
           {assembliesError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {assembliesError}
+            <div className="px-4">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {assembliesError}
+              </div>
             </div>
           )}
 
           {!isLoadingAssemblies && assemblies.length === 0 && (
-            <div className="bg-white rounded-lg shadow-md p-8 text-center">
-              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-700">No hay asambleas programadas</h2>
-              <p className="text-gray-500 mt-2">No hay asambleas disponibles para tu propiedad en este momento.</p>
+            <div className="px-4">
+              <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-xl font-semibold text-gray-700">No hay asambleas programadas</h2>
+                <p className="text-gray-500 mt-2">No hay asambleas disponibles para tu propiedad en este momento.</p>
+              </div>
             </div>
           )}
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <section className={styles.list}>
             {assemblies.map((assembly) => (
               <div 
                 key={assembly.id}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                className={`${styles.item} cursor-pointer hover:bg-blue-50`}
                 onClick={() => {
                   if (assembly.livekit_room_name) {
                     router.push(`/residentes/room?r=${assembly.livekit_room_name}`);
                   }
                 }}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800">{assembly.name}</h3>
-                    {assembly.description && (
-                      <p className="text-gray-600 text-sm mt-1">{assembly.description}</p>
+                <div className="flex-1">
+                  <span className={styles.fechaResidentes}>{assembly.name}</span>
+                  <div className={styles.containerRadioResidentes}>
+                    <span className={styles.text}>
+                      {assembly.description || 'Asambleas'}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500 px-4">
+                    {assembly.scheduled_at && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{new Date(assembly.scheduled_at).toLocaleDateString('es-CO')}</span>
+                      </div>
                     )}
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-blue-600" />
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-500">
-                  {assembly.scheduled_at && (
+                    {assembly.started_at && (
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{new Date(assembly.started_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(assembly.scheduled_at).toLocaleDateString('es-CO')}</span>
+                      <Users className="w-4 h-4" />
+                      <span>En vivo</span>
                     </div>
-                  )}
-                  {assembly.started_at && (
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{new Date(assembly.started_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    <span>En vivo</span>
                   </div>
                 </div>
-
                 {assembly.livekit_room_name && (
-                  <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
-                    <Video className="w-4 h-4" />
-                    Unirse a la Asamblea
-                  </button>
+                  <div className="flex items-center pr-4">
+                    <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center gap-2">
+                      <Video className="w-4 h-4" />
+                      Unirse
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
-          </div>
-        </div>
+          </section>
+        </main>
       </div>
     );
   }
@@ -247,91 +255,104 @@ export default function RoomPage() {
   // Show error if room is missing after loading
   if (error && !token) {
     return (
-      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-md w-96">
-          <h1 className="text-2xl font-bold mb-4 text-center text-red-600">
-            Error al conectarse
-          </h1>
-          <p className="text-gray-600 text-center mb-4">
-            {error}
-          </p>
-          <p className="text-sm text-gray-500 text-center">
-            Por favor intenta nuevamente o contacta al administrador.
-          </p>
-        </div>
+      <div className={styles.blockResidentes}>
+        <main className={styles.containerResidentes}>
+          <UsuariosHeader />
+          <div className="flex flex-col gap-4 items-center justify-center py-12">
+            <h1 className="text-2xl font-bold text-red-600">
+              Error al conectarse
+            </h1>
+            <p className="text-gray-600 text-center">
+              {error}
+            </p>
+            <p className="text-sm text-gray-500">
+              Por favor intenta nuevamente o contacta al administrador.
+            </p>
+          </div>
+        </main>
       </div>
     );
   }
 
   if (!token) {
     return (
-      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-md w-96">
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            Unirse a Video Chat
-          </h1>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-            }}
-            className="flex flex-col gap-4"
-          >
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Nombre de la sala
-              </label>
-              <input
-                placeholder="Ej: reunion-equipo"
-                value={room}
-                onChange={(e) => setRoom(e.target.value)}
-                className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
-              />
-            </div>
-            {session ? (
-              <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
-                <p className="text-sm text-blue-700">
-                  <span className="font-medium">Conectado como:</span> {userName}
-                </p>
-                {ownership && (
-                  <p className="text-xs text-blue-600">
-                    <span className="font-medium">Propiedad:</span> {ownership.name}
-                  </p>
-                )}
-              </div>
-            ) : null}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Tu nombre
-              </label>
-              <input
-                placeholder="Ej: Juan Pérez"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading || !!userName}
-              />
-            </div>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded text-sm">
-                {error}
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-6 py-2 rounded font-medium transition-colors"
+      <div className={styles.blockResidentes}>
+        <main className={styles.containerResidentes}>
+          <UsuariosHeader />
+          <div className="flex flex-col gap-4 items-center justify-center py-12">
+            <h1 className="text-2xl font-bold mb-6 text-center">
+              Unirse a Video Chat
+            </h1>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+              }}
+              className="flex flex-col gap-4 w-full max-w-md"
             >
-              {isLoading ? "Conectando..." : "Unirse"}
-            </button>
-          </form>
-        </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Nombre de la sala
+                </label>
+                <input
+                  placeholder="Ej: reunion-equipo"
+                  value={room}
+                  onChange={(e) => setRoom(e.target.value)}
+                  className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={isLoading}
+                />
+              </div>
+              {session ? (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+                  <p className="text-sm text-blue-700">
+                    <span className="font-medium">Conectado como:</span> {userName}
+                  </p>
+                  {ownership && (
+                    <p className="text-xs text-blue-600">
+                      <span className="font-medium">Propiedad:</span> {ownership.name}
+                    </p>
+                  )}
+                </div>
+              ) : null}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Tu nombre
+                </label>
+                <input
+                  placeholder="Ej: Juan Pérez"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={isLoading || !!userName}
+                />
+              </div>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded text-sm">
+                  {error}
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-6 py-2 rounded font-medium transition-colors"
+              >
+                {isLoading ? "Conectando..." : "Unirse"}
+              </button>
+            </form>
+          </div>
+        </main>
       </div>
     );
   }
 
   if(!serverUrl || serverUrl == ""){
-    return (<>serverUrl no existe.</>);
+    return (
+      <div className={styles.blockResidentes}>
+        <main className={styles.containerResidentes}>
+          <UsuariosHeader />
+          <div className="p-4">serverUrl no existe.</div>
+        </main>
+      </div>
+    );
   }
 
   return (
