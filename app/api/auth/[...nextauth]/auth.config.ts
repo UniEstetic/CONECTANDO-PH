@@ -38,10 +38,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
             if (startLogin?.result?.access_token) {
               const access_token_backend = startLogin?.result?.access_token;
-              const profileData = await getProfile(
+              let profileData = await getProfile(
                 String(access_token_backend),
               );
               
+              if(profileData?.ownership){
+                //profileData.ownership= profileData?.ownership[profileData.ownership];
+              }
+
               return {
                 ...profileData,
                 id: profileData?.userId || "ID_UNICO",

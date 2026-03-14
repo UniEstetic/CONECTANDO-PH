@@ -2,8 +2,9 @@
 
 import LogoUsuarios from '@/app/components/logo_usuarios';
 import styles from '@/app/ui/styles/roomResidentes.module.css';
-import { useRef, useState } from "react";
+import { useRef, useState, Suspense, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 
 // Import types and components from separate files 
 import { WordRequest } from "../types";
@@ -15,16 +16,45 @@ import { CardVideo, CardVideoMethods } from "@/app/residentes/room/components/co
 import { CardAttendance } from "@/app/residentes/room/components/components/CardAttendance";
 import { CardRequestToSpeak } from "@/app/residentes/room/components/components/CardRequestToSpeak";
 import { CardUsersOnline } from "@/app/residentes/room/components/components/CardUsersOnline";
-import { CardAgenda } from "@/app/residentes/room/components/components/CardAgenda";
+import { CardAgenda } from "./components/CardAgenda";
+import { getByLivekitRoom } from "@/app/services/assemblies.service";
+import { Assembly } from "@/app/types/assemblies";
 
 const appName = process.env.NEXT_PUBLIC_APP_NAME || "Conectando PH";
 
-export function AssemblyInterface() {
+type AssemblyDetails = Assembly;
+
+function AssemblyInterfaceContent() {
+  const params = useSearchParams();
+  const roomName = params.get('r') || '';
+  
   const { data: session } = useSession();
   const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
-  const assamblyName = "Primera Asamblea General 2026 Conjunto Los Robles";
   const cardVideoMethodsRef = useRef<CardVideoMethods>(null);
   const [wordRequestNotifications, setWordRequestNotifications] = useState<WordRequest[]>([]);
+  const [assemblyDetails, setAssemblyDetails] = useState<AssemblyDetails | null>(null);
+  const [isLoadingAssembly, setIsLoadingAssembly] = useState(false);
+
+  // Fetch assembly details using room name
+  useEffect(() => {
+    const fetchAssemblyDetails = async () => {
+      if (!roomName) return;
+      
+      setIsLoadingAssembly(true);
+      try {
+        const response = await getByLivekitRoom(roomName);
+        if (response.data) {
+          setAssemblyDetails(response.data as AssemblyDetails);
+        }
+      } catch (err) {
+        console.error('Error fetching assembly details:', err);
+      } finally {
+        setIsLoadingAssembly(false);
+      }
+    };
+
+    fetchAssemblyDetails();
+  }, [roomName]);
 
   // Función para cerrar notificación de petición de palabra
   const closeWordRequestNotification = (id: string) => {
@@ -39,6 +69,9 @@ export function AssemblyInterface() {
   const toggleMic = () => {
     cardVideoMethodsRef.current?.toggleFn('mic');
   };
+
+  // Use assembly name from details, fallback to default
+  const assemblyTitle = assemblyDetails?.name || "Primera Asamblea General 2026 Conjunto Los Robles";
 
   return (
     <div className={styles["assembly_container"]}>
@@ -68,7 +101,7 @@ export function AssemblyInterface() {
         <div className={styles["main-content"]}>
           <div className={`${styles["text-center"]} ${styles["mobile-title-section"]}`}>
             <p className={styles["assembly-title"]}>
-              {assamblyName}
+              {assemblyTitle}
             </p>
             <p className={styles["assembly-subtitle"]}>{appName}</p>
           </div>
@@ -82,7 +115,7 @@ export function AssemblyInterface() {
               <CardSharedFiles></CardSharedFiles>
             </div>
             <div className={styles["info-card"]}>
-              <CardMessages></CardMessages>
+              <CardMessages assemblyDetails={assemblyDetails}></CardMessages>
             </div>
           </div>
           
@@ -110,5 +143,23 @@ export function AssemblyInterface() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function AssemblyInterfaceLoading() {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  );
+}
+
+// Main export with Suspense wrapper
+export function AssemblyInterface() {
+  return (
+    <Suspense fallback={<AssemblyInterfaceLoading />}>
+      <AssemblyInterfaceContent />
+    </Suspense>
   );
 }
