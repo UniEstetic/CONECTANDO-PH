@@ -1,10 +1,12 @@
 'use client'
 
 import styles from '@/app/ui/styles/usuarios.module.css';
+import pageStyles from '@/app/ui/styles/EntityForm.module.css';
 import { useState, FormEvent } from 'react'
 import { Roles } from '@/app/types/roles'
 import { create } from '@/app/services/roles.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import ToastNotice from '@/app/components/general/ToastNotice'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -36,7 +38,13 @@ export default function CrearRolPage() {
     setMessage(null)
 
     try {
-      await create(formData)
+      const payload = {
+        name: formData.name.trim(),
+        ...(formData.description?.trim() ? { description: formData.description.trim() } : {}),
+        ...(formData.scopes?.trim() ? { scopes: formData.scopes.trim() } : {}),
+      }
+
+      await create(payload)
       
       setMessage({ type: 'success', text: 'Rol creado exitosamente' })
       
@@ -67,43 +75,21 @@ export default function CrearRolPage() {
     <div className={styles.blockResidentes}>
       <main className={styles.containerResidentes}>
         <UsuariosHeader />
+
+        <div className={styles.headerActions}>
+          <Link href="/admin/roles" className={styles.btnBack}></Link>
+        </div>
         
-        <div style={{
-          backgroundColor: '#c4a861',
-          color: 'white',
-          padding: '12px 15px',
-          borderRadius: '4px',
-          marginBottom: '20px',
-          fontWeight: '500',
-          fontSize: '15px'
-        }}>
+        <div className={pageStyles.titleBanner}>
           Crear nuevo rol
         </div>
 
-        {message && (
-          <div style={{
-            padding: '10px 12px',
-            marginBottom: '20px',
-            borderRadius: '4px',
-            backgroundColor: message.type === 'success' ? '#d4edda' : '#f8d7da',
-            color: message.type === 'success' ? '#155724' : '#721c24',
-            border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
-            fontSize: '14px'
-          }}>
-            {message.text}
-          </div>
-        )}
+        <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
-        <form onSubmit={handleSubmit}>
-          {/* Nombre del Rol */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Nombre del rol: <span style={{ color: 'red' }}>*</span></span>
+        <form onSubmit={handleSubmit} className={pageStyles.form}>
+          <div className={pageStyles.formGrid}>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Nombre del rol: *</span>
               <input 
                 type="text" 
                 name="name" 
@@ -111,135 +97,44 @@ export default function CrearRolPage() {
                 onChange={handleChange}
                 required
                 placeholder="Ej: Administrador, Editor, Visualizador"
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          {/* Descripción */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Descripción: <span style={{ color: 'red' }}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Descripción:</span>
               <textarea 
                 name="description" 
                 value={formData.description}
                 onChange={handleChange}
-                required
                 rows={3}
                 placeholder="Describe las funciones de este rol"
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                  resize: 'vertical',
-                  fontFamily: 'inherit'
-                }}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          {/* Permisos/Scopes */}
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '500' }}>Permisos (scopes):</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Permisos (scopes):</span>
               <textarea 
                 name="scopes" 
                 value={formData.scopes}
                 onChange={handleChange}
                 rows={4}
                 placeholder="Ej: users.read, users.write, roles.admin, assemblies.create"
-                style={{ 
-                  width: '100%',
-                  padding: '10px 14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                  resize: 'vertical',
-                  fontFamily: 'inherit'
-                }}
+                className={pageStyles.input}
               />
-              <span style={{ fontSize: '12px', color: '#666' }}>
+              <span className={styles.formHint} style={{ color: '#ffffff' }}>
                 Ingrese los permisos separados por comas
               </span>
             </label>
           </div>
 
-          {/* Estado */}
-          <div style={{ marginBottom: '25px' }}>
-            <label style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>
-              <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
-                style={{ width: '18px', height: '18px' }}
-              />
-              <span style={{ fontWeight: '500' }}>Rol activo</span>
-            </label>
-            <span style={{ fontSize: '12px', color: '#666', marginLeft: '28px', display: 'block' }}>
-              Los roles inactivos no podrán ser asignados a usuarios
-            </span>
-          </div>
-
-          {/* Botones */}
-          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '30px' }}>
-            <Link href="/admin/roles">
-              <button 
-                type="button"
-                style={{
-                  padding: '12px 30px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '25px',
-                  cursor: 'pointer',
-                  fontSize: '15px',
-                  fontWeight: '500'
-                }}
-              >
-                Cancelar
-              </button>
-            </Link>
+          <div className={pageStyles.actions}>
+            <Link href="/admin/roles" className={pageStyles.cancelButton}>Cancelar</Link>
             <button 
               type="submit" 
               disabled={loading}
-              style={{
-                padding: '12px 50px',
-                backgroundColor: loading ? '#ccc' : '#c4a861',
-                color: 'white',
-                border: 'none',
-                borderRadius: '25px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '15px',
-                fontWeight: '500'
-              }}
+              className={pageStyles.submitButton}
             >
               {loading ? 'Guardando...' : 'Guardar rol'}
             </button>

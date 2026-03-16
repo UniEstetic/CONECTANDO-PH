@@ -14,6 +14,8 @@ import UsuariosHeader from '@/app/components/UsuariosHeader';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from "next-auth/react";
+import pageStyles from '@/app/ui/styles/EntityForm.module.css'
+import ToastNotice from '@/app/components/general/ToastNotice'
 
 type UserFormData = Omit<User, 'id' | 'created_at'>
 
@@ -146,9 +148,16 @@ export default function CrearUsuarioPage() {
     })
   }
 
-  const getUnitsForRole = (roleId: string) => {
-    const assignment = roleUnitAssignments.find(a => a.roleId === roleId)
-    return assignment?.selectedUnits || []
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Aquí puedes implementar la lógica para subir el archivo
+      console.log('Archivo seleccionado:', file.name)
+      setFormData((prev) => ({
+        ...prev,
+        avatar_url: file.name,
+      }))
+    }
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -157,12 +166,12 @@ export default function CrearUsuarioPage() {
     setMessage(null)
 
     try {
-      const userData = {
+      const payload: UserFormData = {
         ...formData,
-        ...(password && { password })
+        ...(password.trim() ? { password: password.trim() } : {}),
       }
-      
-      const response = await create(userData)
+
+      const response = await create(payload)
       const userId = response.data.id
 
       // Asignar roles al usuario
@@ -196,124 +205,115 @@ export default function CrearUsuarioPage() {
     <div className={styles.blockResidentes}>
       <main className={styles.containerResidentes}>
         <UsuariosHeader />
-        
-        <div className={styles.formSectionTitle}>
+
+        <div className={styles.headerActions}>
+          <Link href='/admin/usuarios' className={styles.btnBack}></Link>
+        </div>
+
+        <div className={pageStyles.titleBanner}>
           Crear usuario
         </div>
 
-        {message && (
-          <div className={`${styles.alert} ${message.type === 'success' ? styles.alertSuccess : styles.alertError}`}>
-            {message.text}
-          </div>
-        )}
+        <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Nombre: <span className={styles.required}>*</span></span>
+        <form onSubmit={handleSubmit} className={pageStyles.form}>
+          <div className={pageStyles.formGrid}>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Nombre:</span>
               <input 
                 type="text" 
                 name="first_name" 
                 value={formData.first_name}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Apellido: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Apellido:</span>
               <input 
                 type="text" 
                 name="last_name" 
                 value={formData.last_name}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Email: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Email:</span>
               <input 
                 type="email" 
                 name="email" 
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Contraseña: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Contrasena (opcional):</span>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Tipo de documento: <span className={styles.required}>*</span></span>
-              <input 
-                type="text" 
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Tipo de documento:</span>
+              <select
                 name="document_type" 
                 value={formData.document_type}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
-              />
+                className={pageStyles.input}
+              >
+                <option value="">Seleccione</option>
+                <option value="CC">Cedula de ciudadania (CC)</option>
+                <option value="CE">Cedula de extranjeria (CE)</option>
+                <option value="TI">Tarjeta de identidad (TI)</option>
+                <option value="NIT">NIT</option>
+                <option value="PAS">Pasaporte</option>
+              </select>
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Número de documento: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Numero de documento:</span>
               <input 
                 type="text" 
                 name="document_number" 
                 value={formData.document_number}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Número celular: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Numero celular:</span>
               <input 
                 type="tel" 
                 name="phone_number" 
                 value={formData.phone_number}
                 onChange={handleChange}
                 required
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Tipo de usuario: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Tipo de usuario:</span>
               <select 
                 name="type_person" 
                 value={formData.type_person}
                 onChange={handleChange}
                 required
-                className={styles.formSelect}
+                className={pageStyles.input}
               >
                 <option value="">Seleccione</option>
                 <option value="Natural">Natural</option>
@@ -322,121 +322,40 @@ export default function CrearUsuarioPage() {
                 <option value="Empleado">Empleado</option>
               </select>
             </label>
-          </div>
 
-          {/* Roles del usuario */}
-          <div className={styles.selectionSection}>
-            <span className={styles.selectionTitle}>Roles asignados:</span>
-            
-            {rolesLoading ? (
-              <p className={styles.loading}>Cargando roles...</p>
-            ) : allRoles.length === 0 ? (
-              <p className={styles.empty}>No hay roles disponibles</p>
-            ) : (
-              <div className={styles.selectionGrid}>
-                {allRoles.map((role) => (
-                  <label 
-                    key={role.id} 
-                    className={`${styles.checkboxCard} ${selectedRoles.includes(role.id!) ? styles.checked : ''}`}
-                  >
-                    <input 
-                      type="checkbox" 
-                      checked={selectedRoles.includes(role.id!)}
-                      onChange={() => handleRoleChange(role.id!)}
-                    />
-                    <div className={styles.checkboxCardContent}>
-                      <span className={styles.checkboxCardTitle}>{role.name}</span>
-                      <p className={styles.checkboxCardDescription}>{role.description}</p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            )}
-            <span className={styles.selectionHint}>Seleccione los roles que tendrá este usuario</span>
-          </div>
-
-          {/* Unidades por rol */}
-          {selectedRoles.length > 0 && !unitsLoading && allUnits.length > 0 && (
-            <div className={styles.selectionSection}>
-              <span className={styles.selectionTitle}>Unidades por rol:</span>
-              <p className={styles.selectionHint}>Selecciona las unidades que tendrá el usuario para cada rol</p>
-              
-              {selectedRoles.map(roleId => {
-                const role = allRoles.find(r => r.id === roleId)
-                const isExpanded = expandedRoles.includes(roleId)
-                const selectedUnits = getUnitsForRole(roleId)
-                
-                return (
-                  <div key={roleId} className={styles.accordion}>
-                    <button
-                      type="button"
-                      onClick={() => toggleRoleUnits(roleId)}
-                      className={`${styles.accordionHeader} ${isExpanded ? styles.active : ''}`}
-                    >
-                      <span className={styles.accordionTitle}>
-                        {role?.name}
-                        {selectedUnits.length > 0 && (
-                          <span className={styles.accordionBadge}>{selectedUnits.length}</span>
-                        )}
-                      </span>
-                      <span className={styles.accordionIcon}>{isExpanded ? '▲' : '▼'}</span>
-                    </button>
-                    
-                    {isExpanded && (
-                      <div className={styles.accordionContent}>
-                        <div className={styles.unitsGrid}>
-                          {allUnits.map(unit => (
-                            <label
-                              key={unit.id}
-                              className={`${styles.unitCheckbox} ${selectedUnits.includes(unit.id!) ? styles.checked : ''}`}
-                            >
-                              <input 
-                                type="checkbox"
-                                checked={selectedUnits.includes(unit.id!)}
-                                onChange={() => handleUnitChange(roleId, unit.id!)}
-                              />
-                              <div className={styles.unitCheckboxInfo}>
-                                <span className={styles.unitCheckboxNumber}>{unit.unit_number}</span>
-                                <span className={styles.unitCheckboxDetail}>{unit.block} - Piso {unit.floor}</span>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {/* Estado */}
-          <div className={styles.formGroup}>
-            <label className={styles.formCheckbox}>
+            <div className={pageStyles.uploadRow}>
+              <label className={pageStyles.uploadLabel}>Imagen de perfil:</label>
               <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
+                type="file"
+                id="avatar-upload"
+                onChange={handleFileUpload}
+                accept="image/*"
+                className={pageStyles.hiddenFileInput}
               />
-              <span className={styles.formCheckboxLabel}>Usuario activo</span>
-            </label>
-            <span className={styles.formHint} style={{ marginLeft: '28px' }}>
-              Los usuarios inactivos no podrán iniciar sesión
-            </span>
+              <label htmlFor="avatar-upload" className={pageStyles.uploadButton}>
+                Subir archivo
+              </label>
+              <input
+                type='text'
+                name='avatar_url'
+                value={formData.avatar_url}
+                onChange={handleChange}
+                placeholder='URL de la imagen de perfil'
+                className={pageStyles.input}
+              />
+            </div>
           </div>
 
-          {/* Botones */}
-          <div className={styles.formButtons}>
-            <Link href="/admin/usuarios" className={styles.btnCancel}>
+          <div className={pageStyles.actions}>
+            <Link href='/admin/usuarios' className={pageStyles.cancelButton}>
               Cancelar
             </Link>
             <button 
               type="submit" 
-              disabled={saving}
-              className={styles.btnSubmit}
+              disabled={loading}
+              className={pageStyles.submitButton}
             >
-              {saving ? 'Guardando...' : 'Guardar usuario'}
+              {loading ? 'Guardando...' : 'Guardar usuario'}
             </button>
           </div>
         </form>
