@@ -1,17 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  createVotingQuestion,
-  getVotingQuestions,
-  updateVotingQuestion,
-  deleteVotingQuestion,
-  CreateVotingQuestionDto,
-} from '@/lib/api/voting-questions';
+  create,
+  getAll,
+  update,
+  remove,
+} from '@/app/services/voting-questions.service';
+import { VotingQuestions } from '@/app/types/voting-questions';
 
 // Hook para obtener todas las preguntas
 export function useVotingQuestions(where?: string) {
   return useQuery({
     queryKey: ['voting-questions', where],
-    queryFn: () => getVotingQuestions(where),
+    queryFn: () => getAll({ where }),
   });
 }
 
@@ -20,7 +20,7 @@ export function useCreateVotingQuestion() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (dto: CreateVotingQuestionDto) => createVotingQuestion(dto),
+    mutationFn: (dto: VotingQuestions) => create(dto),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['voting-questions'] });
       return response;
@@ -33,8 +33,8 @@ export function useUpdateVotingQuestion() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, dto }: { id: string; dto: CreateVotingQuestionDto }) =>
-      updateVotingQuestion(id, dto),
+    mutationFn: ({ id, data }: { id: string; data: Partial<VotingQuestions> }) =>
+      update(id, data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['voting-questions'] });
       return response;
@@ -47,7 +47,7 @@ export function useDeleteVotingQuestion() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteVotingQuestion(id),
+    mutationFn: (id: string) => remove(id),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['voting-questions'] });
       return response;
