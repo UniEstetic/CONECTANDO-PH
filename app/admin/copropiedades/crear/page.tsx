@@ -9,30 +9,12 @@ import pageStyles from '@/app/ui/styles/EntityForm.module.css'
 import UsuariosHeader from '@/app/components/UsuariosHeader'
 import { create } from '@/app/services/phs.service'
 import ToastNotice from '@/app/components/general/ToastNotice'
-
-type CreatePhFormState = {
-  name: string
-  tax_id: string
-  address: string
-  phone_number: string
-  email: string
-  logo_url: string
-  legal_representative: string
-  city: string
-  state: string
-  country: string
-  stratum: string
-  number_of_towers: string
-  amount_of_real_estate: string
-  horizontal_property_regulations: string
-}
-
-type UploadKind = 'logo' | 'regulation'
+import { Phs } from '@/app/types/phs';
 
 export default function CrearCopropiedadPage() {
   const router = useRouter()
 
-  const [formData, setFormData] = useState<CreatePhFormState>({
+  const [formData, setFormData] = useState<Phs>({
     name: '',
     tax_id: '',
     address: '',
@@ -50,7 +32,7 @@ export default function CrearCopropiedadPage() {
   })
 
   const [loading, setLoading] = useState(false)
-  const [uploading, setUploading] = useState<UploadKind | null>(null)
+  const [uploading, setUploading] = useState<boolean>(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,46 +40,16 @@ export default function CrearCopropiedadPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const uploadFile = async (file: File, field: 'logo_url' | 'horizontal_property_regulations', kind: UploadKind) => {
-    setUploading(kind)
-
-    try {
-      const data = new FormData()
-      data.append('file', file)
-
-      const res = await fetch('/api/uploads', {
-        method: 'POST',
-        body: data,
-      })
-
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        throw new Error(json?.message || 'No se pudo subir el archivo')
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        [field]: json.url || '',
-      }))
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Error subiendo archivo',
-      })
-    } finally {
-      setUploading(null)
-    }
-  }
-
   const handleFileInput = async (
     e: React.ChangeEvent<HTMLInputElement>,
     field: 'logo_url' | 'horizontal_property_regulations',
-    kind: UploadKind,
   ) => {
     const file = e.target.files?.[0]
     if (!file) return
-
-    await uploadFile(file, field, kind)
+    setUploading(true)
+    // Simulación: solo guarda el nombre del archivo como string
+    setFormData((prev) => ({ ...prev, [field]: file.name }))
+    setUploading(false)
     e.target.value = ''
   }
 
@@ -236,18 +188,18 @@ export default function CrearCopropiedadPage() {
 
             <div className={pageStyles.uploadRow}>
               <label className={pageStyles.uploadLabel}>Logotipo</label>
-              <input id='logo-upload' type='file' accept='image/*' onChange={(e) => handleFileInput(e, 'logo_url', 'logo')} className={pageStyles.hiddenFileInput} />
+              <input id='logo-upload' type='file' accept='image/*' onChange={(e) => handleFileInput(e, 'logo_url')} className={pageStyles.hiddenFileInput} />
               <label htmlFor='logo-upload' className={pageStyles.uploadButton}>
-                {uploading === 'logo' ? 'Subiendo...' : 'Subir logotipo'}
+                {uploading ? 'Subiendo...' : 'Subir logotipo'}
               </label>
               <input name='logo_url' value={formData.logo_url} onChange={handleChange} placeholder='URL del logotipo (se llena al subir)' className={pageStyles.input} />
             </div>
 
             <div className={pageStyles.uploadRow}>
               <label className={pageStyles.uploadLabel}>Reglamento</label>
-              <input id='regulation-upload' type='file' accept='.pdf,.doc,.docx,.txt' onChange={(e) => handleFileInput(e, 'horizontal_property_regulations', 'regulation')} className={pageStyles.hiddenFileInput} />
+              <input id='regulation-upload' type='file' accept='.pdf,.doc,.docx,.txt' onChange={(e) => handleFileInput(e, 'horizontal_property_regulations')} className={pageStyles.hiddenFileInput} />
               <label htmlFor='regulation-upload' className={pageStyles.uploadButton}>
-                {uploading === 'regulation' ? 'Subiendo...' : 'Subir reglamento'}
+                {uploading ? 'Subiendo...' : 'Subir reglamento'}
               </label>
               <input
                 name='horizontal_property_regulations'
