@@ -8,19 +8,33 @@ import styles from '@/app/ui/styles/home.module.css';
 import AcmeLogo from '@/app/ui/logo';
 import Link from 'next/link';
 import Image from 'next/image';
+import ToastNotice from '@/app/components/general/ToastNotice'
 
 export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const resolveAuthErrorMessage = (result: unknown) => {
+    const payload = (result || {}) as { error?: string; code?: string };
+    if (!payload.error) return null;
+
+    if (payload.error === 'CredentialsSignin') {
+      return payload.code && payload.code !== 'credentials'
+        ? payload.code
+        : 'Email o contrasena incorrectos';
+    }
+
+    return payload.error;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setMessage(null);
 
     
     const result = await signIn("credentials", {
@@ -29,11 +43,13 @@ export default function LoginPage() {
       redirect: false,
     });
     
-    if (result?.error) {
-      // Auth.js devuelve "CredentialsSignin" por defecto
-      setError("Email o contraseña incorrectos");
+    const authError = resolveAuthErrorMessage(result);
+    if (authError) {
+      setMessage({
+        type: 'error',
+        text: authError || "Email o contrasena incorrectos",
+      });
       setLoading(false);
-      setTimeout(setError, 3000)
     } else {
       // Si todo sale bien, redirigimos manualmente
       router.push('/');
@@ -43,6 +59,8 @@ export default function LoginPage() {
 
   return (
     <main className={styles.mainContainer}>
+      <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
+
       <div className={styles.curveSection}>
         <AcmeLogo />
       </div>
@@ -75,11 +93,6 @@ export default function LoginPage() {
         <Link href="#" className={styles.forgot}>
           ¿Olvidaste tu contraseña?
         </Link>
-        {error && (
-          <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-md border border-red-200">
-            <p className="text-sm font-medium">{error}</p>
-          </div>
-        )}
 
         <button className={styles.btnUsuarios} type="submit">
           {loading ? 'Cargando...' : 'Iniciar Sesión'}
