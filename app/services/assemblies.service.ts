@@ -66,3 +66,21 @@ export async function update(
   }
   return res.json() as Promise<responseAssembly>;
 }
+
+// Obtener detalles de asamblea por nombre de sala LiveKit
+export async function getByLivekitRoom(roomName: string): Promise<responseAssembly> {
+  const res = await apiClientSession(`/assemblies/livekit/${roomName}`);
+  if (!res.ok) {
+    throw new Error('Error al obtener asamblea por sala LiveKit');
+  }
+  return res.json() as Promise<responseAssembly>;
+}
+
+// Listar asambleas por PH
+export async function getByPh(phsId: string): Promise<responseListAssembly> {
+  const res = await apiClientSession(`/assemblies/ph/${phsId}`);
+  if (!res.ok) {
+    throw new Error('Error al obtener asambleas por PH');
+  }
+  return res.json() as Promise<responseListAssembly>;
+}
