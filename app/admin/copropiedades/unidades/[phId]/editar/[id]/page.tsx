@@ -1,20 +1,22 @@
 'use client'
 
 import styles from '@/app/ui/styles/usuarios.module.css';
+import pageStyles from '@/app/ui/styles/EntityForm.module.css';
 import { useState, FormEvent, useEffect } from 'react'
 import { Units } from '@/app/types/units'
 import { getById, update } from '@/app/services/units.service'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import ToastNotice from '@/app/components/general/ToastNotice'
 
 type UnitFormData = Omit<Units, 'id' | 'created_at'>
 
 export default function EditarUnidadPage() {
   const router = useRouter()
   const params = useParams()
-  const phId = params.phId as string
-  const unitId = params.id as string
+  const phId = Array.isArray(params.phId) ? params.phId[0] : params.phId
+  const unitId = Array.isArray(params.id) ? params.id[0] : params.id
 
   const [formData, setFormData] = useState<UnitFormData>({
     block: '',
@@ -81,7 +83,45 @@ export default function EditarUnidadPage() {
     setMessage(null)
 
     try {
-      await update(phId, unitId, formData)
+      if (!phId || !unitId) {
+        throw new Error('Unidad o copropiedad inválida')
+      }
+
+      if (!formData.floor?.toString().trim()) {
+        throw new Error('El campo Piso es obligatorio')
+      }
+
+      const floor = Number(formData.floor)
+      const coefficient = formData.coefficient?.toString().trim()
+        ? Number(formData.coefficient.toString().replace(',', '.'))
+        : undefined
+      const area = formData.area?.toString().trim()
+        ? Number(formData.area.toString().replace(',', '.'))
+        : undefined
+
+      if (Number.isNaN(floor)) {
+        throw new Error('El campo Piso debe ser numérico')
+      }
+      if (coefficient !== undefined && Number.isNaN(coefficient)) {
+        throw new Error('El campo Coeficiente debe ser numérico')
+      }
+      if (area !== undefined && Number.isNaN(area)) {
+        throw new Error('El campo Área debe ser numérico')
+      }
+
+      const payload = {
+        block: formData.block,
+        unit_number: formData.unit_number,
+        type: formData.type,
+        floor,
+        ...(coefficient !== undefined ? { coefficient } : {}),
+        ...(area !== undefined ? { area } : {}),
+        ...(formData.tax_responsible?.trim() ? { tax_responsible: formData.tax_responsible.trim() } : {}),
+        ...(formData.tax_responsible_document_type?.trim() ? { tax_responsible_document_type: formData.tax_responsible_document_type.trim() } : {}),
+        ...(formData.tax_responsible_document?.trim() ? { tax_responsible_document: formData.tax_responsible_document.trim() } : {}),
+      }
+
+      await update(phId, unitId, payload)
       
       setMessage({ type: 'success', text: 'Unidad actualizada exitosamente' })
       
@@ -103,11 +143,12 @@ export default function EditarUnidadPage() {
     return (
       <div className={styles.blockResidentes}>
         <main className={styles.containerResidentes}>
+          <UsuariosHeader />
+
           <div className={styles.headerActions}>
-            <Link href={`/admin/copropiedades/unidades/${phId}`} className={styles.btnBack}>
-              Volver
-            </Link>
+            <Link href={`/admin/copropiedades/unidades/${phId}`} className={styles.btnBack}></Link>
           </div>
+
           <div className={styles.loading}>
             <p>Cargando datos de la unidad...</p>
           </div>
@@ -125,20 +166,16 @@ export default function EditarUnidadPage() {
           <Link href={`/admin/copropiedades/unidades/${phId}`} className={styles.btnBack}></Link>
         </div>
 
-        <div className={styles.formSectionTitle}>
+        <div className={pageStyles.titleBanner}>
           Editar unidad
         </div>
 
-        {message && (
-          <div className={`${styles.alert} ${message.type === 'success' ? styles.alertSuccess : styles.alertError}`}>
-            {message.text}
-          </div>
-        )}
+        <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Número de unidad: <span className={styles.required}>*</span></span>
+        <form onSubmit={handleSubmit} className={pageStyles.form}>
+          <div className={pageStyles.formGrid}>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Número de unidad: *</span>
               <input 
                 type="text" 
                 name="unit_number" 
@@ -146,14 +183,12 @@ export default function EditarUnidadPage() {
                 onChange={handleChange}
                 required
                 placeholder="Ej: 401, Apto 502"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Bloque/Torre: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Bloque/Torre: *</span>
               <input 
                 type="text" 
                 name="block" 
@@ -161,33 +196,31 @@ export default function EditarUnidadPage() {
                 onChange={handleChange}
                 required
                 placeholder="Ej: Torre A, Bloque 1"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Piso:</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Piso: *</span>
               <input 
-                type="text" 
+                type="number"
                 name="floor" 
                 value={formData.floor}
                 onChange={handleChange}
+                required
+                min="0"
                 placeholder="Ej: 4, 5"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Tipo de unidad:</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Tipo de unidad:</span>
               <select 
                 name="type" 
                 value={formData.type}
                 onChange={handleChange}
-                className={styles.formSelect}
+                className={pageStyles.input}
               >
                 <option value="Apartamento">Apartamento</option>
                 <option value="Casa">Casa</option>
@@ -197,103 +230,85 @@ export default function EditarUnidadPage() {
                 <option value="Deposito">Depósito</option>
               </select>
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Área (m²):</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Área (m²):</span>
               <input 
-                type="text" 
+                type="number"
                 name="area" 
                 value={formData.area}
                 onChange={handleChange}
+                min="0"
+                step="any"
                 placeholder="Ej: 85"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Coeficiente:</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Coeficiente:</span>
               <input 
-                type="text" 
+                type="number"
                 name="coefficient" 
                 value={formData.coefficient}
                 onChange={handleChange}
+                min="0"
+                step="any"
                 placeholder="Ej: 0.015"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Responsable de impuestos:</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Responsable de impuestos:</span>
               <input 
                 type="text" 
                 name="tax_responsible" 
                 value={formData.tax_responsible}
                 onChange={handleChange}
                 placeholder="Nombre del propietario"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Tipo de documento:</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Tipo de documento:</span>
               <select 
                 name="tax_responsible_document_type" 
                 value={formData.tax_responsible_document_type}
                 onChange={handleChange}
-                className={styles.formSelect}
+                className={pageStyles.input}
               >
-                <option value="CC">Cédula de Ciudadanía</option>
-                <option value="CE">Cédula de Extranjería</option>
+                <option value="">Seleccione</option>
+                <option value="CC">Cedula de ciudadania (CC)</option>
+                <option value="CE">Cedula de extranjeria (CE)</option>
+                <option value="TI">Tarjeta de identidad (TI)</option>
                 <option value="NIT">NIT</option>
                 <option value="PAS">Pasaporte</option>
               </select>
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Número de documento:</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Número de documento:</span>
               <input 
                 type="text" 
                 name="tax_responsible_document" 
                 value={formData.tax_responsible_document}
                 onChange={handleChange}
                 placeholder="Número de identificación"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formCheckbox}>
-              <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
-              />
-              <span className={styles.formCheckboxLabel}>Unidad activa</span>
-            </label>
-          </div>
-
-          <div className={styles.formButtons}>
-            <Link href={`/admin/copropiedades/unidades/${phId}`}>
-              <button type="button" className={styles.btnCancel}>
-                Cancelar
-              </button>
+          <div className={pageStyles.actions}>
+            <Link href={`/admin/copropiedades/unidades/${phId}`} className={pageStyles.cancelButton}>
+              Cancelar
             </Link>
             <button 
               type="submit" 
               disabled={saving}
-              className={styles.btnSubmit}
+              className={pageStyles.submitButton}
             >
               {saving ? 'Guardando...' : 'Actualizar unidad'}
             </button>

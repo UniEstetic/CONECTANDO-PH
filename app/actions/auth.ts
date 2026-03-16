@@ -1,24 +1,25 @@
 'use server'
 
-import { SignupFormSchema, FormState } from '@/app/types/definitions'
+import { SignupFormSchema } from '@/app/types/definitions'
 import { redirect } from 'next/navigation';
-import { createSession } from '@/app/utils/session'
 import { signOut } from "@/app/api/auth/[...nextauth]/auth.config";
 
 export async function signup(state: SignupFormState, formData: FormData): Promise<SignupFormState>{
-  const validatedFields = SignupFormSchema.safeParse({
+  SignupFormSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
     password: formData.get('password'),
   })
-  
-  const user= {id: "1"}
-  await createSession(user.id)
+
   redirect('/auth/login');
 }
 
 export async function handleSignOut() {
-  await signOut({ redirectTo: "/auth/login" });
+  // Invalida cookie JWT/sesión de Auth.js y dispara revokeRefreshToken por events.signOut.
+  await signOut({ redirect: false });
+
+  // Redirección explícita al login
+  redirect('/auth/login');
 }
 
 export type SignupFormState = 

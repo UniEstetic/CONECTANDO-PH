@@ -1,0 +1,79 @@
+.card {
+  margin-top: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.7);
+  border-radius: 16px;
+  background: rgba(239, 68, 68, 0.12);
+  backdrop-filter: blur(2px);
+  padding: 12px 14px;
+}
+
+.cardActive {
+  border-color: rgba(16, 185, 129, 0.9);
+  background: rgba(16, 185, 129, 0.18);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.textWrap {
+  display: grid;
+  gap: 3px;
+}
+
+.title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hint {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 12px;
+}
+
+.checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.track {
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.95);
+  background: rgba(220, 38, 38, 0.35);
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease;
+}
+
+.checkbox:checked + .track {
+  background: rgba(5, 150, 105, 0.95);
+  border-color: rgba(5, 150, 105, 1);
+}
+
+.checkbox:checked + .track .thumb {
+  transform: translateX(20px);
+}
+
+.checkbox:disabled + .track {
+  opacity: 0.55;
+}

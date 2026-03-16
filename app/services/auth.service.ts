@@ -5,6 +5,7 @@ import {
   UserAuth,
   SelectProviderResponse,
   ValidateLoginResponse,
+  RefreshTokenResponse,
 } from "@/app/types/next-auth";
 
 // Seleccionar proveedor de autenticación
@@ -48,24 +49,68 @@ export async function validateLogin(
   
   return data;
 }
+
+// Refrescar access token usando refresh token
+export async function refreshAccessToken(
+  refreshToken: string,
+): Promise<RefreshTokenResponse> {
+  const res = await apiClient("/auth/refresh", {
+    method: "POST",
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || `Error al refrescar token (${res.status})`);
+  }
+
+  const data = (await res.json()) as RefreshTokenResponse;
+
+  return data;
+}
+
+// Cerrar sesión en backend e invalidar refresh token
+export async function revokeRefreshToken(refreshToken: string): Promise<void> {
+  const res = await apiClient("/auth/logout", {
+    method: "POST",
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || `Error al cerrar sesion (${res.status})`);
+  }
+}
+
 // Obtener perfil del usuario autenticado
 export async function getProfile(tokenBack?: string): Promise<UserAuth> {
-  const res = await apiClientSession("/users/profile", {
-    method: "GET",
-    headers: tokenBack ? {
-      Authorization: `Bearer ${tokenBack}`,
-    } : {}
-  });
+  const res = tokenBack
+    ? await apiClient("/users/profile", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${tokenBack}`,
+        },
+      })
+    : await apiClientSession("/users/profile", {
+        method: "GET",
+      });
 
   if (res.status === 401) {
     throw new Error("No autenticado. Inicia sesión.");
   }
 
-  const data = await res.json();
-
-  if (data.status && data.message && data.data) {
-    return data.data as UserAuth;
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || `Error al obtener perfil (${res.status})`);
   }
 
-  return data as UserAuth;
+  const data = await res.json().catch(() => ({}));
+
+  // Support common API wrappers: {data}, {result}, or direct payload.
+  const payload =
+    (data as any)?.data ||
+    (data as any)?.result ||
+    data;
+
+  return payload as UserAuth;
 }

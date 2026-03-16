@@ -1,0 +1,103 @@
+.titleBanner {
+  background-color: #fff2d6;
+  color: #6b4f1d;
+  padding: 12px 18px;
+  border: 1px solid #d9bd7c;
+  border-radius: 9999px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 16px;
+  text-align: center;
+}
+
+.form {
+  max-width: 760px;
+  margin: 18px auto 0 auto;
+}
+
+.formGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.fieldWrap {
+  display: grid;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.uploadRow {
+  display: grid;
+  gap: 8px;
+}
+
+.uploadLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.uploadButton {
+  display: inline-block;
+  width: fit-content;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancelButton {
+  padding: 12px 28px;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+  background-color: white;
+  color: #374151;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.submitButton {
+  padding: 12px 28px;
+  border-radius: 25px;
+  border: none;
+  background-color: #c4a861;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.spacerSm {
+  margin-top: 8px;
+}
+
+.spacerMd {
+  margin-top: 12px;
+}

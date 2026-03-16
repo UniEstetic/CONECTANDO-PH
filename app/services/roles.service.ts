@@ -3,12 +3,13 @@
 import { apiClientSession } from '@/app/utils/apiClient';
 import { Roles, responseListRoles, responseRoles } from '@/app/types/roles';
 import {removeRegister, listFilters} from "@/app/types/definitions";
+import { extractErrorMessage } from '@/app/services/_shared/http-errors';
 
 // Buscar por ID
 export async function getById(id: string): Promise<responseRoles> {
   const res = await apiClientSession(`/roles/${id}`);
   if (!res.ok) {
-    throw new Error('Error al obtener registro por ID');
+    throw new Error(await extractErrorMessage(res, 'Error al obtener registro por ID'));
   }
   return res.json() as Promise<responseRoles>;
 }
@@ -19,7 +20,7 @@ export async function remove(id: string): Promise<removeRegister>{
     method: 'DELETE',
   });
   if (!res.ok) {
-    throw new Error('Error al eliminar registro.');
+    throw new Error(await extractErrorMessage(res, 'Error al eliminar registro.'));
   }
   return res.json() as Promise<removeRegister>;
 }
@@ -35,7 +36,7 @@ export async function getAll({fields="*", where="", limit="100", page="1"} : lis
 
   const res = await apiClientSession(`/roles?${queryParams.toString()}`);
   if (!res.ok) {
-    throw new Error('Error al obtener registro.');
+    throw new Error(await extractErrorMessage(res, 'Error al obtener registro.'));
   }
   return res.json() as Promise<responseListRoles>;
 }
@@ -47,7 +48,7 @@ export async function create(payload: Partial<Roles>): Promise<responseRoles> {
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al crear registro');
+    throw new Error(await extractErrorMessage(res, 'Error al crear registro'));
   }
   return res.json() as Promise<responseRoles>;
 }
@@ -62,7 +63,7 @@ export async function update(
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al actualizar registro');
+    throw new Error(await extractErrorMessage(res, 'Error al actualizar registro'));
   }
   return res.json() as Promise<responseRoles>;
 }
