@@ -41,15 +41,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               let profileData = await getProfile(
                 String(access_token_backend),
               );
+              // Handle ownership/ownerships response
+              // ownership can be an object (single) or ownerships can be an array (multiple)
+              let ownership = null;
+              let ownerships: any[] = [];
               
-              if(profileData?.ownership){
-                //profileData.ownership= profileData?.ownership[profileData.ownership];
+              if (profileData?.ownership) {
+                // Single ownership - it's an object
+                ownership = profileData.ownership;
+                ownerships = [profileData.ownership];
+              } else if (profileData?.ownerships && Array.isArray(profileData.ownerships)) {
+                // Multiple ownerships - it's an array
+                ownerships = profileData.ownerships;
+                ownership = ownerships[0] || null; // Default to first one
               }
 
               return {
                 ...profileData,
                 id: profileData?.userId || "ID_UNICO",
                 accessToken: access_token_backend,
+                ownership,
+                ownerships,
               };
             }
           }
@@ -71,6 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.profile = {
            userProfile: (user as any).userProfile,
            ownership: (user as any).ownership,
+           ownerships: (user as any).ownerships,
            userId: (user as any).userId,
            scope: (user as any).scope
         };
