@@ -50,7 +50,7 @@ export async function validateLogin(
 }
 // Obtener perfil del usuario autenticado
 export async function getProfile(tokenBack?: string): Promise<UserAuth> {
-  const res = await apiClientSession("/auth/getProfile", {
+  const res = await apiClientSession("/users/profile", {
     method: "GET",
     headers: tokenBack ? {
       Authorization: `Bearer ${tokenBack}`,

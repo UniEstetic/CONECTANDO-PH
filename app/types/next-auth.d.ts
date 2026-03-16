@@ -17,13 +17,24 @@ declare module "next-auth" {
         phone?: string;
       };
       ownership?: {
-        name: string;
         id: string;
+        name: string;
         tax_id?: string;
         address?: string;
         city?: string;
         country?: string;
         state?: string;
+        logo_url?: string;
+      };
+      ownerships?: {
+        id: string;
+        name: string;
+        tax_id?: string;
+        address?: string;
+        city?: string;
+        country?: string;
+        state?: string;
+        logo_url?: string;
       }[];
     } & DefaultSession["user"];
   }
@@ -31,6 +42,7 @@ declare module "next-auth" {
   interface User {
     userProfile?: any;
     ownership?: any;
+    ownerships?: any[];
     accessToken?: string;
     userId?: string;
   }
@@ -40,6 +52,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     userProfile?: any;
     ownership?: any;
+    ownerships?: any[];
     accessToken?: string;
   }
 }
@@ -63,8 +76,19 @@ export interface UserAuth{
     address: string,
     city: string,
     country: string,
-    state: string
+    state: string,
+    logo_url?: string
   },
+  ownerships?: {
+    id: string,
+    name: string,
+    tax_id: string,
+    address: string,
+    city: string,
+    country: string,
+    state: string,
+    logo_url?: string
+  }[],
   scope: string
 }
 
