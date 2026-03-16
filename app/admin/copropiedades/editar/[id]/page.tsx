@@ -479,7 +479,7 @@ export default function EditarCopropiedadPage() {
 
           <StatusToggle
             entityLabel='Copropiedad'
-            checked={formData.is_active}
+            checked={!!formData.is_active}
             onChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
             hint='Las copropiedades desactivadas no seran visibles para los usuarios'
           />

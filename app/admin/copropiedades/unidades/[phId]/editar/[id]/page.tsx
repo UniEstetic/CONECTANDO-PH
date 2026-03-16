@@ -281,7 +281,7 @@ export default function EditarUnidadPage() {
               >
                 <option value="">Seleccione</option>
                 <option value="CC">Cedula de ciudadania (CC)</option>
-                <option value="CE">Cedula de extranjeria (CE)</option>
+                <option value="C2E">Cedula de extranjeria (CE)</option>
                 <option value="TI">Tarjeta de identidad (TI)</option>
                 <option value="NIT">NIT</option>
                 <option value="PAS">Pasaporte</option>

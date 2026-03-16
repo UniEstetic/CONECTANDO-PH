@@ -362,7 +362,7 @@ export default function EditarUsuarioPage() {
                 placeholder="Dejar en blanco para mantener la actual"
                 className={pageStyles.input}
               />
-              <span className={styles.formHint}>Complete solo si desea cambiar la contrasena</span>
+              <span className={styles.formHint} style={{ color: '#fff' }}>Complete solo si desea cambiar la contrasena</span>
             </label>
 
             <label className={pageStyles.fieldWrap}>
