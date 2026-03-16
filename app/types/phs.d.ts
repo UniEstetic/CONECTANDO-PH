@@ -15,8 +15,8 @@ export interface Phs {
   number_of_towers: string;
   amount_of_real_estate: string;
   horizontal_property_regulations: string;
-  is_active: boolean;
-  created_by: string;
+  is_active?: boolean;
+
 }
 
 export interface responsePhs {
