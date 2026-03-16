@@ -28,11 +28,12 @@ interface RoleWithUnits {
 }
 
 export default function EditarUsuarioPage() {
+  const { data: session } = useSession();
   const router = useRouter()
   const params = useParams()
-  const { data: session } = useSession()
-  const userId = Array.isArray(params.id) ? params.id[0] : params.id
-  const phId = (session?.user as any)?.ownership?.id as string | undefined
+  const userId = params.id as string
+  const phId = session?.user?.ownership?.id; // Lista Unidades
+
 
   const [formData, setFormData] = useState<UserFormData>({
     first_name: '',
@@ -81,6 +82,12 @@ export default function EditarUsuarioPage() {
       loadUserRoles(userId)
     }
   }, [userId, rolesLoading])
+
+  useEffect(() => {
+    if (phId) {
+      loadUnits(phId)
+    }
+  }, [phId])
 
   const loadUser = async (id: string) => {
     try {

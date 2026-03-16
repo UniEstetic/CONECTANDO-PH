@@ -33,23 +33,50 @@ declare module "next-auth" {
   interface Session {
     accessToken?: string;
     accessTokenExpiresAt?: number;
+    userId?: string;
     error?: string;
     user: {
-      userProfile?: AuthProfileUser;
-      ownership?: AuthOwnership;
-      firstName?: string;
       userId?: string;
       scope?: string[];
+      firstName?: string;
+      userProfile?: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        roles: string[];
+        avatar: string;
+        document?: string;
+        documentType?: string;
+        phone?: string;
+      };
+      ownership?: {
+        id: string;
+        name: string;
+        tax_id?: string;
+        address?: string;
+        city?: string;
+        country?: string;
+        state?: string;
+        logo_url?: string;
+      };
+      ownerships?: {
+        id: string;
+        name: string;
+        tax_id?: string;
+        address?: string;
+        city?: string;
+        country?: string;
+        state?: string;
+      };
     } & DefaultSession["user"];
   }
 
   interface User {
     userProfile?: any;
     ownership?: any;
+    ownerships?: any[];
     accessToken?: string;
-    refreshToken?: string;
-    accessTokenExpiresIn?: number;
-    refreshTokenExpiresIn?: number;
+    userId?: string;
   }
 }
 
@@ -57,6 +84,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     userProfile?: any;
     ownership?: any;
+    ownerships?: any[];
     accessToken?: string;
     refreshToken?: string;
     accessTokenExpiresAt?: number;

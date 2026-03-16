@@ -66,3 +66,41 @@ export async function update(
   }
   return res.json() as Promise<responseQaEntries>;
 }
+
+// Obtener preguntas activas al cargar (para asamblea)
+export async function getActiveByAssembly(assemblyId: string): Promise<responseListQaEntries> {
+  const res = await apiClientSession(`/qa_entries/assembly/${assemblyId}/active`);
+  if (!res.ok) {
+    throw new Error('Error al obtener preguntas activas');
+  }
+  return res.json() as Promise<responseListQaEntries>;
+}
+
+// Obtener preguntas moderadas (para asamblea)
+export async function getModeratedByAssembly(assemblyId: string): Promise<responseListQaEntries> {
+  const res = await apiClientSession(`/qa_entries/assembly/${assemblyId}/moderated`);
+  if (!res.ok) {
+    throw new Error('Error al obtener preguntas moderadas');
+  }
+  return res.json() as Promise<responseListQaEntries>;
+}
+
+// Obtener todas las preguntas por asamblea
+export async function getByAssembly(assemblyId: string): Promise<responseListQaEntries> {
+  const res = await apiClientSession(`/qa_entries/assembly/${assemblyId}`);
+  if (!res.ok) {
+    throw new Error('Error al obtener preguntas de la asamblea');
+  }
+  return res.json() as Promise<responseListQaEntries>;
+}
+
+// Votar pregunta
+export async function upvote(id: string): Promise<responseQaEntries> {
+  const res = await apiClientSession(`/qa_entries/${id}/upvote`, {
+    method: 'POST',
+  });
+  if (!res.ok) {
+    throw new Error('Error al votar pregunta');
+  }
+  return res.json() as Promise<responseQaEntries>;
+}

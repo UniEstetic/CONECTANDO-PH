@@ -4,6 +4,7 @@ import { useRoomContext } from "@livekit/components-react";
 import { RoomEvent } from "livekit-client";
 import { useEffect, useState } from "react";
 import { Circle } from "lucide-react";
+import styles from '@/app/ui/styles/roomResidentes.module.css';
 
 // Componente para controlar la grabación
 export function RecordingControls() {
@@ -73,7 +74,7 @@ export function RecordingControls() {
     <button
       onClick={isRecording ? stopRecording : startRecording}
       disabled={isLoading}
-      className={`control-btn ${isRecording ? "recording" : ""}`}
+      className={`${styles["control-btn"]} ${isRecording ? styles["recording"] : ""}`}
       title={isRecording ? "Detener grabación" : "Iniciar grabación"}
     >
       <Circle 

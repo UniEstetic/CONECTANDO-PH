@@ -12,10 +12,9 @@ import {
 import type { JWT } from "next-auth/jwt";
 import type { AuthTokenProfile, AuthUser } from "@/app/types/next-auth";
 
-const PROVIDER_DEFAULT =
-  process.env.AUTH_PROVIDER_DEFAULT ?? "accessEmail";
-
-const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
+const PROVIDER_DEFAULT = process?.env?.AUTH_PROVIDER_DEFAULT ?? "accessEmail";
+const SESSION_TIMEOUT = parseInt(process?.env?.NEXTAUTH_SESSION_TIMEOUT ?? "3600", 10);
+const ACCESS_TOKEN_SAFETY_WINDOW_MS = 30 * 1000;
 
 class LoginCredentialsError extends CredentialsSignin {
   code: string;
@@ -25,8 +24,6 @@ class LoginCredentialsError extends CredentialsSignin {
     this.code = message || "credentials";
   }
 }
-
-const ACCESS_TOKEN_SAFETY_WINDOW_MS = 30 * 1000;
 
 function computeExpiresAt(expiresInSeconds?: number) {
   if (!expiresInSeconds || Number.isNaN(expiresInSeconds)) {
@@ -77,8 +74,15 @@ function getRequiredFirstName(
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: NEXTAUTH_SECRET,
-
+  secret: process.env.NEXTAUTH_SECRET || "clave_super_secreta_de_emergencia",
+  session: {
+    strategy: "jwt",
+    maxAge: SESSION_TIMEOUT,
+    updateAge: 60,
+  },
+  jwt: {
+    maxAge: SESSION_TIMEOUT,
+  },
   providers: [
     Credentials({
       name: "Credentials",
@@ -174,7 +178,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         const incomingUser = user as AuthUser;
 
@@ -214,7 +218,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           error: "MissingAccessTokenExpiry",
         };
       }
-
+      // Set expiration time
+      const now = Math.floor(Date.now() / 1000);
+      token.exp = now + SESSION_TIMEOUT;
+      
       const accessTokenExpiresAt = Number(token.accessTokenExpiresAt || 0);
       if (accessTokenExpiresAt - ACCESS_TOKEN_SAFETY_WINDOW_MS > Date.now()) {
         return token;
