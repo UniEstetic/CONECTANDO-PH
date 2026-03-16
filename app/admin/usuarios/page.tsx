@@ -25,9 +25,7 @@ export default function ListadoUsuariosPage() {
   const loadUsuarios = async () => {
     try {
       setLoading(true)
-      const response = await getAll({
-        fields: 'id,first_name,last_name,email,document_number,type_person,is_active',
-      })
+      const response = await getAll()
       setUsuarios(response.data)
     } catch (error) {
       console.error('Error al cargar usuarios:', error)
