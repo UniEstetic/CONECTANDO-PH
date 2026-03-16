@@ -1,10 +1,13 @@
 'use client'
 
 import styles from '@/app/ui/styles/usuarios.module.css';
+import pageStyles from '@/app/ui/styles/EntityForm.module.css';
 import { useState, FormEvent, useEffect } from 'react'
 import { Roles } from '@/app/types/roles'
 import { getById, update } from '@/app/services/roles.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import StatusToggle from '@/app/components/general/StatusToggle'
+import ToastNotice from '@/app/components/general/ToastNotice'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 
@@ -13,7 +16,7 @@ type RoleFormData = Omit<Roles, 'id' | 'created_at'>
 export default function EditarRolPage() {
   const router = useRouter()
   const params = useParams()
-  const roleId = params.id as string
+  const roleId = Array.isArray(params.id) ? params.id[0] : params.id
 
   const [formData, setFormData] = useState<RoleFormData>({
     name: '',
@@ -39,7 +42,7 @@ export default function EditarRolPage() {
       const role = response.data
       setFormData({
         name: role.name,
-        description: role.description,
+        description: role.description || '',
         scopes: role.scopes || '',
         is_active: role.is_active
       })
@@ -68,7 +71,18 @@ export default function EditarRolPage() {
     setMessage(null)
 
     try {
-      await update(roleId, formData)
+      if (!roleId) {
+        throw new Error('Rol inválido')
+      }
+
+      const payload = {
+        name: formData.name.trim(),
+        ...(formData.description?.trim() ? { description: formData.description.trim() } : {}),
+        ...(formData.scopes?.trim() ? { scopes: formData.scopes.trim() } : {}),
+        is_active: formData.is_active,
+      }
+
+      await update(roleId, payload)
       
       setMessage({ type: 'success', text: 'Rol actualizado exitosamente' })
       
@@ -91,6 +105,9 @@ export default function EditarRolPage() {
       <div className={styles.blockResidentes}>
         <main className={styles.containerResidentes}>
           <UsuariosHeader />
+          <div className={styles.headerActions}>
+            <Link href="/admin/roles" className={styles.btnBack}></Link>
+          </div>
           <div className={styles.loading}>
             <p>Cargando datos del rol...</p>
           </div>
@@ -103,21 +120,21 @@ export default function EditarRolPage() {
     <div className={styles.blockResidentes}>
       <main className={styles.containerResidentes}>
         <UsuariosHeader />
+
+        <div className={styles.headerActions}>
+          <Link href="/admin/roles" className={styles.btnBack}></Link>
+        </div>
         
-        <div className={styles.formSectionTitle}>
+        <div className={pageStyles.titleBanner}>
           Editar rol
         </div>
 
-        {message && (
-          <div className={`${styles.alert} ${message.type === 'success' ? styles.alertSuccess : styles.alertError}`}>
-            {message.text}
-          </div>
-        )}
+        <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Nombre del rol: <span className={styles.required}>*</span></span>
+        <form onSubmit={handleSubmit} className={pageStyles.form}>
+          <div className={pageStyles.formGrid}>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Nombre del rol: *</span>
               <input 
                 type="text" 
                 name="name" 
@@ -125,66 +142,52 @@ export default function EditarRolPage() {
                 onChange={handleChange}
                 required
                 placeholder="Ej: Administrador, Editor, Visualizador"
-                className={styles.formInput}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Descripción: <span className={styles.required}>*</span></span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Descripción:</span>
               <textarea 
                 name="description" 
                 value={formData.description}
                 onChange={handleChange}
-                required
                 rows={3}
                 placeholder="Describe las funciones de este rol"
-                className={styles.formTextarea}
+                className={pageStyles.input}
               />
             </label>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <span>Permisos (scopes):</span>
+            <label className={pageStyles.fieldWrap}>
+              <span className={pageStyles.fieldLabel}>Permisos (scopes):</span>
               <textarea 
                 name="scopes" 
                 value={formData.scopes}
                 onChange={handleChange}
                 rows={4}
                 placeholder="Ej: users.read, users.write, roles.admin, assemblies.create"
-                className={styles.formTextarea}
+                className={pageStyles.input}
               />
-              <span className={styles.formHint}>Ingrese los permisos separados por comas</span>
+              <span className={styles.formHint} style={{ color: '#ffffff' }}>Ingrese los permisos separados por comas</span>
             </label>
+
+            <StatusToggle
+              entityLabel='Rol'
+              checked={formData.is_active}
+              onChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
+              hint='Define si el rol está habilitado para asignación y uso.'
+              activeText='activo'
+              inactiveText='inactivo'
+              disabled={saving}
+            />
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.formCheckbox}>
-              <input 
-                type="checkbox" 
-                name="is_active" 
-                checked={formData.is_active}
-                onChange={handleChange}
-              />
-              <span className={styles.formCheckboxLabel}>Rol activo</span>
-            </label>
-            <span className={styles.formHint} style={{ marginLeft: '28px' }}>
-              Los roles inactivos no podrán ser asignados a usuarios
-            </span>
-          </div>
-
-          <div className={styles.formButtons}>
-            <Link href="/admin/roles">
-              <button type="button" className={styles.btnCancel}>
-                Cancelar
-              </button>
-            </Link>
+          <div className={pageStyles.actions}>
+            <Link href="/admin/roles" className={pageStyles.cancelButton}>Cancelar</Link>
             <button 
               type="submit" 
               disabled={saving}
-              className={styles.btnSubmit}
+              className={pageStyles.submitButton}
             >
               {saving ? 'Guardando...' : 'Actualizar rol'}
             </button>
