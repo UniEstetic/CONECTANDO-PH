@@ -2,6 +2,7 @@
 
 import styles from '@/app/ui/styles/usuarios.module.css';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import ToastNotice from '@/app/components/general/ToastNotice'
 import { useState, useEffect } from 'react'
 import { getAll, remove } from '@/app/services/roles.service'
 import { Roles } from '@/app/types/roles'
@@ -14,6 +15,7 @@ export default function RolesPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [deleteModal, setDeleteModal] = useState<{ show: boolean; id: string | null; name: string }>({
     show: false,
     id: null,
@@ -40,10 +42,11 @@ export default function RolesPage() {
     try {
       await remove(id)
       setDeleteModal({ show: false, id: null, name: '' })
+      setMessage({ type: 'success', text: 'Rol eliminado correctamente' })
       loadRoles()
     } catch (error) {
       console.error('Error al eliminar rol:', error)
-      alert('Error al eliminar el rol')
+      setMessage({ type: 'error', text: 'Error al eliminar el rol' })
     }
   }
 
@@ -72,6 +75,8 @@ export default function RolesPage() {
             Nuevo Rol
           </Link>
         </div>
+
+        <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
         {/* Buscador y Filtros */}
         <section className={styles.searchSection}>
@@ -147,9 +152,7 @@ export default function RolesPage() {
                       </span>
                     </td>
                     <td className={styles.actionsCell}>
-                      <Link href={`/admin/roles/editar/${role.id}`}>
-                        <button className={styles.btnIcon} title="Editar">✏️</button>
-                      </Link>
+                      <Link href={`/admin/roles/editar/${role.id}`} className={styles.btnIcon} title="Editar">✏️</Link>
                       <button 
                         className={styles.btnIcon} 
                         title="Eliminar"

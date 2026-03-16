@@ -3,12 +3,13 @@
 import { apiClientSession } from '@/app/utils/apiClient';
 import { User, responseListUsers, responseUsers } from '@/app/types/users';
 import {removeRegister, listFilters} from "@/app/types/definitions";
+import { extractErrorMessage } from '@/app/services/_shared/http-errors';
 
 // Buscar usuario por ID
 export async function getById(id: string): Promise<responseUsers> {
-  const res = await apiClientSession(`/users/id/${id}`);
+  const res = await apiClientSession(`/users/${id}`);
   if (!res.ok) {
-    throw new Error('Error al obtener usuario por ID');
+    throw new Error(await extractErrorMessage(res, 'Error al obtener usuario por ID'));
   }
   return res.json() as Promise<responseUsers>;
 }
@@ -19,7 +20,7 @@ export async function remove(id: string): Promise<removeRegister> {
     method: 'DELETE',
   });
   if (!res.ok) {
-    throw new Error('Error al eliminar usuario');
+    throw new Error(await extractErrorMessage(res, 'Error al eliminar usuario'));
   }
   return res.json() as Promise<removeRegister>;
 }
@@ -35,7 +36,7 @@ export async function getAll({fields="*", where="", limit="100", page="1"} : lis
 
   const res = await apiClientSession(`/users?${queryParams.toString()}`);
   if (!res.ok) {
-    throw new Error('Error al obtener usuarios');
+    throw new Error(await extractErrorMessage(res, 'Error al obtener usuarios'));
   }
   return res.json() as Promise<responseListUsers>;
 }
@@ -47,7 +48,7 @@ export async function create(payload: Partial<User>): Promise<responseUsers> {
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al crear usuario');
+    throw new Error(await extractErrorMessage(res, 'Error al crear usuario'));
   }
   return res.json() as Promise<responseUsers>;
 }
@@ -62,7 +63,7 @@ export async function update(
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al actualizar usuario');
+    throw new Error(await extractErrorMessage(res, 'Error al actualizar usuario'));
   }
   return res.json() as Promise<responseUsers>;
 }
@@ -71,7 +72,7 @@ export async function update(
 export async function getByEmail(email: string): Promise<responseUsers> {
   const res = await apiClientSession(`/users/email/${email}`);
   if (!res.ok) {
-    throw new Error('Error al obtener usuario por email');
+    throw new Error(await extractErrorMessage(res, 'Error al obtener usuario por email'));
   }
   return res.json() as Promise<responseUsers>;
 }
