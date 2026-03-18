@@ -4,6 +4,7 @@ export interface VotingQuestions {
   agenda_id: string;
   question_text: string;
   description: string;
+  is_active?: boolean;
   type: string;
   status: string;
   result_type: string;
