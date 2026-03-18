@@ -6,7 +6,7 @@ import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID
 export async function getById(id: string): Promise<responseAssemblyAnnouncements> {
-  const res = await apiClientSession(`/agenda/${id}`);
+  const res = await apiClientSession(`/assembly_announcements/${id}`);
   if (!res.ok) {
     throw new Error('Error al obtener registro por ID');
   }

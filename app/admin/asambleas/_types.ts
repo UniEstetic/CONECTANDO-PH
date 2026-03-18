@@ -1,0 +1,56 @@
+import { Assembly } from '@/app/types/assemblies';
+
+export type Option = {
+  id?: string;
+  text: string;
+};
+
+export type VotingQuestion = {
+  id?: string;
+  question_text: string;
+  description: string;
+  type: string;
+  result_type: string;
+  min_selections: number;
+  max_selections: number;
+  options: Option[];
+};
+
+export type AgendaItem = {
+  id?: string;
+  assembly_id?: string;
+  title: string;
+  sort_order: number;
+  is_votable: boolean;
+  required_quorum: number;
+  is_active?: boolean;
+  type: 'Encuesta' | 'Documento' | 'Texto';
+  document_url?: string;
+  content?: string;
+  votingQuestions?: VotingQuestion[];
+};
+
+export type AssemblyFormData = Partial<Assembly>;
+
+export const EMPTY_CURRENT_ITEM: Partial<AgendaItem> = {
+  title: '',
+  is_votable: false,
+  required_quorum: 50,
+  type: 'Texto',
+};
+
+export const EMPTY_CURRENT_QUESTION: Partial<VotingQuestion> = {
+  question_text: '',
+  description: '',
+  type: 'simple',
+  result_type: 'relative_majority',
+  min_selections: 1,
+  max_selections: 1,
+  options: [{ text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }],
+};
+
+export const normalizeAgendaSortOrder = (items: AgendaItem[]): AgendaItem[] =>
+  items.map((item, index) => ({
+    ...item,
+    sort_order: index + 1,
+  }));
