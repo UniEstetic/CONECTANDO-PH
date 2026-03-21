@@ -98,6 +98,7 @@ export interface UserAuth{
   userProfile: AuthProfileUser,
   userId: string,
   ownership: AuthOwnership,
+  ownerships?: any[];
   scope: string[]
 }
 
@@ -108,6 +109,7 @@ export interface AuthUser extends UserAuth {
   accessTokenExpiresIn?: number;
   refreshTokenExpiresIn?: number;
   firstName?: string;
+  
 }
 
 export interface SelectProviderResponse {

@@ -130,16 +130,27 @@
   justify-content: center;
   gap: 12px;
   margin-top: 24px;
+  padding-bottom: 40px;
 }
 
 .cancelButton {
   padding: 12px 28px;
   border-radius: 25px;
-  border: 1px solid #ccc;
+  border: 1.5px solid #5b2d4e;
   background-color: white;
-  color: #374151;
+  color: #5b2d4e;
   text-decoration: none;
   font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-block;
+  font-family: inherit;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.cancelButton:hover {
+  background-color: rgba(91, 45, 78, 0.06);
+  transform: translateY(-1px);
 }
 
 .submitButton {
@@ -149,7 +160,21 @@
   background-color: #c4a861;
   color: white;
   font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.submitButton:hover {
+  background-color: #b39750;
+  transform: translateY(-1px);
+}
+
+.submitButton:disabled {
+  background-color: #b5a8b0;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .spacerSm {
