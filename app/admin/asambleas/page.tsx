@@ -2,28 +2,55 @@
 
 import styles from '@/app/ui/styles/roomStylesAdministrativo.module.css'; 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Assembly } from '@/app/types/assemblies';
 import { getAll, remove } from '@/app/services/assemblies.service';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+
+const STATUS_CLASS_MAP: Record<string, string> = {
+  scheduled: 'statusScheduled',
+  in_progress: 'statusInProgress',
+  completed: 'statusCompleted',
+  cancelled: 'statusCancelled',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  scheduled: 'Programada',
+  in_progress: 'En progreso',
+  completed: 'Completada',
+  cancelled: 'Cancelada',
+};
+
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+};
 
 export default function MenuAsambleas() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const phsId = session?.user?.ownership?.id;
   const [assemblies, setAssemblies] = useState<Assembly[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadAssemblies();
-  }, []);
+    if (phsId) {
+      loadAssemblies();
+    }
+  }, [phsId]);
 
   const loadAssemblies = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAll({ limit: '100', page: '1' });
+      const response = await getAll({ phs_id: phsId || '', limit: '100', page: '1' });
       setAssemblies(response.data || []);
     } catch (err) {
       console.error('Error cargando asambleas:', err);
@@ -51,48 +78,23 @@ export default function MenuAsambleas() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     if (!dateString) return 'Sin fecha';
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('es-CO', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      return new Date(dateString).toLocaleDateString('es-CO', DATE_OPTIONS);
     } catch {
       return dateString;
     }
-  };
+  }, []);
 
-  const getStatusBadge = (status: string) => {
-    const statusColors: Record<string, { bg: string; text: string }> = {
-      'scheduled': { bg: '#3498db', text: 'white' },
-      'in_progress': { bg: '#27ae60', text: 'white' },
-      'completed': { bg: '#95a5a6', text: 'white' },
-      'cancelled': { bg: '#e74c3c', text: 'white' }
-    };
-    
-    const color = statusColors[status] || { bg: '#95a5a6', text: 'white' };
-    
+  const getStatusBadge = useCallback((status: string) => {
+    const cssClass = styles[STATUS_CLASS_MAP[status] || 'statusCompleted'];
     return (
-      <span style={{
-        padding: '4px 10px',
-        borderRadius: '12px',
-        fontSize: '11px',
-        fontWeight: 600,
-        backgroundColor: color.bg,
-        color: color.text
-      }}>
-        {status === 'scheduled' ? 'Programada' : 
-         status === 'in_progress' ? 'En progreso' : 
-         status === 'completed' ? 'Completada' : 
-         status === 'cancelled' ? 'Cancelada' : status}
+      <span className={`${styles.statusBadge} ${cssClass}`}>
+        {STATUS_LABELS[status] || status}
       </span>
     );
-  };
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -101,107 +103,63 @@ export default function MenuAsambleas() {
 
         <div className={styles.divAssambleasConf}>
           <div>
-            <Link href="/admin/asambleas/crear" className={styles.btnUsuarios}>
-              <button className={styles.configButton}>
-                Configurar nueva asamblea
-              </button>
+            <Link href="/admin/asambleas/crear" className={styles.configButton}>
+              Configurar nueva asamblea
             </Link>
           </div>
 
           <div className={styles.assambleasSidebar}>
-            <div className={styles.assambleasList}>
-              <h3 className={styles.assambleasTitle}>Asambleas programadas</h3>
+            <div className={styles.assambleasListCard}>
+              <div className={styles.assambleasListHeader}>
+                <h3 className={styles.assambleasTitle}>Asambleas programadas</h3>
+                <span className={styles.assambleasCount}>{assemblies.length}</span>
+              </div>
               
               {loading ? (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '20px', 
-                  color: 'white',
-                  fontWeight: 500 
-                }}>
+                <div className={styles.assambleasState}>
                   Cargando asambleas...
                 </div>
               ) : error ? (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '20px', 
-                  color: '#e74c3c',
-                  fontWeight: 500 
-                }}>
+                <div className={`${styles.assambleasState} ${styles.assambleasStateError}`}>
                   {error}
                 </div>
               ) : assemblies.length === 0 ? (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '20px', 
-                  color: 'white',
-                  fontWeight: 500 
-                }}>
+                <div className={styles.assambleasState}>
                   No hay asambleas programadas
                 </div>
               ) : (
-                assemblies.map((asembly) => (
-                  <div key={asembly.id} className={styles.assambleasItem}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ 
-                        fontWeight: 600, 
-                        fontSize: '14px',
-                        color: '#6b5b3e',
-                        marginBottom: '4px'
-                      }}>
-                        {asembly.name}
+                <div className={styles.assambleasItemsScroll}>
+                  {assemblies.map((asembly) => (
+                    <div key={asembly.id} className={styles.assambleasItem}>
+                      <div className={styles.assambleasItemMain}>
+                        <div className={styles.assambleasItemName} title={asembly.name}>
+                          {asembly.name}
+                        </div>
+                        <div className={styles.assambleasItemDate}>
+                          {formatDate(asembly.scheduled_at)}
+                        </div>
+                        <div className={styles.assambleasItemMeta}>
+                          {getStatusBadge(asembly.status)}
+                        </div>
                       </div>
-                      <div style={{ 
-                        fontSize: '12px', 
-                        color: '#6b5b3e',
-                        marginBottom: '4px'
-                      }}>
-                        {formatDate(asembly.scheduled_at)}
-                      </div>
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        {getStatusBadge(asembly.status)}
-                      </div>
-                    </div>
-                    <div style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      gap: '6px' 
-                    }}>
-                      <Link href={`/admin/asambleas/editar/${asembly.id}`}>
-                        <button 
-                          style={{
-                            padding: '6px 12px',
-                            backgroundColor: '#3498db',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '15px',
-                            fontSize: '12px',
-                            fontWeight: 500,
-                            cursor: 'pointer'
-                          }}
+                      <div className={styles.assambleasActions}>
+                        <Link
+                          href={`/admin/asambleas/editar/${asembly.id}`}
+                          className={`${styles.assambleaActionBtn} ${styles.editBtn}`}
                         >
                           Editar
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(asembly.id!)}
+                          disabled={deletingId === asembly.id}
+                          className={`${styles.assambleaActionBtn} ${styles.deleteBtn}`}
+                        >
+                          {deletingId === asembly.id ? '...' : 'Eliminar'}
                         </button>
-                      </Link>
-                      <button 
-                        onClick={() => handleDelete(asembly.id!)}
-                        disabled={deletingId === asembly.id}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: deletingId === asembly.id ? '#95a5a6' : '#e74c3c',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '15px',
-                          fontSize: '12px',
-                          fontWeight: 500,
-                          cursor: deletingId === asembly.id ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {deletingId === asembly.id ? '...' : 'Eliminar'}
-                      </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </div>

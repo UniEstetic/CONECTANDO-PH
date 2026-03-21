@@ -2,13 +2,14 @@
 
 import { apiClientSession } from '@/app/utils/apiClient';
 import { QuestionOptions, responseListQuestionOptions, responseQuestionOptions } from '@/app/types/question-options';
+import { extractErrorMessage } from '@/app/services/_shared/http-errors';
 import {removeRegister, listFilters} from "@/app/types/definitions";
 
 // Buscar por ID
 export async function getById(id: string): Promise<responseQuestionOptions> {
   const res = await apiClientSession(`/question-options/${id}`);
   if (!res.ok) {
-    throw new Error('Error al obtener registro por ID');
+    throw new Error(await extractErrorMessage(res, 'Error al obtener registro por ID'));
   }
   return res.json() as Promise<responseQuestionOptions>;
 }
@@ -19,7 +20,7 @@ export async function remove(id: string): Promise<removeRegister>{
     method: 'DELETE',
   });
   if (!res.ok) {
-    throw new Error('Error al eliminar registro.');
+    throw new Error(await extractErrorMessage(res, 'Error al eliminar registro.'));
   }
   return res.json() as Promise<removeRegister>;
 }
@@ -35,7 +36,7 @@ export async function getAll({fields="*", where="", limit="100", page="1"} : lis
 
   const res = await apiClientSession(`/question-options?${queryParams.toString()}`);
   if (!res.ok) {
-    throw new Error('Error al obtener registro.');
+    throw new Error(await extractErrorMessage(res, 'Error al obtener registro.'));
   }
   return res.json() as Promise<responseListQuestionOptions>;
 }
@@ -47,7 +48,7 @@ export async function create(payload: Partial<QuestionOptions>): Promise<respons
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al crear registro');
+    throw new Error(await extractErrorMessage(res, 'Error al crear registro'));
   }
   return res.json() as Promise<responseQuestionOptions>;
 }
@@ -62,7 +63,7 @@ export async function update(
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error('Error al actualizar registro');
+    throw new Error(await extractErrorMessage(res, 'Error al actualizar registro'));
   }
   return res.json() as Promise<responseQuestionOptions>;
 }
