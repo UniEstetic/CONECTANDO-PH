@@ -199,7 +199,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         token.profile = {
           userProfile,
-          ownership: incomingUser.ownership,
+          ownerships: incomingUser.ownerships,
           userId: incomingUser.userId,
           scope: incomingUser.scope,
           firstName,
@@ -256,7 +256,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         session.user = {
           ...(session.user || {}),
-          ownership: profile.ownership,
+          ownerships: profile.ownerships,
           userId: profile.userId,
           scope: profile.scope,
           userProfile,
