@@ -138,6 +138,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             refreshToken,
             accessTokenExpiresIn,
             refreshTokenExpiresIn,
+            // Asume ownership principal como el primero de la lista
+            ownership: Array.isArray(profileData.ownerships) ? profileData.ownerships[0] : profileData.ownerships,
           };
 
           return user;

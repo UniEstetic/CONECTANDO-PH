@@ -28,17 +28,7 @@ export default function CopropiedadesPage() {
     try {
       setLoading(true)
       const response = await getAll()
-      const rawData = (response as any)?.data
-
-      const normalizedCopropiedades: Phs[] = Array.isArray(rawData)
-        ? rawData
-        : Array.isArray(rawData?.data)
-          ? rawData.data
-          : Array.isArray(rawData?.items)
-            ? rawData.items
-            : []
-
-      setCopropiedades(normalizedCopropiedades)
+      setCopropiedades(response.data)
     } catch (error) {
       console.error('Error al cargar copropiedades:', error)
       setMessage({

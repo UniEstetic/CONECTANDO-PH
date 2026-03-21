@@ -26,7 +26,16 @@
     cursor: pointer;
     color: white;
     font-weight: 700;
-    transition: all 0.3s ease;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.configButton:hover {
+    background-color: #4a2440;
+    border-color: #4a2440;
+    transform: translateY(-1px);
 }
 
 .opcionBtn {
@@ -134,6 +143,8 @@
 
 .assambleasSidebar {
     flex: 0 0 300px;
+    max-width: 700px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -145,12 +156,44 @@
     gap: 1rem;
 }
 
+.assambleasListCard {
+    background-color: rgba(255, 242, 214, 0.9);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 8px 20px rgba(91, 45, 78, 0.16);
+    max-height: 620px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.assambleasListHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
 .assambleasTitle {
     font-size: 16px;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    text-align: end;
+    margin: 0;
+    color: #6b5b3e;
+    text-align: left;
+}
+
+.assambleasCount {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: #5b2d4e;
     color: white;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .assambleaItem {
@@ -169,14 +212,156 @@
 .assambleasItem {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 12px;
+    align-items: flex-start;
+    padding: 12px 12px;
     font-size: 14px;
     color: #6b5b3e;
-    background-color: #fff2d6;
-    border-radius: 10px;
-    font-weight: 600;
+    background-color: #ffffff;
+    border: 1px solid #ecd7ad;
+    border-radius: 12px;
+    font-weight: 500;
     gap: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.assambleasItem:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(107, 91, 62, 0.14);
+}
+
+.assambleasItemsScroll {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    max-height: 540px;
+    padding-right: 4px;
+}
+
+.assambleasItemsScroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.assambleasItemsScroll::-webkit-scrollbar-thumb {
+    background: #c7ad71;
+    border-radius: 10px;
+}
+
+.assambleasItemMain {
+    flex: 1;
+    min-width: 0;
+}
+
+.assambleasItemName {
+    font-size: 14px;
+    font-weight: 700;
+    color: #6b5b3e;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.assambleasItemDate {
+    font-size: 12px;
+    color: #7e6e4e;
+    margin-bottom: 6px;
+    line-height: 1.35;
+}
+
+.assambleasItemMeta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.assambleasActions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.assambleaActionBtn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 82px;
+    font-family: inherit;
+    text-decoration: none;
+    text-align: center;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.assambleaActionBtn:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+.assambleaActionBtn:disabled {
+    background-color: #b5a8b0;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 1;
+}
+
+.editBtn {
+    background-color: #5b2d4e;
+}
+
+.editBtn:hover {
+    background-color: #4a2440;
+}
+
+.deleteBtn {
+    background-color: transparent;
+    color: #c0392b;
+    border: 1.5px solid #c0392b;
+}
+
+.deleteBtn:hover {
+    background-color: rgba(192, 57, 43, 0.08);
+    opacity: 1;
+}
+
+.statusBadge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+}
+
+.statusScheduled {
+    background-color: #c4a861;
+}
+
+.statusInProgress {
+    background-color: #5b2d4e;
+}
+
+.statusCompleted {
+    background-color: #b5a8b0;
+}
+
+.statusCancelled {
+    background-color: #c0392b;
+}
+
+.assambleasState {
+    text-align: center;
+    padding: 16px;
+    color: #6b5b3e;
+    font-weight: 600;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.assambleasStateError {
+    color: #e74c3c;
 }
 
 .radioGroup {
@@ -243,12 +428,12 @@
    ======================================== */
 
 .asambleaConfigContainer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
     padding: 2rem;
-    width: 80%;
-    margin: auto;
+    max-width: 960px;
+    margin: 18px auto 0 auto;
 }
 
 /* ========================================
@@ -267,6 +452,14 @@
     gap: 1rem;
 }
 
+.formGroup:has(textarea) {
+    align-items: flex-start;
+}
+
+.formGroup:has(textarea) label {
+    padding-top: 10px;
+}
+
 .formGroup label {
     font-size: 16px;
     font-weight: 500;
@@ -277,11 +470,12 @@
 
 .formGroup input {
     flex: 1;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 26px;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
     font-size: 14px;
-    max-width: 300px;
+    background-color: white;
+    box-sizing: border-box;
 }
 
 .formSelect {
@@ -289,16 +483,25 @@
     background-color: #fff;
     border-radius: 20px;
     flex: 1;
-    padding: 8px 12px;
-    font-size: 13px;
-    max-width: 300px;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.loadingMessage {
+    text-align: center;
+    padding: 40px;
+    color: white;
+    font-weight: 500;
+    font-size: 18px;
 }
 
 .inputWithIcon {
     display: flex;
     gap: 8px;
     flex: 1;
-    max-width: 350px;
 }
 
 .inputWithIcon input {
@@ -476,8 +679,6 @@
     }
     
     .asambleaConfigContainer {
-        grid-template-columns: 1fr;
-        gap: 2rem;
         padding: 1.5rem;
     }
     
@@ -515,6 +716,24 @@
     
     .assambleasTitle {
         font-size: 18px;
+    }
+
+    .assambleasListCard {
+        max-height: none;
+    }
+
+    .assambleasItemsScroll {
+        max-height: 430px;
+    }
+
+    .assambleasActions {
+        flex-direction: row;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .assambleaActionBtn {
+        min-width: 74px;
     }
     
     .assambleaItem {
@@ -576,8 +795,7 @@
     
     /* Configuración de Asambleas */
     .asambleaConfigContainer {
-        padding: 1rem;
-        padding-bottom: 3rem;
+        padding: 1rem 1rem 3rem;
     }
     
     .sectionHeader {
@@ -617,4 +835,546 @@
   .containerResidentes {
     padding: 0 10px;
   }
+}
+
+/* ========================================
+   ASSEMBLY FORM - SHARED COMPONENTS
+   ======================================== */
+
+/* Inputs del formulario de info general */
+.formInput {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: white;
+    font-family: inherit;
+}
+
+.formTextarea {
+    flex: 1;
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 14px;
+    min-height: 80px;
+    resize: vertical;
+    box-sizing: border-box;
+    background-color: white;
+    font-family: inherit;
+}
+
+.formInputDatetime {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: white;
+    font-family: inherit;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkboxInput {
+    width: auto !important;
+}
+
+/* ========================================
+   AGENDA BUILDER
+   ======================================== */
+
+.agendaFormCard {
+    padding: 15px;
+    background-color: #fff2d6;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.agendaFormField {
+    margin-bottom: 12px;
+}
+
+.agendaFormLabel {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #6b5b3e;
+}
+
+.agendaFormInput {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 14px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.agendaFormRow {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.agendaTypeSelect {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    font-size: 13px;
+    font-family: inherit;
+    background-color: white;
+}
+
+.agendaCheckboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #6b5b3e;
+}
+
+.agendaQuorumInput {
+    width: 80px;
+    padding: 6px 10px;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.agendaFormActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+/* Agenda items list */
+.agendaItemsList {
+    margin-bottom: 20px;
+}
+
+.agendaItemsTitle {
+    color: white;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.agendaItemCard {
+    background-color: #fff2d6;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    border: 2px solid transparent;
+    cursor: default;
+}
+
+.agendaItemDragging {
+    opacity: 0.4;
+}
+
+.agendaItemDragOver {
+    border-color: #c4a861;
+    box-shadow: 0 0 0 2px rgba(196, 168, 97, 0.3);
+}
+
+.agendaDragHandle {
+    cursor: grab;
+    color: #b5a8b0;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 4px;
+    user-select: none;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s ease;
+}
+
+.agendaDragHandle:hover {
+    color: #5b2d4e;
+}
+
+.agendaDragHandle:active {
+    cursor: grabbing;
+}
+
+.agendaItemContent {
+    flex: 1;
+}
+
+.agendaItemName {
+    font-weight: 600;
+    color: #6b5b3e;
+    margin-bottom: 4px;
+}
+
+.agendaItemMeta {
+    font-size: 12px;
+    color: #6b5b3e;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.agendaTypeBadge {
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.badgeActive {
+    background-color: #c4a861;
+}
+
+.badgeInactive {
+    background-color: #b5a8b0;
+}
+
+.questionCountBadge {
+    background-color: #5b2d4e;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.savedBadge {
+    font-size: 10px;
+    background-color: #c4a861;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-left: 8px;
+}
+
+.agendaItemActions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.agendaEmpty {
+    text-align: center;
+    padding: 20px;
+    color: white;
+    font-style: italic;
+}
+
+/* ========================================
+   VOTING QUESTIONS FORM
+   ======================================== */
+
+.votingFormContainer {
+    margin-top: 15px;
+    padding: 14px;
+    background-color: #fef9ef;
+    border-radius: 12px;
+    border: 1px solid #c4a861;
+}
+
+.votingFormTitle {
+    font-weight: 600;
+    color: #5b2d4e;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.votingQuestionsList {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.votingQuestionItem {
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.votingQuestionText {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.votingQuestionMeta {
+    font-size: 11px;
+    color: #666;
+}
+
+.votingQuestionActions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.votingQuestionForm {
+    margin-bottom: 10px;
+}
+
+.votingInput {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    font-size: 13px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.votingTextarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    font-size: 13px;
+    margin-bottom: 8px;
+    min-height: 50px;
+    box-sizing: border-box;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.votingSelectsRow {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.votingSelect {
+    padding: 8px 12px;
+    border-radius: 15px;
+    font-size: 13px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    background-color: white;
+    min-width: 170px;
+}
+
+.votingOptionsLabel {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #6b5b3e;
+}
+
+.votingOptionRow {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.votingOptionInput {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    font-size: 13px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.votingFormActions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+/* ========================================
+   SHARED BUTTONS
+   ======================================== */
+
+.btnSmall {
+    padding: 5px 12px;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.btnSmall:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+.btnPrimary {
+    padding: 10px 22px;
+    background-color: #5b2d4e;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btnPrimary:hover {
+    background-color: #4a2440;
+    transform: translateY(-1px);
+}
+
+.btnPrimary:disabled {
+    background-color: #b5a8b0;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btnSecondary {
+    padding: 10px 22px;
+    background-color: transparent;
+    color: #5b2d4e;
+    border: 1.5px solid #5b2d4e;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btnSecondary:hover {
+    background-color: rgba(91, 45, 78, 0.08);
+    transform: translateY(-1px);
+}
+
+.btnSuccess {
+    background-color: #c4a861;
+}
+
+.btnSuccess:hover {
+    background-color: #b39750;
+}
+
+.btnDanger {
+    background-color: #c0392b;
+}
+
+.btnDanger:hover {
+    background-color: #a93226;
+}
+
+.btnEdit {
+    background-color: #5b2d4e;
+}
+
+.btnEdit:hover {
+    background-color: #4a2440;
+}
+
+/* ========================================
+   FORM ACTIONS (bottom buttons)
+   ======================================== */
+
+.formActionsBar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 1px;
+    padding-bottom: 80px;
+}
+
+.btnCancelLarge {
+    padding: 12px 28px;
+    border-radius: 25px;
+    border: 1.5px solid #5b2d4e;
+    background-color: white;
+    color: #5b2d4e;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    display: inline-block;
+    font-family: inherit;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btnCancelLarge:hover {
+    background-color: rgba(91, 45, 78, 0.06);
+    transform: translateY(-1px);
+}
+
+.btnSubmitLarge {
+    padding: 12px 28px;
+    border-radius: 25px;
+    border: none;
+    background-color: #c4a861;
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btnSubmitLarge:hover {
+    background-color: #b39750;
+    transform: translateY(-1px);
+}
+
+.btnSubmitLarge:disabled {
+    background-color: #b5a8b0;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ========================================
+   RESPONSIVE - SHARED COMPONENTS
+   ======================================== */
+
+@media screen and (max-width: 1024px) {
+    .agendaFormRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .formInput,
+    .formTextarea {
+        max-width: 100%;
+    }
+
+    .agendaItemCard {
+        flex-direction: column;
+    }
+
+    .agendaItemActions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .votingFormActions {
+        flex-direction: column;
+    }
 }
