@@ -67,3 +67,12 @@ export async function update(
   }
   return res.json() as Promise<responseVotingQuestions>;
 }
+
+// Obtener preguntas de votación por ID de asamblea
+export async function getByAssembly(assemblyId: string): Promise<responseListVotingQuestions> {
+  const res = await apiClientSession(`/voting-questions/assembly/${assemblyId}`);
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al obtener preguntas de votación'));
+  }
+  return res.json() as Promise<responseListVotingQuestions>;
+}

@@ -107,7 +107,7 @@ function AssemblyInterfaceContent() {
           </div>
 
           <div className={styles["desktop-video-wrapper"]}>
-            <CardVideo ref={cardVideoMethodsRef}></CardVideo>
+            <CardVideo assemblyId={assemblyDetails?.id} ref={cardVideoMethodsRef}></CardVideo>
           </div>
 
           <div className={styles["desktop-bottom-panels"]}>
@@ -120,21 +120,21 @@ function AssemblyInterfaceContent() {
           </div>
           
           <div className={`${styles["info-card"]} ${styles["mobile-attendance-card"]}`}>
-            <CardAttendance></CardAttendance>
+            <CardAttendance assemblyId={assemblyDetails?.id}></CardAttendance>
           </div>
         </div>
 
         {/* COLUMNA CENTRO - Orden del día */}
-        <CardAgenda></CardAgenda>
+        <CardAgenda assemblyId={assemblyDetails?.id}></CardAgenda>
 
         {/* COLUMNA DERECHA */}
         <div className={styles["desktop-right-column"]}>
           <div className={`${styles["info-card"]}`}>
-            <CardAttendance></CardAttendance>
+            <CardAttendance assemblyId={assemblyDetails?.id}></CardAttendance>
           </div>
 
           <div className={styles["info-card"]}>
-            <CardRequestToSpeak></CardRequestToSpeak>
+            <CardRequestToSpeak assemblyId={assemblyDetails?.id}></CardRequestToSpeak>
           </div>
 
           <div className={styles["info-card"]}>
