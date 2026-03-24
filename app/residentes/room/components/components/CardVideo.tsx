@@ -159,7 +159,6 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
     try {
       // First, get the attendees to find the current user's attendance ID
       const attendeesResponse = await getAttendees(assemblyId);
-      
       if (!attendeesResponse.data || !Array.isArray(attendeesResponse.data)) {
         throw new Error('No se pudo obtener la lista de asistentes');
       }
