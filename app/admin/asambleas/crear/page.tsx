@@ -14,9 +14,11 @@ import { VotingQuestions } from '@/app/types/voting-questions';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { AgendaItem, AssemblyFormData, normalizeAgendaSortOrder } from '../_types';
-import AssemblyInfoForm from '../_components/AssemblyInfoForm';
-import AgendaBuilder from '../_components/AgendaBuilder';
+import { AgendaItem } from '@/app/types/agenda';
+import { AssemblyFormData } from '@/app/types/assemblies';
+import { normalizeAgendaSortOrder } from '../_types';
+import AssemblyInfoForm from '../components/AssemblyInfoForm';
+import AgendaBuilder from '../components/AgendaBuilder';
 
 export default function CrearAsambleasPage() {
   const { data: session } = useSession();
