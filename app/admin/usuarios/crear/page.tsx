@@ -2,7 +2,7 @@
 
 import styles from '@/app/ui/styles/usuarios.module.css';
 import { useState, FormEvent, useEffect } from 'react'
-import { User } from '@/app/types/users'
+import { User, UserFormData, RoleWithUnits } from '@/app/types/users'
 import { Roles } from '@/app/types/roles'
 import { Units } from '@/app/types/units'
 import { create } from '@/app/services/users.service'
@@ -11,25 +11,20 @@ import { getAll as getAllUnits } from '@/app/services/units.service'
 import { assign as assignUserRoles } from '@/app/services/user_roles.service'
 import { assign as assignUnitAssignments } from '@/app/services/unit_assignments.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import UserFormFields from '../components/UserFormFields'
+import UserRolesUnitsSelector from '../components/UserRolesUnitsSelector'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from "next-auth/react";
 import pageStyles from '@/app/ui/styles/EntityForm.module.css'
 import ToastNotice from '@/app/components/general/ToastNotice'
 
-type UserFormData = Omit<User, 'id' | 'created_at'>
-
-// Tipos para las asignaciones de unidades por rol
-interface RoleWithUnits {
-  roleId: string
-  roleName: string
-  selectedUnits: string[]
-}
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export default function CrearUsuarioPage() {
   const { data: session } = useSession();
   const router = useRouter()
-  const phId = session?.user?.ownership?.id; // Lista Unidades
+  const phId = session?.user?.ownership?.id;
 
   const [formData, setFormData] = useState<UserFormData>({
     first_name: '',
@@ -45,7 +40,6 @@ export default function CrearUsuarioPage() {
   })
 
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
@@ -59,6 +53,7 @@ export default function CrearUsuarioPage() {
   const [unitsLoading, setUnitsLoading] = useState(true)
   const [roleUnitAssignments, setRoleUnitAssignments] = useState<RoleWithUnits[]>([])
   const [expandedRoles, setExpandedRoles] = useState<string[]>([])
+  const [unitSearch, setUnitSearch] = useState('')
 
   useEffect(() => {
     loadRoles()
@@ -94,10 +89,10 @@ export default function CrearUsuarioPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    })
+    }))
   }
 
   const handleRoleChange = (roleId: string) => {
@@ -113,8 +108,8 @@ export default function CrearUsuarioPage() {
   }
 
   const toggleRoleUnits = (roleId: string) => {
-    setExpandedRoles(prev => 
-      prev.includes(roleId) 
+    setExpandedRoles(prev =>
+      prev.includes(roleId)
         ? prev.filter(id => id !== roleId)
         : [...prev, roleId]
     )
@@ -125,14 +120,14 @@ export default function CrearUsuarioPage() {
       const existing = prev.find(a => a.roleId === roleId)
       if (existing) {
         if (existing.selectedUnits.includes(unitId)) {
-          return prev.map(a => 
-            a.roleId === roleId 
+          return prev.map(a =>
+            a.roleId === roleId
               ? { ...a, selectedUnits: a.selectedUnits.filter(id => id !== unitId) }
               : a
           )
         } else {
-          return prev.map(a => 
-            a.roleId === roleId 
+          return prev.map(a =>
+            a.roleId === roleId
               ? { ...a, selectedUnits: [...a.selectedUnits, unitId] }
               : a
           )
@@ -142,22 +137,26 @@ export default function CrearUsuarioPage() {
         return [...prev, {
           roleId,
           roleName: role?.name || 'Rol',
-          selectedUnits: [unitId]
+          selectedUnits: [unitId],
+          canVote: true
         }]
       }
     })
   }
 
+  const handleCanVoteChange = (roleId: string, canVote: boolean) => {
+    setRoleUnitAssignments(prev =>
+      prev.map(a => a.roleId === roleId ? { ...a, canVote } : a)
+    )
+  }
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      // Aquí puedes implementar la lógica para subir el archivo
-      console.log('Archivo seleccionado:', file.name)
-      setFormData((prev) => ({
-        ...prev,
-        avatar_url: file.name,
-      }))
-    }
+    if (!file) return
+    setFormData((prev) => ({
+      ...prev,
+      avatar_url: file.name,
+    }))
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -166,35 +165,60 @@ export default function CrearUsuarioPage() {
     setMessage(null)
 
     try {
+      // Validar que los roles de residente tengan al menos una unidad
+      const residenteRoles = allRoles.filter(r => selectedRoles.includes(r.id!) && r.name.toLowerCase().includes('residente'))
+      for (const role of residenteRoles) {
+        const assignment = roleUnitAssignments.find(a => a.roleId === role.id!)
+        if (!assignment || assignment.selectedUnits.length === 0) {
+          setMessage({ type: 'error', text: `Debe seleccionar al menos una unidad para el rol "${role.name}"` })
+          setSaving(false)
+          return
+        }
+      }
+
       const payload: UserFormData = {
         ...formData,
         ...(password.trim() ? { password: password.trim() } : {}),
       }
 
       const response = await create(payload)
-      const userId = response.data.id
+      console.log('[DEBUG] Respuesta crear usuario:', JSON.stringify(response, null, 2))
+      const createdUser = response.data as any
+      const userId = createdUser?.id || createdUser?.user_id || createdUser?.user?.id || createdUser?.userId
+      console.log('[DEBUG] userId extraído:', userId)
 
-      // Asignar roles al usuario
+      if (!userId || !UUID_REGEX.test(userId)) {
+        throw new Error(`No se pudo obtener un ID de usuario válido. Respuesta: ${JSON.stringify(response.data)}`)
+      }
+
+      // Asignar roles al usuario (enviar IDs de rol)
       if (selectedRoles.length > 0) {
+        console.log('[DEBUG] Enviando roleIds:', selectedRoles)
         await assignUserRoles(userId, { roles: selectedRoles })
-        
-        // Asignar unidades por rol
-        for (const assignment of roleUnitAssignments) {
-          const userRolId = `${userId}_${assignment.roleId}`
-          await assignUnitAssignments(userRolId, { units: assignment.selectedUnits })
+
+        // Asignar unidades por rol en paralelo
+        const unitPromises = roleUnitAssignments
+          .filter(a => a.selectedUnits.length > 0)
+          .flatMap(assignment =>
+            assignment.selectedUnits.map(unitId =>
+              assignUnitAssignments(userId, { units_id: unitId, can_vote: assignment.canVote })
+            )
+          )
+        if (unitPromises.length > 0) {
+          await Promise.all(unitPromises)
         }
       }
-      
+
       setMessage({ type: 'success', text: 'Usuario creado exitosamente' })
-      
+
       setTimeout(() => {
         router.push('/admin/usuarios')
       }, 1500)
 
     } catch (error) {
-      setMessage({ 
-        type: 'error', 
-        text: error instanceof Error ? error.message : 'Error al crear el usuario' 
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Error al crear el usuario'
       })
     } finally {
       setSaving(false)
@@ -217,145 +241,40 @@ export default function CrearUsuarioPage() {
         <ToastNotice message={message} onClear={() => setMessage(null)} durationMs={5000} />
 
         <form onSubmit={handleSubmit} className={pageStyles.form}>
-          <div className={pageStyles.formGrid}>
-            <label className={pageStyles.fieldWrap}>
-              <span className={pageStyles.fieldLabel}>Nombre:</span>
-              <input 
-                type="text" 
-                name="first_name" 
-                value={formData.first_name}
-                onChange={handleChange}
-                required
-                className={pageStyles.input}
-              />
-            </label>
+          <UserFormFields
+            formData={formData}
+            password={password}
+            onFormChange={handleChange}
+            onPasswordChange={setPassword}
+            onFileUpload={handleFileUpload}
+          />
 
-            <label className={pageStyles.fieldWrap}>
-              <span className={pageStyles.fieldLabel}>Apellido:</span>
-              <input 
-                type="text" 
-                name="last_name" 
-                value={formData.last_name}
-                onChange={handleChange}
-                required
-                className={pageStyles.input}
-              />
-            </label>
-
-            <label className={pageStyles.fieldWrap}>
-              <span className={pageStyles.fieldLabel}>Email:</span>
-              <input 
-                type="email" 
-                name="email" 
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className={pageStyles.input}
-              />
-            </label>
-
-            <label className={pageStyles.fieldWrap}>
-              <span className={pageStyles.fieldLabel}>Contrasena (opcional):</span>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={pageStyles.input}
-              />
-            </label>
-
-            <label className={pageStyles.fieldWrap}>
-              <span className={pageStyles.fieldLabel}>Tipo de documento:</span>
-              <select
-                name="document_type" 
-                value={formData.document_type}
-                onChange={handleChange}
-                required
-                className={pageStyles.input}
-              >
-                <option value="">Seleccione</option>
-                <option value="CC">Cedula de ciudadania (CC)</option>
-                <option value="CE">Cedula de extranjeria (CE)</option>
-                <option value="TI">Tarjeta de identidad (TI)</option>
-                <option value="NIT">NIT</option>
-                <option value="PAS">Pasaporte</option>
-              </select>
-            </label>
-
-            <label className={pageStyles.fieldWrap}>
-              <span className={pageStyles.fieldLabel}>Numero de documento:</span>
-              <input 
-                type="text" 
-                name="document_number" 
-                value={formData.document_number}
-                onChange={handleChange}
-                required
-                className={pageStyles.input}
-              />
-            </label>
-
-            <label className={pageStyles.fieldWrap}>
-              <span className={pageStyles.fieldLabel}>Numero celular:</span>
-              <input 
-                type="tel" 
-                name="phone_number" 
-                value={formData.phone_number}
-                onChange={handleChange}
-                required
-                className={pageStyles.input}
-              />
-            </label>
-
-            <label className={pageStyles.fieldWrap}>
-              <span className={pageStyles.fieldLabel}>Tipo de usuario:</span>
-              <select 
-                name="type_person" 
-                value={formData.type_person}
-                onChange={handleChange}
-                required
-                className={pageStyles.input}
-              >
-                <option value="">Seleccione</option>
-                <option value="Natural">Natural</option>
-                <option value="Juridica">Jurídica</option>
-                <option value="Administrador">Administrador</option>
-                <option value="Empleado">Empleado</option>
-              </select>
-            </label>
-
-            <div className={pageStyles.uploadRow}>
-              <label className={pageStyles.uploadLabel}>Imagen de perfil:</label>
-              <input 
-                type="file"
-                id="avatar-upload"
-                onChange={handleFileUpload}
-                accept="image/*"
-                className={pageStyles.hiddenFileInput}
-              />
-              <label htmlFor="avatar-upload" className={pageStyles.uploadButton}>
-                Subir archivo
-              </label>
-              <input
-                type='text'
-                name='avatar_url'
-                value={formData.avatar_url}
-                onChange={handleChange}
-                placeholder='URL de la imagen de perfil'
-                className={pageStyles.input}
-              />
-            </div>
-          </div>
+          <UserRolesUnitsSelector
+            allRoles={allRoles}
+            allUnits={allUnits}
+            selectedRoles={selectedRoles}
+            expandedRoles={expandedRoles}
+            roleUnitAssignments={roleUnitAssignments}
+            unitSearch={unitSearch}
+            rolesLoading={rolesLoading}
+            unitsLoading={unitsLoading}
+            onRoleChange={handleRoleChange}
+            onToggleRoleUnits={toggleRoleUnits}
+            onUnitChange={handleUnitChange}
+            onCanVoteChange={handleCanVoteChange}
+            onUnitSearchChange={setUnitSearch}
+          />
 
           <div className={pageStyles.actions}>
             <Link href='/admin/usuarios' className={pageStyles.cancelButton}>
               Cancelar
             </Link>
-            <button 
-              type="submit" 
-              disabled={loading}
+            <button
+              type="submit"
+              disabled={saving}
               className={pageStyles.submitButton}
             >
-              {loading ? 'Guardando...' : 'Guardar usuario'}
+              {saving ? 'Guardando...' : 'Guardar usuario'}
             </button>
           </div>
         </form>
