@@ -24,18 +24,28 @@ import { RecordingIndicator } from "./RecordingIndicator";
 import { RecordingControls } from "./RecordingControls";
 import { Track } from "livekit-client";
 import { getCurrentTime } from "@/app/utils/utils";
+import { getAttendees } from "@/app/services/assemblies.service";
+import { create, remove, upvote } from "@/app/services/qa_entries.service";
+
+interface CardVideoProps {
+  assemblyId?: string;
+}
 
 export interface CardVideoMethods {
   toggleFn: (ac: string) => void;
 }
 
-export const CardVideo = forwardRef<CardVideoMethods, {}>((props, ref) => {
+export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, ref) => {
   const { data: session } = useSession();
+  const assemblyId = props.assemblyId;
   const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userId = session?.user?.userProfile?.id || '';
   const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone]);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isMicOn, setIsMicOn] = useState(false);
   const [isHandRaised, setIsHandRaised] = useState(false);
+  const [isLoadingHand, setIsLoadingHand] = useState(false);
+  const [currentQaEntryId, setCurrentQaEntryId] = useState<string | null>(null);
   const { localParticipant } = useLocalParticipant();
   const participants = useParticipants();
 
@@ -44,6 +54,31 @@ export const CardVideo = forwardRef<CardVideoMethods, {}>((props, ref) => {
     setIsCameraOn(localParticipant.isCameraEnabled);
     setIsMicOn(localParticipant.isMicrophoneEnabled);
   }, [localParticipant]);
+
+  // Check if user already has an active word request on mount
+  useEffect(() => {
+    const checkExistingRequest = async () => {
+      if (!assemblyId || !userId) return;
+      
+      try {
+        const response = await getAttendees(assemblyId);
+        if (response.data && Array.isArray(response.data)) {
+          // Find current user's attendance
+          const userAttendance = response.data.find(
+            (attendee: any) => attendee.userId === userId
+          );
+          if (userAttendance) {
+            // Check if user already has an active request (would need to check QA entries)
+            // For now, we'll track by local state
+          }
+        }
+      } catch (err) {
+        console.error('Error checking existing request:', err);
+      }
+    };
+
+    checkExistingRequest();
+  }, [assemblyId, userId]);
 
   // Obtener el video track principal
   const mainVideoTrack = tracks.find(
@@ -96,35 +131,66 @@ export const CardVideo = forwardRef<CardVideoMethods, {}>((props, ref) => {
   }));
 
   // Control de petición de palabra
-  const toggleHandRaised = () => {
-    const newHandRaisedState = !isHandRaised;
-    setIsHandRaised(newHandRaisedState);
-
-    if (newHandRaisedState) {
-        // Levantar la mano
-        /*const newRequest: WordRequest = {
-          id: Date.now().toString(),
-          name: 'Andrés',
-          apartment: '102',
-          tower: '3',
-          initials: 'AN',
-          time: getCurrentTime()
-        };
-  
-        setWordRequests(prev => [...prev, newRequest]);
-        
-        // Crear notificación
-        setWordRequestNotifications(prev => [...prev, newRequest]);
-        
-        // Auto-eliminar notificación después de 5 segundos
-        setTimeout(() => {
-          setWordRequestNotifications(prev => prev.filter(n => n.id !== newRequest.id));
-        }, 5000);
-      } else {
-        // Bajar la mano - eliminar de la lista
-        setWordRequests(prev => prev.filter(req => req.name !== 'Andrés'));
+  const toggleHandRaised = async () => {
+    if (isLoadingHand) return;
+    
+    // If lowering hand and we have a current QA entry, delete it
+    if (isHandRaised && currentQaEntryId) {
+      setIsLoadingHand(true);
+      try {
+        await remove(currentQaEntryId);
+        setCurrentQaEntryId(null);
+        setIsHandRaised(false);
+      } catch (err) {
+        console.error('Error removing word request:', err);
+      } finally {
+        setIsLoadingHand(false);
       }
-        */}
+      return;
+    }
+
+    // If raising hand, create a new QA entry
+    if (!assemblyId) {
+      console.warn('No assembly ID available');
+      return;
+    }
+
+    setIsLoadingHand(true);
+    try {
+      // First, get the attendees to find the current user's attendance ID
+      const attendeesResponse = await getAttendees(assemblyId);
+      if (!attendeesResponse.data || !Array.isArray(attendeesResponse.data)) {
+        throw new Error('No se pudo obtener la lista de asistentes');
+      }
+
+      // Find current user's attendance
+      const userAttendance = attendeesResponse.data.find(
+        (attendee: any) => attendee.userId === userId
+      );
+
+      if (!userAttendance) {
+        throw new Error('No se encontró tu registro de asistencia');
+      }
+
+      // Create a new QA entry for word request
+      const qaEntry = await create({
+        assembly_attendances_id: userAttendance.id,
+        question_text: "Petición de palabra",
+        status: "pending",
+        answer_text: "",
+        upvotes: 0,
+      });
+
+      if (qaEntry.data?.id) {
+        setCurrentQaEntryId(qaEntry.data.id);
+        setIsHandRaised(true);
+      }
+    } catch (err) {
+      console.error('Error creating word request:', err);
+      alert(err instanceof Error ? err.message : 'Error al solicitar palabra');
+    } finally {
+      setIsLoadingHand(false);
+    }
   };
 
   return (<>
@@ -181,6 +247,7 @@ export const CardVideo = forwardRef<CardVideoMethods, {}>((props, ref) => {
         <button
           className={`${styles["control-btn"]} ${isHandRaised ? styles["hand-raised"] : ""}`}
           onClick={toggleHandRaised}
+          disabled={isLoadingHand}
           title={isHandRaised ? "Bajar mano" : "Levantar mano"}
         >
           <Hand size={24} color={isHandRaised ? "#fff" : "#666"} />

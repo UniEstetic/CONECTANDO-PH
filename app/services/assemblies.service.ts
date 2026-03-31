@@ -86,3 +86,50 @@ export async function getByPh(phsId: string): Promise<responseListAssembly> {
   }
   return res.json() as Promise<responseListAssembly>;
 }
+
+// ==================== SERVICIOS DE ASISTENCIA ====================
+
+// Obtener usuarios citados (con derecho a voto) para una asamblea
+export async function getCited(assemblyId: string): Promise<any> {
+  const res = await apiClientSession(`/assemblies/${assemblyId}/citados`);
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al obtener citados'));
+  }
+  return res.json() as Promise<any>;
+}
+
+// Obtener usuarios que asistieron a la asamblea
+export async function getAttendees(assemblyId: string): Promise<any> {
+  const res = await apiClientSession(`/assemblies/${assemblyId}/asistentes`);
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al obtener asistentes'));
+  }
+  return res.json() as Promise<any>;
+}
+
+// Obtener usuarios citados que no asistieron
+export async function getAbsences(assemblyId: string): Promise<any> {
+  const res = await apiClientSession(`/assemblies/${assemblyId}/ausentes`);
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al obtener ausentes'));
+  }
+  return res.json() as Promise<any>;
+}
+
+// Obtener la suma de coeficientes de las unidades asistentes
+export async function getCoefficient(assemblyId: string): Promise<any> {
+  const res = await apiClientSession(`/assemblies/${assemblyId}/coeficiente`);
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al obtener coeficiente'));
+  }
+  return res.json() as Promise<any>;
+}
+
+// Obtener información del quórum (requerido vs actual)
+export async function getQuorum(assemblyId: string): Promise<any> {
+  const res = await apiClientSession(`/assemblies/${assemblyId}/quorum`);
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al obtener quórum'));
+  }
+  return res.json() as Promise<any>;
+}

@@ -66,3 +66,12 @@ export async function update(
   }
   return res.json() as Promise<responseAgenda>;
 }
+
+// Obtener agenda por ID de asamblea
+export async function getByAssembly(assemblyId: string): Promise<responseListAgenda> {
+  const res = await apiClientSession(`/agenda/assembly/${assemblyId}`);
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al obtener agenda de la asamblea'));
+  }
+  return res.json() as Promise<responseListAgenda>;
+}
