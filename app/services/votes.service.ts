@@ -46,3 +46,16 @@ export async function update(
   }
   return res.json() as Promise<responseVotes>;
 }
+
+// Obtener votos por ID de pregunta de votación
+export async function getByVotingQuestion(votingQuestionId: string): Promise<responseListVotes> {
+  const queryParams = new URLSearchParams({
+    _fields: '*',
+    _where: JSON.stringify({ voting_question_id: votingQuestionId }),
+  });
+  const res = await apiClientSession(`/votes?${queryParams.toString()}`);
+  if (!res.ok) {
+    throw new Error('Error al obtener votos de la pregunta');
+  }
+  return res.json() as Promise<responseListVotes>;
+}
