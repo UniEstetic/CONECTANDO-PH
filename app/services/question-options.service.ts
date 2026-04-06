@@ -67,3 +67,12 @@ export async function update(
   }
   return res.json() as Promise<responseQuestionOptions>;
 }
+
+// Obtener opciones por ID de pregunta de votación
+export async function getByVotingQuestion(votingQuestionId: string): Promise<responseListQuestionOptions> {
+  const res = await apiClientSession(`/question-options/voting-question/${votingQuestionId}`);
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al obtener opciones de votación'));
+  }
+  return res.json() as Promise<responseListQuestionOptions>;
+}

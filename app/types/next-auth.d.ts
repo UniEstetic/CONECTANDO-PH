@@ -22,6 +22,7 @@ export interface AuthOwnership {
 }
 
 export interface AuthTokenProfile {
+  ownerships: (any[] & { id: string; name: string; tax_id?: string | undefined; address?: string | undefined; city?: string | undefined; country?: string | undefined; state?: string | undefined; }) | undefined;
   userProfile?: AuthProfileUser;
   ownership?: AuthOwnership;
   userId?: string;
@@ -103,6 +104,7 @@ export interface UserAuth{
 }
 
 export interface AuthUser extends UserAuth {
+  ownerships: any;
   id: string;
   accessToken: string;
   refreshToken?: string;
