@@ -1,12 +1,12 @@
 .sectionTitle {
   font-size: 17px;
   font-weight: 700;
-  color: #c4a861;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 .sectionHint {
   font-size: 14px;
-  color: #8a7a4d;
+  color: #ffffff;
   margin-top: 4px;
 }
 /* Checkbox custom styles */
@@ -183,4 +183,82 @@
 
 .spacerMd {
   margin-top: 12px;
+}
+
+/* Unit Picker */
+.unitPickerContainer {
+  border: 1px solid #d9bd7c;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fefcf6;
+}
+
+.unitSearchInput {
+  width: 100%;
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 13px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+.unitGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.unitChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 6px;
+  border-radius: 10px;
+  border: 1.5px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.unitChip:hover {
+  border-color: #c4a861;
+  transform: translateY(-1px);
+}
+
+.unitChipSelected {
+  border-color: #c4a861;
+  background: #fff8e7;
+}
+
+.unitChipSelected:hover {
+  background: #fef0cc;
+}
+
+.unitChipBlock {
+  font-size: 11px;
+  color: #8a7a4d;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.unitChipNumber {
+  font-size: 15px;
+  font-weight: 700;
+  color: #5b2d4e;
+}
+
+.unitDividerLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8a7a4d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 10px 0 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #d9bd7c;
 }
