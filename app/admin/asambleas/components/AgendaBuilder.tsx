@@ -1,7 +1,9 @@
 'use client';
 
 import styles from '@/app/ui/styles/roomStylesAdministrativo.module.css';
-import { AgendaItem, VotingQuestion, EMPTY_CURRENT_ITEM, EMPTY_CURRENT_QUESTION } from '../_types';
+import { AgendaItem } from '@/app/types/agenda';
+import { VotingQuestion } from '@/app/types/voting-questions';
+import { EMPTY_CURRENT_ITEM, EMPTY_CURRENT_QUESTION } from '../_types';
 import VotingQuestionsForm from './VotingQuestionsForm';
 import { useState } from 'react';
 

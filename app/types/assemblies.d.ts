@@ -27,3 +27,5 @@ export interface responseListAssembly {
   data: Assembly[];
   properties: propertiesList;
 }
+
+export type AssemblyFormData = Partial<Assembly>
