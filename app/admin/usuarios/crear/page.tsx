@@ -181,11 +181,12 @@ export default function CrearUsuarioPage() {
         ...(password.trim() ? { password: password.trim() } : {}),
       }
 
+      console.log('[PASO 1] Creando usuario con payload:', JSON.stringify(payload, null, 2))
       const response = await create(payload)
-      console.log('[DEBUG] Respuesta crear usuario:', JSON.stringify(response, null, 2))
+      console.log('[PASO 1 OK] Respuesta crear usuario:', JSON.stringify(response, null, 2))
       const createdUser = response.data as any
       const userId = createdUser?.id || createdUser?.user_id || createdUser?.user?.id || createdUser?.userId
-      console.log('[DEBUG] userId extraído:', userId)
+      console.log('[PASO 1] userId extraído:', userId)
 
       if (!userId || !UUID_REGEX.test(userId)) {
         throw new Error(`No se pudo obtener un ID de usuario válido. Respuesta: ${JSON.stringify(response.data)}`)
@@ -193,19 +194,25 @@ export default function CrearUsuarioPage() {
 
       // Asignar roles al usuario (enviar IDs de rol)
       if (selectedRoles.length > 0) {
-        console.log('[DEBUG] Enviando roleIds:', selectedRoles)
+        const roleNames = selectedRoles.map(id => allRoles.find(r => r.id === id)?.name || id)
+        console.log('[PASO 2] Asignando roles:', roleNames, 'roleIds:', selectedRoles)
         await assignUserRoles(userId, { roles: selectedRoles })
+        console.log('[PASO 2 OK] Roles asignados correctamente')
 
         // Asignar unidades por rol en paralelo
         const unitPromises = roleUnitAssignments
           .filter(a => a.selectedUnits.length > 0)
           .flatMap(assignment =>
-            assignment.selectedUnits.map(unitId =>
-              assignUnitAssignments(userId, { units_id: unitId, can_vote: assignment.canVote })
-            )
+            assignment.selectedUnits.map(unitId => {
+              console.log('[PASO 3] Asignando unidad:', unitId, 'al rol:', assignment.roleId, 'canVote:', assignment.canVote)
+              return assignUnitAssignments(userId, { units_id: unitId, can_vote: assignment.canVote })
+            })
           )
         if (unitPromises.length > 0) {
           await Promise.all(unitPromises)
+          console.log('[PASO 3 OK] Unidades asignadas correctamente')
+        } else {
+          console.log('[PASO 3] No hay unidades que asignar')
         }
       }
 
@@ -216,6 +223,8 @@ export default function CrearUsuarioPage() {
       }, 1500)
 
     } catch (error) {
+      console.error('[ERROR] Fallo en creación de usuario:', error)
+      console.error('[ERROR] Mensaje:', error instanceof Error ? error.message : String(error))
       setMessage({
         type: 'error',
         text: error instanceof Error ? error.message : 'Error al crear el usuario'
