@@ -140,6 +140,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             refreshTokenExpiresIn,
             // Asume ownership principal como el primero de la lista
             ownership: Array.isArray(profileData.ownerships) ? profileData.ownerships[0] : profileData.ownerships,
+            ownerships: Array.isArray(profileData.ownerships)
+              ? profileData.ownerships
+              : profileData.ownerships
+                ? [profileData.ownerships]
+                : [],
           };
 
           return user;
@@ -188,7 +193,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const firstName = getRequiredFirstName(
           incomingUser.firstName,
-          userProfile.firstName
+          userProfile?.firstName
         );
 
         token.accessToken = incomingUser.accessToken;
@@ -244,11 +249,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
     async session({ session, token }) {
       if (token) {
-        const profile = token.profile || {};
-        const userProfile = profile?.userProfile;
+        const profile = (token.profile ?? {}) as AuthTokenProfile;
+        const userProfile = profile.userProfile;
+        const ownership = Array.isArray(profile.ownerships)
+          ? profile.ownerships[0]
+          : profile.ownerships;
 
         const firstName = getRequiredFirstName(
-          profile?.firstName,
+          profile.firstName,
           userProfile?.firstName
         );
 
@@ -258,6 +266,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         session.user = {
           ...(session.user || {}),
+          ownership,
           ownerships: profile.ownerships,
           userId: profile.userId,
           scope: profile.scope,
