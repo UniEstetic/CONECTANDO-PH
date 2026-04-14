@@ -2,11 +2,17 @@ import Image from 'next/image';
 import styles from '@/app/ui/styles/usuarios.module.css';
 import Link from 'next/link';
 import { ImportIcon } from 'lucide-react';
+import { AccessGuard } from "@/app/components/AccessController";
 import Header from "@/app/components/general/header";
 import Footer from "@/app/components/general/footer";
 import LogoutPage from "@/app/auth/login/logout";
+import { auth } from "@/app/api/auth/[...nextauth]/auth.config";
 
-export default function UsuariosPage() {
+
+export default async function UsuariosPage() {
+  // 1. Obtenemos la sesión para conocer los roles del usuario
+  const session = await auth();
+  const userRoles = session?.user?.userProfile?.roles?.map((r: any) => r.name) || [];
   return (
     <div className={styles.container}>
       <LogoutPage />
@@ -14,6 +20,8 @@ export default function UsuariosPage() {
       <p className={styles.opcionesUsuarios}>Tus opciones</p>
 
       <div className={styles.roles}>
+        {/* BOTÓN RESIDENTE: Permitido para Residentes y Administradores */}
+        <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Residentes', 'Administrador']}>
         <div className={styles.role}>
           <div className={styles.imagenUsuarios}>
             <Link href="/residentes" className={styles.btnUsuarios}>
@@ -26,7 +34,10 @@ export default function UsuariosPage() {
             </Link>
           </div>
         </div>
+    </AccessGuard>
 
+    {/* BOTÓN ADMINISTRADOR */}
+      <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Administrador']}>
         <div className={styles.role}>
           <div className={styles.imagenUsuarios}>
             <Link href="/admin" className={styles.btnUsuarios}>
@@ -39,7 +50,10 @@ export default function UsuariosPage() {
             </Link>
           </div>
         </div>
+      </AccessGuard>
 
+      {/* BOTÓN PORTERÍA */}
+      <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Guarda', 'Administrador']}>
         <div className={styles.role}>
           <div className={styles.imagenUsuarios}>
             <Link href="/porteria" className={styles.btnUsuarios}>
@@ -52,6 +66,7 @@ export default function UsuariosPage() {
             </Link>
           </div>
         </div>
+        </AccessGuard>
       </div>
       <Footer />
     </div>
