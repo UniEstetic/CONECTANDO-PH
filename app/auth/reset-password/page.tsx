@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import styles from "@/app/ui/styles/home.module.css";
-import rpStyles from "./resetPassword.module.css";
+import rpStyles from "@/app/ui/styles/resetPassword.module.css";
 import AcmeLogo from "@/app/ui/logo";
 import ToastNotice from "@/app/components/general/ToastNotice";
 
