@@ -26,13 +26,17 @@ export async function remove(id: string): Promise<removeRegister> {
 }
 
 // Listar usuarios
-export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListUsers> {
+export async function getAll({fields="*", where="", limit="100", page="1", phs_id=""} : listFilters = {}): Promise<responseListUsers> {
   const queryParams = new URLSearchParams({
     _fields: fields,
     _where: where,
     limit: limit,
     page: page
   });
+
+  if (phs_id) {
+    queryParams.set('phId', phs_id);
+  }
 
   const res = await apiClientSession(`/users?${queryParams.toString()}`);
   if (!res.ok) {

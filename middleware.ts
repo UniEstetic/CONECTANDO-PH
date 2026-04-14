@@ -9,7 +9,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth && hasAccessToken && !hasSessionError;
 
   // 1. Definir qué rutas son de autenticación (donde no quieres que esté si ya entró)
-  const isAuthRoute = nextUrl.pathname.startsWith("/auth/login");
+  const isAuthRoute = nextUrl.pathname.startsWith("/auth");
   
   // 2. Permitir siempre las rutas de la API de Auth
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
@@ -17,8 +17,10 @@ export default auth((req) => {
   if (isApiAuthRoute) return NextResponse.next();
 
   // 3. Si es una ruta de login y ya está logueado, mandarlo al dashboard/home
+  //    (excepto reset-password que debe ser accesible siempre)
   if (isAuthRoute) {
-    if (isLoggedIn) {
+    const isResetPassword = nextUrl.pathname.startsWith("/auth/reset-password");
+    if (isLoggedIn && !isResetPassword) {
       return NextResponse.redirect(new URL("/", nextUrl));
     }
     return NextResponse.next();
