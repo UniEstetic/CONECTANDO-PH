@@ -6,8 +6,12 @@ import { useState, useEffect } from 'react'
 import { getAll, remove } from '@/app/services/users.service'
 import { User } from '@/app/types/users'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 export default function ListadoUsuariosPage() {
+  const { data: session } = useSession();
+  const phId = session?.user?.ownership?.id;
+
   const [usuarios, setUsuarios] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -19,13 +23,13 @@ export default function ListadoUsuariosPage() {
   })
 
   useEffect(() => {
-    loadUsuarios()
-  }, [])
+    if (phId) loadUsuarios()
+  }, [phId])
 
   const loadUsuarios = async () => {
     try {
       setLoading(true)
-      const response = await getAll()
+      const response = await getAll({ phs_id: phId })
       setUsuarios(response.data)
     } catch (error) {
       console.error('Error al cargar usuarios:', error)

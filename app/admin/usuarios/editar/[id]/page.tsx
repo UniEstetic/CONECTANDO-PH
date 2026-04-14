@@ -10,6 +10,7 @@ import { getAll as getAllRoles } from '@/app/services/roles.service'
 import { getAll as getAllUnits } from '@/app/services/units.service'
 import { getById as getUserRoles, assign as assignUserRoles, removeRole } from '@/app/services/user_roles.service'
 import { getById as getUnitAssignments, assign as assignUnitAssignments, remove as removeUnitAssignment } from '@/app/services/unit_assignments.service'
+import { assign as assignUserRolePhs } from '@/app/services/user_roles_phs.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import UserFormFields from '../../components/UserFormFields'
 import UserRolesUnitsSelector from '../../components/UserRolesUnitsSelector'
@@ -334,7 +335,15 @@ export default function EditarUsuarioPage() {
 
       // Asignar roles nuevos (enviar IDs de rol)
       if (rolesToAdd.length > 0) {
-        await assignUserRoles(userId, { roles: rolesToAdd })
+        const rolesResponse = await assignUserRoles(userId, { roles: rolesToAdd })
+
+        // Asignar copropiedad a cada user_role creado
+        if (phId && rolesResponse.data.assigned?.length > 0) {
+          const phsPromises = rolesResponse.data.assigned.map(assignedRole =>
+            assignUserRolePhs(assignedRole.id, { phs_ids: [phId] })
+          )
+          await Promise.all(phsPromises)
+        }
       }
 
       // Eliminar roles desmarcados

@@ -10,6 +10,7 @@ import { getAll as getAllRoles } from '@/app/services/roles.service'
 import { getAll as getAllUnits } from '@/app/services/units.service'
 import { assign as assignUserRoles } from '@/app/services/user_roles.service'
 import { assign as assignUnitAssignments } from '@/app/services/unit_assignments.service'
+import { assign as assignUserRolePhs } from '@/app/services/user_roles_phs.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import UserFormFields from '../components/UserFormFields'
 import UserRolesUnitsSelector from '../components/UserRolesUnitsSelector'
@@ -181,11 +182,12 @@ export default function CrearUsuarioPage() {
         ...(password.trim() ? { password: password.trim() } : {}),
       }
 
+      console.log('[PASO 1] Creando usuario con payload:', JSON.stringify(payload, null, 2))
       const response = await create(payload)
-      console.log('[DEBUG] Respuesta crear usuario:', JSON.stringify(response, null, 2))
+      console.log('[PASO 1 OK] Respuesta crear usuario:', JSON.stringify(response, null, 2))
       const createdUser = response.data as any
       const userId = createdUser?.id || createdUser?.user_id || createdUser?.user?.id || createdUser?.userId
-      console.log('[DEBUG] userId extraído:', userId)
+      console.log('[PASO 1] userId extraído:', userId)
 
       if (!userId || !UUID_REGEX.test(userId)) {
         throw new Error(`No se pudo obtener un ID de usuario válido. Respuesta: ${JSON.stringify(response.data)}`)
@@ -193,19 +195,35 @@ export default function CrearUsuarioPage() {
 
       // Asignar roles al usuario (enviar IDs de rol)
       if (selectedRoles.length > 0) {
-        console.log('[DEBUG] Enviando roleIds:', selectedRoles)
-        await assignUserRoles(userId, { roles: selectedRoles })
+        const roleNames = selectedRoles.map(id => allRoles.find(r => r.id === id)?.name || id)
+        console.log('[PASO 2] Asignando roles:', roleNames, 'roleIds:', selectedRoles)
+        const rolesResponse = await assignUserRoles(userId, { roles: selectedRoles })
+        console.log('[PASO 2 OK] Roles asignados:', JSON.stringify(rolesResponse.data, null, 2))
+
+        // Asignar copropiedad a cada user_role creado
+        if (phId && rolesResponse.data.assigned?.length > 0) {
+          const phsPromises = rolesResponse.data.assigned.map(assignedRole => {
+            console.log('[PASO 2.5] Asignando PH', phId, 'al userRoleId:', assignedRole.id)
+            return assignUserRolePhs(assignedRole.id, { phs_ids: [phId] })
+          })
+          await Promise.all(phsPromises)
+          console.log('[PASO 2.5 OK] Copropiedades asignadas a user_roles')
+        }
 
         // Asignar unidades por rol en paralelo
         const unitPromises = roleUnitAssignments
           .filter(a => a.selectedUnits.length > 0)
           .flatMap(assignment =>
-            assignment.selectedUnits.map(unitId =>
-              assignUnitAssignments(userId, { units_id: unitId, can_vote: assignment.canVote })
-            )
+            assignment.selectedUnits.map(unitId => {
+              console.log('[PASO 3] Asignando unidad:', unitId, 'al rol:', assignment.roleId, 'canVote:', assignment.canVote)
+              return assignUnitAssignments(userId, { units_id: unitId, can_vote: assignment.canVote })
+            })
           )
         if (unitPromises.length > 0) {
           await Promise.all(unitPromises)
+          console.log('[PASO 3 OK] Unidades asignadas correctamente')
+        } else {
+          console.log('[PASO 3] No hay unidades que asignar')
         }
       }
 
@@ -216,6 +234,8 @@ export default function CrearUsuarioPage() {
       }, 1500)
 
     } catch (error) {
+      console.error('[ERROR] Fallo en creación de usuario:', error)
+      console.error('[ERROR] Mensaje:', error instanceof Error ? error.message : String(error))
       setMessage({
         type: 'error',
         text: error instanceof Error ? error.message : 'Error al crear el usuario'
