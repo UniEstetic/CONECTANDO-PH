@@ -26,13 +26,17 @@ export async function remove(id: string): Promise<removeRegister>{
 }
 
 // Listar
-export async function getAll({fields="*", where="", limit="100", page="1"} : listFilters = {}): Promise<responseListPhs> {
+export async function getAll({fields="*", where="", limit="100", page="1", user_id=""} : listFilters = {}): Promise<responseListPhs> {
   const queryParams = new URLSearchParams({
     _fields: fields,
     _where: where,
     limit: limit,
     page: page
   });
+
+  if (user_id) {
+    queryParams.set('userId', user_id);
+  }
 
   const res = await apiClientSession(`/phs?${queryParams.toString()}`);
   if (!res.ok) {

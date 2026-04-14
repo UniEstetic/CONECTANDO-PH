@@ -10,6 +10,7 @@ import { getAll as getAllRoles } from '@/app/services/roles.service'
 import { getAll as getAllUnits } from '@/app/services/units.service'
 import { assign as assignUserRoles } from '@/app/services/user_roles.service'
 import { assign as assignUnitAssignments } from '@/app/services/unit_assignments.service'
+import { assign as assignUserRolePhs } from '@/app/services/user_roles_phs.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import UserFormFields from '../components/UserFormFields'
 import UserRolesUnitsSelector from '../components/UserRolesUnitsSelector'
@@ -196,8 +197,18 @@ export default function CrearUsuarioPage() {
       if (selectedRoles.length > 0) {
         const roleNames = selectedRoles.map(id => allRoles.find(r => r.id === id)?.name || id)
         console.log('[PASO 2] Asignando roles:', roleNames, 'roleIds:', selectedRoles)
-        await assignUserRoles(userId, { roles: selectedRoles })
-        console.log('[PASO 2 OK] Roles asignados correctamente')
+        const rolesResponse = await assignUserRoles(userId, { roles: selectedRoles })
+        console.log('[PASO 2 OK] Roles asignados:', JSON.stringify(rolesResponse.data, null, 2))
+
+        // Asignar copropiedad a cada user_role creado
+        if (phId && rolesResponse.data.assigned?.length > 0) {
+          const phsPromises = rolesResponse.data.assigned.map(assignedRole => {
+            console.log('[PASO 2.5] Asignando PH', phId, 'al userRoleId:', assignedRole.id)
+            return assignUserRolePhs(assignedRole.id, { phs_ids: [phId] })
+          })
+          await Promise.all(phsPromises)
+          console.log('[PASO 2.5 OK] Copropiedades asignadas a user_roles')
+        }
 
         // Asignar unidades por rol en paralelo
         const unitPromises = roleUnitAssignments

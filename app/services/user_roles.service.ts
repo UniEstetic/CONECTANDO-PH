@@ -1,11 +1,11 @@
 'use server';
 
 import { apiClientSession } from '@/app/utils/apiClient';
-import { UserRoles, responseUserRoles } from '@/app/types/user_roles';
+import { UserRoles, responseUserRoles, responseUserRolesAssign } from '@/app/types/user_roles';
 import { extractErrorMessage } from './_shared/http-errors';
 
 // Asignar rol a usuario
-export async function assign(userId: string, payload: UserRoles): Promise<responseUserRoles> {
+export async function assign(userId: string, payload: UserRoles): Promise<responseUserRolesAssign> {
   console.log('[DEBUG SERVER] /user_roles/assing/ - userId:', userId, '- payload:', JSON.stringify(payload));
   const res = await apiClientSession(`/user_roles/assing/${userId}`, {
     method: 'POST',
@@ -14,7 +14,7 @@ export async function assign(userId: string, payload: UserRoles): Promise<respon
   if (!res.ok) {
     throw new Error(await extractErrorMessage(res, 'Error al asignar roles'));
   }
-  return res.json() as Promise<responseUserRoles>;
+  return res.json() as Promise<responseUserRolesAssign>;
 }
 
 // Eliminar rol de usuario por id de relación

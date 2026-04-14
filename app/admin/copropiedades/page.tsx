@@ -8,8 +8,12 @@ import { useState, useEffect } from 'react'
 import { getAll, remove } from '@/app/services/phs.service'
 import { Phs } from '@/app/types/phs'
 import ToastNotice from '@/app/components/general/ToastNotice'
+import { useSession } from 'next-auth/react'
 
 export default function CopropiedadesPage() {
+  const { data: session } = useSession();
+  const userId = session?.user?.userId;
+
   const [copropiedades, setCopropiedades] = useState<Phs[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -21,13 +25,13 @@ export default function CopropiedadesPage() {
   })
 
   useEffect(() => {
-    loadCopropiedades()
-  }, [])
+    if (userId) loadCopropiedades()
+  }, [userId])
 
   const loadCopropiedades = async () => {
     try {
       setLoading(true)
-      const response = await getAll()
+      const response = await getAll({ user_id: userId })
       setCopropiedades(response.data)
     } catch (error) {
       console.error('Error al cargar copropiedades:', error)
