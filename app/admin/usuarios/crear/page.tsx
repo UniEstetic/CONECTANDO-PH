@@ -16,16 +16,15 @@ import UserFormFields from '../components/UserFormFields'
 import UserRolesUnitsSelector from '../components/UserRolesUnitsSelector'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useSession } from "next-auth/react";
 import pageStyles from '@/app/ui/styles/EntityForm.module.css'
 import ToastNotice from '@/app/components/general/ToastNotice'
+import { useProperty } from '@/app/context/PropertyContext'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export default function CrearUsuarioPage() {
-  const { data: session } = useSession();
+  const { selectedPropertyId: phId } = useProperty();
   const router = useRouter()
-  const phId = session?.user?.ownership?.id;
 
   const [formData, setFormData] = useState<UserFormData>({
     first_name: '',
@@ -78,6 +77,7 @@ export default function CrearUsuarioPage() {
   }
 
   const loadUnits = async () => {
+    if (!phId) return
     try {
       const response = await getAllUnits(phId)
       setAllUnits(response.data)

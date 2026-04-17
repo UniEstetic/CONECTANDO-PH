@@ -20,13 +20,14 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { Units } from '@/app/types/units'
+import { useProperty } from '@/app/context/PropertyContext'
 
 export default function EditarUsuarioPage() {
   const { data: session, status: sessionStatus } = useSession();
+  const { selectedPropertyId: phId } = useProperty();
   const router = useRouter()
   const params = useParams()
   const userId = params.id as string
-  const phId = session?.user?.ownership?.id;
 
   const [formData, setFormData] = useState<UserFormData>({
     first_name: '',

@@ -4,12 +4,10 @@ import Link from 'next/link';
 import { ImportIcon } from 'lucide-react';
 import Header from "@/app/components/general/header";
 import Footer from "@/app/components/general/footer";
-import LogoutPage from "@/app/auth/login/logout";
 
 export default function UsuariosPage() {
   return (
     <div className={styles.container}>
-      <LogoutPage />
       <Header/>
       <p className={styles.opcionesUsuarios}>Tus opciones</p>
 
