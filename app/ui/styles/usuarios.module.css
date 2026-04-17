@@ -1533,4 +1533,21 @@
     grid-template-columns: 1fr;
   }
 }
+/* Opacidad para los botones segun el rol logueado*/
 
+.guardContainer {
+  /* Usamos flex para que el div se adapte al tamaño del botón */
+  display: flex; 
+  width: 100%;
+  transition: all 0.3s ease;
+  /* Asegura que si el botón tiene un margen, se respete */
+  justify-content: center; 
+  align-items: center;
+}
+
+.noAcceso {
+  opacity: 0.5;
+  filter: grayscale(50%);
+  pointer-events: none;
+  cursor: not-allowed;
+}
