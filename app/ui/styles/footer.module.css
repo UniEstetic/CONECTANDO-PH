@@ -1,7 +1,6 @@
 .footer {
   justify-content: center;
-  align-items: flex-end;
-  gap: 2rem;
+  align-items: center;
   width: 100%;
   height: auto;
   display: flex;
@@ -14,6 +13,30 @@
     padding-top: 1rem;
     padding-bottom: 2rem;
   }
+}
+
+.propertyIndicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: absolute;
+  left: 1rem;
+}
+
+.propertyIcon {
+  color: #C4A861;
+  flex-shrink: 0;
+}
+
+.propertyName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #B08D4A;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320px;
 }
  .containerFooter{
   display: flex;
