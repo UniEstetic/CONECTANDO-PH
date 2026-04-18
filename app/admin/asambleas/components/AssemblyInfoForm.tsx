@@ -2,7 +2,7 @@
 
 import styles from '@/app/ui/styles/roomStylesAdministrativo.module.css';
 import StatusToggle from '@/app/components/general/StatusToggle';
-import { AssemblyFormData } from '../_types';
+import { AssemblyFormData } from '@/app/types/assemblies';
 
 type Props = {
   formData: AssemblyFormData;

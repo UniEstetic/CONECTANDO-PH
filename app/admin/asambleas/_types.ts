@@ -1,36 +1,10 @@
-import { Assembly } from '@/app/types/assemblies';
+import { AgendaItem } from '@/app/types/agenda';
+import { VotingQuestion } from '@/app/types/voting-questions';
 
-export type Option = {
-  id?: string;
-  text: string;
-};
-
-export type VotingQuestion = {
-  id?: string;
-  question_text: string;
-  description: string;
-  type: string;
-  result_type: string;
-  min_selections: number;
-  max_selections: number;
-  options: Option[];
-};
-
-export type AgendaItem = {
-  id?: string;
-  assembly_id?: string;
-  title: string;
-  sort_order: number;
-  is_votable: boolean;
-  required_quorum: number;
-  is_active?: boolean;
-  type: 'Encuesta' | 'Documento' | 'Texto';
-  document_url?: string;
-  content?: string;
-  votingQuestions?: VotingQuestion[];
-};
-
-export type AssemblyFormData = Partial<Assembly>;
+export type { Option } from '@/app/types/question-options';
+export type { VotingQuestion } from '@/app/types/voting-questions';
+export type { AgendaItem } from '@/app/types/agenda';
+export type { AssemblyFormData } from '@/app/types/assemblies';
 
 export const EMPTY_CURRENT_ITEM: Partial<AgendaItem> = {
   title: '',

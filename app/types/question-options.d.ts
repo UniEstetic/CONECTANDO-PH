@@ -19,3 +19,8 @@ export interface responseListQuestionOptions {
   data: QuestionOptions[];
   properties: propertiesList;
 }
+
+export type Option = {
+  id?: string;
+  text: string;
+}

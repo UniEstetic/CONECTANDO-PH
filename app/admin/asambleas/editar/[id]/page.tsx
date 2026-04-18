@@ -27,9 +27,13 @@ import { VotingQuestions } from '@/app/types/voting-questions';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { AgendaItem, AssemblyFormData, Option, VotingQuestion, normalizeAgendaSortOrder } from '../../_types';
-import AssemblyInfoForm from '../../_components/AssemblyInfoForm';
-import AgendaBuilder from '../../_components/AgendaBuilder';
+import { AgendaItem } from '@/app/types/agenda';
+import { AssemblyFormData } from '@/app/types/assemblies';
+import { Option } from '@/app/types/question-options';
+import { VotingQuestion } from '@/app/types/voting-questions';
+import { normalizeAgendaSortOrder } from '../../_types';
+import AssemblyInfoForm from '../../components/AssemblyInfoForm';
+import AgendaBuilder from '../../components/AgendaBuilder';
 
 const getListFromResponse = <T,>(response: any): T[] => {
   if (Array.isArray(response?.data)) return response.data as T[];

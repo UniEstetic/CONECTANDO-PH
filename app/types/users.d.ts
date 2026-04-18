@@ -27,3 +27,13 @@ export interface responseListUsers {
   data: Users[];
   properties: propertiesList;
 }
+
+export type UserFormData = Omit<User, 'id' | 'created_at'>
+
+export interface RoleWithUnits {
+  roleId: string
+  roleName: string
+  selectedUnits: string[]
+  canVote: boolean
+  unitRelationIds?: Record<string, string>
+}
