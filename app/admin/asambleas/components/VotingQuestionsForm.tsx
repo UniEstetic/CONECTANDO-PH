@@ -1,7 +1,7 @@
 'use client';
 
 import styles from '@/app/ui/styles/roomStylesAdministrativo.module.css';
-import { VotingQuestion } from '../_types';
+import { VotingQuestion } from '@/app/types/voting-questions';
 
 type Props = {
   agendaQuestions: VotingQuestion[];
