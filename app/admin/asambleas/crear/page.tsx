@@ -13,15 +13,15 @@ import { Agenda } from '@/app/types/agenda';
 import { VotingQuestions } from '@/app/types/voting-questions';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { AgendaItem } from '@/app/types/agenda';
 import { AssemblyFormData } from '@/app/types/assemblies';
 import { normalizeAgendaSortOrder } from '../_types';
 import AssemblyInfoForm from '../components/AssemblyInfoForm';
 import AgendaBuilder from '../components/AgendaBuilder';
+import { useProperty } from '@/app/context/PropertyContext';
 
 export default function CrearAsambleasPage() {
-  const { data: session } = useSession();
+  const { selectedPropertyId } = useProperty();
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,7 @@ export default function CrearAsambleasPage() {
     scheduled_at: '',
     quorum_requirement: 50,
     is_active: true,
-    phs_id: session?.user?.ownership?.id || '',
+    phs_id: selectedPropertyId || '',
   });
 
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
@@ -65,7 +65,7 @@ export default function CrearAsambleasPage() {
       const assemblyPayload: Partial<Assembly> = {
         ...formData,
         scheduled_at: scheduledAt,
-        phs_id: session?.user?.ownership?.id || formData.phs_id || '',
+        phs_id: selectedPropertyId || formData.phs_id || '',
         livekit_room_name: `assembly-${Date.now()}`,
         quorum_requirement: Number(formData.quorum_requirement) || 50,
       };

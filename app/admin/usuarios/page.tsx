@@ -6,11 +6,10 @@ import { useState, useEffect } from 'react'
 import { getAll, remove } from '@/app/services/users.service'
 import { User } from '@/app/types/users'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
+import { useProperty } from '@/app/context/PropertyContext'
 
 export default function ListadoUsuariosPage() {
-  const { data: session } = useSession();
-  const phId = session?.user?.ownership?.id;
+  const { selectedPropertyId: phId } = useProperty();
 
   const [usuarios, setUsuarios] = useState<User[]>([])
   const [loading, setLoading] = useState(true)

@@ -7,7 +7,7 @@ import { Assembly } from '@/app/types/assemblies';
 import { getAll, remove } from '@/app/services/assemblies.service';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useProperty } from '@/app/context/PropertyContext';
 
 const STATUS_CLASS_MAP: Record<string, string> = {
   scheduled: 'statusScheduled',
@@ -33,8 +33,7 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
 
 export default function MenuAsambleas() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const phsId = session?.user?.ownership?.id;
+  const { selectedPropertyId: phsId } = useProperty();
   const [assemblies, setAssemblies] = useState<Assembly[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

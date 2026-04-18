@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '@/app/ui/styles/footer.module.css';
+import { FooterPropertyIndicator } from '@/app/components/FooterPropertyIndicator';
 
 export default function Footer() {
   return (
     <footer className={styles.footer}>
+      <FooterPropertyIndicator />
       <div className={styles.containerFooter}>
-        <Link href="/usuarios" className={styles.item_home}>
+        <Link href="/" className={styles.item_home}>
         <Image
           src="/imagenes/10_boton inicio.svg"
           alt="Inicio"
@@ -43,7 +45,7 @@ export default function Footer() {
         />
       </Link>
 
-      <Link href="/" className={styles.item}>
+      <Link href="/auth/profile" className={styles.item}>
         
         <Image
           src="/imagenes/14_perfil.svg"

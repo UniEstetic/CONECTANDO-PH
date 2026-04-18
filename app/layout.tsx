@@ -14,8 +14,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.className} antialised`}>
-        <Providers>{children}</Providers>
-        <Footer />
+        <Providers>
+          {children}
+          <Footer />
+        </Providers>
       </body>
     </html>
   )
