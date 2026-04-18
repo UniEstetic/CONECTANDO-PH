@@ -26,7 +26,6 @@ import { Agenda } from '@/app/types/agenda';
 import { VotingQuestions } from '@/app/types/voting-questions';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { AgendaItem } from '@/app/types/agenda';
 import { AssemblyFormData } from '@/app/types/assemblies';
 import { Option } from '@/app/types/question-options';
@@ -34,6 +33,7 @@ import { VotingQuestion } from '@/app/types/voting-questions';
 import { normalizeAgendaSortOrder } from '../../_types';
 import AssemblyInfoForm from '../../components/AssemblyInfoForm';
 import AgendaBuilder from '../../components/AgendaBuilder';
+import { useProperty } from '@/app/context/PropertyContext';
 
 const getListFromResponse = <T,>(response: any): T[] => {
   if (Array.isArray(response?.data)) return response.data as T[];
@@ -45,7 +45,7 @@ const getIdFromResponse = (response: any): string | undefined =>
   response?.data?.id || response?.id;
 
 export default function EditarAsambleasPage() {
-  const { data: session } = useSession();
+  const { selectedPropertyId } = useProperty();
   const router = useRouter();
   const params = useParams();
   const assemblyId = params.id as string;
@@ -242,7 +242,7 @@ export default function EditarAsambleasPage() {
       const assemblyPayload: Partial<Assembly> = {
         ...formData,
         scheduled_at: scheduledAt,
-        phs_id: formData.phs_id || session?.user?.ownership?.id || '',
+        phs_id: formData.phs_id || selectedPropertyId || '',
         quorum_requirement: Number(formData.quorum_requirement) || 50,
       };
 

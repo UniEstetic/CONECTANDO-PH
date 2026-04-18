@@ -68,7 +68,7 @@ declare module "next-auth" {
         city?: string;
         country?: string;
         state?: string;
-      };
+      }[];
     } & DefaultSession["user"];
   }
 
