@@ -1,0 +1,38 @@
+steps:
+  # 1. Construir la imagen de Docker usando Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest',
+      '.'
+    ]
+
+  # 2. Subir la imagen al Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'
+    ]
+
+  # 3. Desplegar en Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'conectando-ph-frontend'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'NEXT_PUBLIC_APP_NAME=CONECTANDO-PH,NEXT_PUBLIC_BACKEND_URL=https://tu-api-nestjs.a.run.app'
+
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
