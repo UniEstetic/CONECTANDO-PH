@@ -7,6 +7,7 @@ import {
   ValidateLoginResponse,
   RefreshTokenResponse,
 } from "@/app/types/next-auth";
+import { extractErrorMessage } from "./_shared/http-errors";
 
 // Seleccionar proveedor de autenticación
 export async function selectProvider(providerName: string) {
@@ -113,4 +114,32 @@ export async function getProfile(tokenBack?: string): Promise<UserAuth> {
     data;
 
   return payload as UserAuth;
+}
+
+// Solicitar restablecimiento de contraseña (envía email con link)
+export async function resetPasswordRequest(email: string) {
+  const res = await apiClient("/auth/reset-password-request", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+
+ if (!res.ok) {
+     throw new Error(await extractErrorMessage(res, 'Error al enviar solicitud de restablecimiento de contraseña'));
+   }
+
+  return res.json();
+}
+
+// Establecer nueva contraseña con token de restablecimiento
+export async function setPassword(token: string, password: string, confirm_password: string) {
+  const res = await apiClient("/auth/set-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password, confirm_password }),
+  });
+
+  if (!res.ok) {
+      throw new Error(await extractErrorMessage(res, 'Error al establecer nueva contraseña'));
+    }
+
+  return res.json();
 }

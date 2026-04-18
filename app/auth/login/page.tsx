@@ -90,7 +90,7 @@ export default function LoginPage() {
           placeholder="********"
         />
 
-        <Link href="#" className={styles.forgot}>
+        <Link href="/auth/reset-password" className={styles.forgot}>
           ¿Olvidaste tu contraseña?
         </Link>
 

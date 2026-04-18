@@ -1,4 +1,6 @@
 import { propertiesList } from "@/app/types/definitions";
+import { Option } from "@/app/types/question-options";
+
 export interface VotingQuestions {
   id?: string;
   agenda_id: string;
@@ -25,4 +27,15 @@ export interface responseListVotingQuestions {
   message: string;
   data: VotingQuestions[];
   properties: propertiesList;
+}
+
+export type VotingQuestion = {
+  id?: string;
+  question_text: string;
+  description: string;
+  type: string;
+  result_type: string;
+  min_selections: number;
+  max_selections: number;
+  options: Option[];
 }

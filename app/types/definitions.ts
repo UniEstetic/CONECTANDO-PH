@@ -58,6 +58,7 @@ export interface listFilters{
   fields?: string;
   where?: string;
   phs_id?: string;
+  user_id?: string;
   limit?: string;
   page?: string;
 }
