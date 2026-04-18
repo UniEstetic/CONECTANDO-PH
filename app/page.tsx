@@ -15,7 +15,6 @@ export default async function UsuariosPage() {
   const userRoles = session?.user?.userProfile?.roles?.map((r: any) => r.name) || [];
   return (
     <div className={styles.container}>
-      <LogoutPage />
       <Header/>
       <p className={styles.opcionesUsuarios}>Tus opciones</p>
 
