@@ -37,7 +37,7 @@ export default async function UsuariosPage() {
     </AccessGuard>
 
     {/* BOTÓN ADMINISTRADOR */}
-      <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Administrador']}>
+      <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Administrador', 'admin']}>
         <div className={styles.role}>
           <div className={styles.imagenUsuarios}>
             <Link href="/admin" className={styles.btnUsuarios}>
@@ -52,8 +52,8 @@ export default async function UsuariosPage() {
         </div>
       </AccessGuard>
 
-      {/* BOTÓN PORTERÍA */}
-      <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Guarda', 'Administrador']}>
+      {/* BOTÓN PORTERÍA */}<AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Portero', 'administrador', 'admin']}>
+      
         <div className={styles.role}>
           <div className={styles.imagenUsuarios}>
             <Link href="/porteria" className={styles.btnUsuarios}>
