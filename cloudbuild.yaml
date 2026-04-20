@@ -1,5 +1,15 @@
 steps:
-  # 1. Construir la imagen de Docker usando Artifact Registry
+  # 1. Install dependencies
+  - name: 'node:20-alpine'
+    entrypoint: 'npm'
+    args: ['ci']
+
+  # 2. Build Next.js (includes typecheck)
+  - name: 'node:20-alpine'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+
+  # 3. Construir imagen Docker
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
@@ -7,14 +17,14 @@ steps:
       '.'
     ]
 
-  # 2. Subir la imagen al Artifact Registry
+  # 4. Subir imagen a Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'push',
       'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'
     ]
 
-  # 3. Desplegar en Cloud Run
+  # 5. Desplegar en Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -28,8 +38,18 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
+      - '--set-secrets'
+      - 'AUTH_SECRET=AUTH_SECRET:latest'
+      - '--set-secrets'
+      - 'NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest'
+      - '--set-secrets'
+      - 'AUTH_CLIENT_SECRET=AUTH_CLIENT_SECRET:latest'
       - '--set-env-vars'
-      - 'NEXT_PUBLIC_APP_NAME=CONECTANDO-PH,NEXT_PUBLIC_BACKEND_URL=https://tu-api-nestjs.a.run.app'
+      - 'NEXT_PUBLIC_APP_NAME=Conectando PH'
+      - '--set-env-vars'
+      - 'NEXTAUTH_SESSION_TIMEOUT=3600'
+      - '--set-env-vars'
+      - 'AUTH_PROVIDER_DEFAULT=accessEmail'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'
