@@ -5,7 +5,7 @@
 .container {
     padding-bottom: 2rem;
     background: linear-gradient(#F3DEAA 0%, #b68c3a 24%, #9c7b2f 100%);
-    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .containerSelection {
@@ -50,12 +50,9 @@
 
 .containerResidentes {
   max-width: 1200px;
+    width: min(1200px, 92%);
   margin: 0 auto;
   margin-bottom: 1rem;
-  @media screen and (max-width: 1024px){
-    width: 90%;
-    margin-bottom: 7rem;
-  }
 }
 
 .explorarBtn {
@@ -125,7 +122,7 @@
 .assambleasContainer {
     display: flex;
     gap: 2rem;
-    padding: 2rem;
+    padding: 1.5rem 0 2rem;
     width: 100%;
     justify-content: center;
 }
@@ -135,6 +132,11 @@
     justify-content: center;
     align-items: center;
     gap: 10rem;
+}
+
+.configButtonWrapper {
+    display: flex;
+    justify-content: flex-start;
 }
 
 /* ========================================
@@ -490,13 +492,6 @@
     font-family: inherit;
 }
 
-.loadingMessage {
-    text-align: center;
-    padding: 40px;
-    color: white;
-    font-weight: 500;
-    font-size: 18px;
-}
 
 .inputWithIcon {
     display: flex;
@@ -661,11 +656,20 @@
 
 /* Tablets (1024px) */
 @media screen and (max-width: 1024px) {
+    .containerResidentes {
+        width: 92%;
+        margin-bottom: 4rem;
+    }
+
+    .divAssambleasConf {
+        gap: 2rem;
+        align-items: flex-start;
+    }
+
     .assambleasContainer {
         flex-direction: column;
-        padding: 1rem;
+        padding: 1rem 0 1.5rem;
         gap: 1.5rem;
-        padding-bottom: 2rem;
     }
     
     .assambleasSidebar {
@@ -701,13 +705,39 @@
 
 /* Mobile (768px) */
 @media screen and (max-width: 768px) {
+    .container {
+        padding-bottom: 5.5rem;
+    }
+
+    .containerResidentes {
+        width: 94%;
+        margin-bottom: 0;
+    }
+
+    .divAssambleasConf {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .configButtonWrapper {
+        width: 100%;
+        order: 1;
+    }
+
     .titleAsambleasTitle {
         color: white;
     }
     
     .configButton {
-        width: fit-content;
-        align-self: flex-start;
+        width: 100%;
+        text-align: center;
+        border-radius: 16px;
+        padding: 12px 16px;
+    }
+
+    .assambleasSidebar {
+        order: 2;
     }
     
     .assambleasList {
@@ -723,17 +753,43 @@
     }
 
     .assambleasItemsScroll {
-        max-height: 430px;
+        max-height: none;
+        overflow-y: visible;
     }
 
     .assambleasActions {
         flex-direction: row;
         width: 100%;
-        justify-content: flex-end;
+        justify-content: flex-start;
+        gap: 8px;
     }
 
     .assambleaActionBtn {
-        min-width: 74px;
+        flex: 1;
+        min-width: 0;
+        padding: 8px 10px;
+    }
+
+    .assambleasItem {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .assambleasItemName {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: initial;
+        line-height: 1.35;
+        font-size: 15px;
+    }
+
+    .assambleasItemDate {
+        font-size: 13px;
+    }
+
+    .assambleasItemMeta {
+        margin-top: 4px;
     }
     
     .assambleaItem {
@@ -835,6 +891,18 @@
   .containerResidentes {
     padding: 0 10px;
   }
+
+    .assambleasListCard {
+        padding: 12px;
+    }
+
+    .assambleasTitle {
+        font-size: 16px;
+    }
+
+    .assambleaActionBtn {
+        font-size: 11px;
+    }
 }
 
 /* ========================================

@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect } from 'react';
 import ToastNotice from '@/app/components/general/ToastNotice';
 import styles from '@/app/ui/styles/roomStylesAdministrativo.module.css';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import LoadingState from '@/app/components/LoadingState';
 import { getById as getAssemblyById, update as updateAssembly } from '@/app/services/assemblies.service';
 import {
   create as createAgenda,
@@ -421,7 +422,7 @@ export default function EditarAsambleasPage() {
       <div className={styles.container}>
         <main className={styles.containerResidentes}>
           <UsuariosHeader />
-          <div className={styles.loadingMessage}>Cargando datos de la asamblea...</div>
+          <LoadingState message="Cargando datos de la asamblea..." variant="fullPage" />
         </main>
       </div>
     );
