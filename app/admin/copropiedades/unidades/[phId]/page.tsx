@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react'
 import { getAll, remove } from '@/app/services/units.service'
 import { Units } from '@/app/types/units'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import LoadingState from '@/app/components/LoadingState';
+import ConfirmDeleteModal from '@/app/components/ConfirmDeleteModal';
 
 export default function UnidadesPage() {
   const params = useParams()
@@ -22,6 +24,7 @@ export default function UnidadesPage() {
     id: null,
     unit: ''
   })
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (phId && phId !== 'undefined' && phId !== 'null') {
@@ -63,6 +66,7 @@ export default function UnidadesPage() {
 
   const handleDelete = async (id: string) => {
     try {
+      setDeleting(true)
       if (!phId || phId === 'undefined' || phId === 'null') {
         throw new Error('Copropiedad inválida')
       }
@@ -73,6 +77,8 @@ export default function UnidadesPage() {
     } catch (error) {
       console.error('Error al eliminar unidad:', error)
       alert('Error al eliminar la unidad')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -130,10 +136,10 @@ export default function UnidadesPage() {
         <section className={styles.tableContainer}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Cargando unidades...</p>
+              <LoadingState message="Cargando unidades..." />
             </div>
           ) : filteredUnidades.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
               <p>No se encontraron unidades</p>
             </div>
           ) : (
@@ -193,64 +199,16 @@ export default function UnidadesPage() {
         </section>
       </main>
 
-      {/* Modal de Confirmación de Eliminación */}
-      {deleteModal.show && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '8px',
-            maxWidth: '400px',
-            width: '90%',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Confirmar eliminación</h3>
-            <p style={{ marginBottom: '20px', color: '#666' }}>
-              ¿Está seguro de que desea eliminar la unidad <strong>{deleteModal.unit}</strong>? 
-              Esta acción no se puede deshacer.
-            </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setDeleteModal({ show: false, id: null, unit: '' })}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => deleteModal.id && handleDelete(deleteModal.id)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDeleteModal
+        isOpen={deleteModal.show}
+        title="Confirmar eliminación"
+        message="¿Está seguro de que desea eliminar la unidad"
+        itemName={deleteModal.unit}
+        isProcessing={deleting}
+        onCancel={() => setDeleteModal({ show: false, id: null, unit: '' })}
+        onConfirm={() => deleteModal.id && handleDelete(deleteModal.id)}
+      />
+
     </div>
   )
 }

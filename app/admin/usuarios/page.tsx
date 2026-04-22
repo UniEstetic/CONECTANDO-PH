@@ -7,6 +7,8 @@ import { getAll, remove } from '@/app/services/users.service'
 import { User } from '@/app/types/users'
 import Link from 'next/link'
 import { useProperty } from '@/app/context/PropertyContext'
+import LoadingState from '@/app/components/LoadingState'
+import ConfirmDeleteModal from '@/app/components/ConfirmDeleteModal';
 
 export default function ListadoUsuariosPage() {
   const { selectedPropertyId: phId } = useProperty();
@@ -20,6 +22,8 @@ export default function ListadoUsuariosPage() {
     id: null,
     name: ''
   })
+
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (phId) loadUsuarios()
@@ -39,12 +43,16 @@ export default function ListadoUsuariosPage() {
 
   const handleDelete = async (id: string) => {
     try {
+      setDeleting(true)
       await remove(id)
       setDeleteModal({ show: false, id: null, name: '' })
       loadUsuarios()
     } catch (error) {
       console.error('Error al eliminar usuario:', error)
       alert('Error al eliminar el usuario')
+    }
+     finally {
+      setDeleting(false)
     }
   }
 
@@ -96,11 +104,9 @@ export default function ListadoUsuariosPage() {
         {/* Tabla de Usuarios */}
         <section className={styles.tableContainer}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Cargando usuarios...</p>
-            </div>
+            <LoadingState message="Cargando usuarios..." />
           ) : filteredUsuarios.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
               <p>No se encontraron usuarios</p>
             </div>
           ) : (
@@ -155,64 +161,15 @@ export default function ListadoUsuariosPage() {
         </section>
       </main>
 
-      {/* Modal de Confirmación de Eliminación */}
-      {deleteModal.show && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '8px',
-            maxWidth: '400px',
-            width: '90%',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Confirmar eliminación</h3>
-            <p style={{ marginBottom: '20px', color: '#666' }}>
-              ¿Está seguro de que desea eliminar al usuario <strong>{deleteModal.name}</strong>? 
-              Esta acción no se puede deshacer.
-            </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setDeleteModal({ show: false, id: null, name: '' })}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => deleteModal.id && handleDelete(deleteModal.id)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDeleteModal
+              isOpen={deleteModal.show}
+              title="Confirmar eliminación"
+              message="¿Está seguro de que desea eliminar al usuario"
+              itemName={deleteModal.name}
+              isProcessing={deleting}
+              onCancel={() => setDeleteModal({ show: false, id: null, name: '' })}
+              onConfirm={() => deleteModal.id && handleDelete(deleteModal.id)}
+            />
     </div>
   )
 }
