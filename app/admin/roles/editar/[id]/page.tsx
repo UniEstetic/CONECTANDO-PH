@@ -10,6 +10,7 @@ import StatusToggle from '@/app/components/general/StatusToggle'
 import ToastNotice from '@/app/components/general/ToastNotice'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
+import LoadingState from '@/app/components/LoadingState'
 
 type RoleFormData = Omit<Roles, 'id' | 'created_at'>
 
@@ -108,9 +109,7 @@ export default function EditarRolPage() {
           <div className={styles.headerActions}>
             <Link href="/admin/roles" className={styles.btnBack}></Link>
           </div>
-          <div className={styles.loading}>
-            <p>Cargando datos del rol...</p>
-          </div>
+          <LoadingState message="Cargando datos del rol..." variant="fullPage" />
         </main>
       </div>
     )

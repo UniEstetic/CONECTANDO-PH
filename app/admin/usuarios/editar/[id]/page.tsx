@@ -8,6 +8,7 @@ import { Roles } from '@/app/types/roles'
 import { getById, update } from '@/app/services/users.service'
 import { getAll as getAllRoles } from '@/app/services/roles.service'
 import { getAll as getAllUnits } from '@/app/services/units.service'
+import LoadingState from '@/app/components/LoadingState'
 import { getById as getUserRoles, assign as assignUserRoles, removeRole } from '@/app/services/user_roles.service'
 import { getById as getUnitAssignments, assign as assignUnitAssignments, remove as removeUnitAssignment } from '@/app/services/unit_assignments.service'
 import { assign as assignUserRolePhs } from '@/app/services/user_roles_phs.service'
@@ -401,9 +402,7 @@ export default function EditarUsuarioPage() {
       <div className={styles.blockResidentes}>
         <main className={styles.containerResidentes}>
           <UsuariosHeader />
-          <div className={styles.loading}>
-            <p>Cargando datos del usuario...</p>
-          </div>
+          <LoadingState message="Cargando datos del usuario..." variant="fullPage" />
         </main>
       </div>
     )

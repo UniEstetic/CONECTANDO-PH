@@ -8,6 +8,7 @@ import { getAll, remove } from '@/app/services/assemblies.service';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import { useRouter } from 'next/navigation';
 import { useProperty } from '@/app/context/PropertyContext';
+import LoadingState from '@/app/components/LoadingState';
 
 const STATUS_CLASS_MAP: Record<string, string> = {
   scheduled: 'statusScheduled',
@@ -101,7 +102,7 @@ export default function MenuAsambleas() {
         <UsuariosHeader />
 
         <div className={styles.divAssambleasConf}>
-          <div>
+          <div className={styles.configButtonWrapper}>
             <Link href="/admin/asambleas/crear" className={styles.configButton}>
               Configurar nueva asamblea
             </Link>
@@ -115,15 +116,13 @@ export default function MenuAsambleas() {
               </div>
               
               {loading ? (
-                <div className={styles.assambleasState}>
-                  Cargando asambleas...
-                </div>
+                <LoadingState message="Cargando asambleas..." />
               ) : error ? (
                 <div className={`${styles.assambleasState} ${styles.assambleasStateError}`}>
                   {error}
                 </div>
               ) : assemblies.length === 0 ? (
-                <div className={styles.assambleasState}>
+                <div className={styles.assambleasState} >
                   No hay asambleas programadas
                 </div>
               ) : (
