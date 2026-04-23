@@ -2,6 +2,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import LoadingState from '@/app/components/LoadingState';
 
 // ✅ Tipado correcto
 interface Role {
@@ -42,7 +43,7 @@ export default function PorteriaLayout({ children }: { children: React.ReactNode
 
   // ⛔ Evita el flash
   if (status === 'loading' || !autorizado) {
-    return <p>Cargando módulo de portería...</p>;
+    return <LoadingState message="Cargando módulo de portería..." variant="fullPage" />;
   }
 
   return <>{children}</>;

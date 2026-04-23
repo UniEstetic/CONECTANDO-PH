@@ -2,6 +2,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import LoadingState from '@/app/components/LoadingState';
 
 // ✅ Tipado de roles
 interface Role {
@@ -38,7 +39,7 @@ export default function ResidentesLayout({ children }: { children: React.ReactNo
 
   }, [status, session, router]);
 
-  if (status === 'loading') return <p>Cargando módulo de residentes...</p>;
+  if (status === 'loading') return <LoadingState message="Cargando módulo de residentes..." variant="fullPage" />;
 
   return <>{children}</>;
 }

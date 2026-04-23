@@ -8,6 +8,8 @@ import { getAll, remove } from '@/app/services/roles.service'
 import { Roles } from '@/app/types/roles'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import LoadingState from '@/app/components/LoadingState'
+import ConfirmDeleteModal from '@/app/components/ConfirmDeleteModal';
 
 export default function RolesPage() {
   const router = useRouter()
@@ -38,8 +40,10 @@ export default function RolesPage() {
     }
   }
 
+  const [deleting, setDeleting] = useState(false)
   const handleDelete = async (id: string) => {
     try {
+      setDeleting(true)
       await remove(id)
       setDeleteModal({ show: false, id: null, name: '' })
       setMessage({ type: 'success', text: 'Rol eliminado correctamente' })
@@ -47,6 +51,8 @@ export default function RolesPage() {
     } catch (error) {
       console.error('Error al eliminar rol:', error)
       setMessage({ type: 'error', text: 'Error al eliminar el rol' })
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -101,11 +107,9 @@ export default function RolesPage() {
         {/* Tabla de Roles */}
         <section className={styles.tableContainer}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Cargando roles...</p>
-            </div>
+            <LoadingState message="Cargando roles..." />
           ) : filteredRoles.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
               <p>No se encontraron roles</p>
             </div>
           ) : (
@@ -167,64 +171,15 @@ export default function RolesPage() {
         </section>
       </main>
 
-      {/* Modal de Confirmación de Eliminación */}
-      {deleteModal.show && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '8px',
-            maxWidth: '400px',
-            width: '90%',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Confirmar eliminación</h3>
-            <p style={{ marginBottom: '20px', color: '#666' }}>
-              ¿Está seguro de que desea eliminar el rol <strong>{deleteModal.name}</strong>? 
-              Esta acción no se puede deshacer.
-            </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setDeleteModal({ show: false, id: null, name: '' })}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => deleteModal.id && handleDelete(deleteModal.id)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDeleteModal
+        isOpen={deleteModal.show}
+        title="Confirmar eliminación"
+        message="¿Está seguro de que desea eliminar el rol?"
+        itemName={deleteModal.name}
+        isProcessing={deleting}
+        onCancel={() => setDeleteModal({ show: false, id: null, name: '' })}
+        onConfirm={() => deleteModal.id && handleDelete(deleteModal.id)}
+      />
     </div>
   )
 }

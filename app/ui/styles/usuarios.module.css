@@ -1501,13 +1501,7 @@
   border: 1px solid #f5c6cb;
 }
 
-/* Loading */
-.loading {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-}
-
+/* Empty */
 .empty {
   text-align: center;
   padding: 40px;
