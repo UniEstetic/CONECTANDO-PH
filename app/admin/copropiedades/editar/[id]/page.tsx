@@ -8,6 +8,7 @@ import { getById, update } from '@/app/services/phs.service'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
 import StatusToggle from '@/app/components/general/StatusToggle'
 import ToastNotice from '@/app/components/general/ToastNotice'
+import LoadingState from '@/app/components/LoadingState'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 
@@ -274,9 +275,7 @@ export default function EditarCopropiedadPage() {
       <div className={styles.blockResidentes}>
         <main className={styles.containerResidentes}>
           <UsuariosHeader />
-          <div className={styles.loading}>
-            <p>Cargando datos de la copropiedad...</p>
-          </div>
+          <LoadingState message="Cargando datos de la copropiedad..." variant="fullPage" />
         </main>
       </div>
     )

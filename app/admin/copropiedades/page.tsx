@@ -8,7 +8,9 @@ import { useState, useEffect } from 'react'
 import { getAll, remove } from '@/app/services/phs.service'
 import { Phs } from '@/app/types/phs'
 import ToastNotice from '@/app/components/general/ToastNotice'
+import LoadingState from '@/app/components/LoadingState'
 import { useSession } from 'next-auth/react'
+import ConfirmDeleteModal from '@/app/components/ConfirmDeleteModal';
 
 export default function CopropiedadesPage() {
   const { data: session } = useSession();
@@ -23,6 +25,7 @@ export default function CopropiedadesPage() {
     id: null,
     name: ''
   })
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (userId) loadCopropiedades()
@@ -47,6 +50,7 @@ export default function CopropiedadesPage() {
 
   const handleDelete = async (id: string) => {
     try {
+      setDeleting(true)
       await remove(id)
       setDeleteModal({ show: false, id: null, name: '' })
       loadCopropiedades()
@@ -56,6 +60,8 @@ export default function CopropiedadesPage() {
         type: 'error',
         text: error instanceof Error ? error.message : 'Error al eliminar la copropiedad',
       })
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -105,11 +111,9 @@ export default function CopropiedadesPage() {
         </section>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>
-            <p>Cargando copropiedades...</p>
-          </div>
+          <LoadingState message="Cargando copropiedades..." />
         ) : filteredCopropiedades.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
             <p>No se encontraron copropiedades</p>
           </div>
         ) : (
@@ -178,64 +182,15 @@ export default function CopropiedadesPage() {
         )}
       </main>
 
-      {/* Modal de Confirmación de Eliminación */}
-      {deleteModal.show && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '8px',
-            maxWidth: '400px',
-            width: '90%',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Confirmar eliminación</h3>
-            <p style={{ marginBottom: '20px', color: '#666' }}>
-              ¿Está seguro de que desea eliminar la copropiedad <strong>{deleteModal.name}</strong>? 
-              Esta acción no se puede deshacer.
-            </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setDeleteModal({ show: false, id: null, name: '' })}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => deleteModal.id && handleDelete(deleteModal.id)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDeleteModal
+        isOpen={deleteModal.show}
+        title="Confirmar eliminación"
+        message="¿Está seguro de que desea eliminar la copropiedad"
+        itemName={deleteModal.name}
+        isProcessing={deleting}
+        onCancel={() => setDeleteModal({ show: false, id: null, name: '' })}
+        onConfirm={() => deleteModal.id && handleDelete(deleteModal.id)}
+      />
     </div>
   )
 }

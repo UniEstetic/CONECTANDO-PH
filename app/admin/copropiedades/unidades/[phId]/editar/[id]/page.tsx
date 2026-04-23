@@ -8,6 +8,7 @@ import { getById, update } from '@/app/services/units.service'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import LoadingState from '@/app/components/LoadingState'
 import ToastNotice from '@/app/components/general/ToastNotice'
 
 type UnitFormData = Omit<Units, 'id' | 'created_at'>
@@ -149,9 +150,7 @@ export default function EditarUnidadPage() {
             <Link href={`/admin/copropiedades/unidades/${phId}`} className={styles.btnBack}></Link>
           </div>
 
-          <div className={styles.loading}>
-            <p>Cargando datos de la unidad...</p>
-          </div>
+          <LoadingState message="Cargando datos de la unidad..." variant="fullPage" />
         </main>
       </div>
     )

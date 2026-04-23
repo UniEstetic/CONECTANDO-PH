@@ -1,0 +1,126 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(32, 20, 11, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  width: min(100%, 460px);
+  background: linear-gradient(180deg, #fff9ea 0%, #f8eed4 100%);
+  border: 1px solid rgba(182, 140, 58, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 22px 45px rgba(49, 30, 11, 0.3);
+  padding: 26px 24px 22px;
+}
+
+.iconWrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #e8be65 0%, #c49743 100%);
+  box-shadow: 0 6px 16px rgba(164, 122, 42, 0.35);
+}
+
+.icon {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.title {
+  margin: 0 0 10px;
+  color: #5b2d4e;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.message {
+  margin: 0;
+  text-align: center;
+  color: #6b5b3e;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.itemName {
+  color: #432136;
+  font-weight: 700;
+}
+
+.actions {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cancelButton,
+.confirmButton {
+  border: none;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cancelButton {
+  color: #5b2d4e;
+  background: #ffffff;
+  border: 1px solid rgba(91, 45, 78, 0.3);
+}
+
+.confirmButton {
+  color: #fff;
+  background: linear-gradient(180deg, #eaa719 0%, #cf9312 100%);
+  box-shadow: 0 8px 16px rgba(185, 62, 50, 0.3);
+}
+
+.cancelButton:hover,
+.confirmButton:hover {
+  transform: translateY(-1px);
+}
+
+.cancelButton:disabled,
+.confirmButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .backdrop {
+    padding: 14px;
+  }
+
+  .modal {
+    border-radius: 16px;
+    padding: 22px 16px 16px;
+  }
+
+  .title {
+    font-size: 19px;
+  }
+
+  .message {
+    font-size: 14px;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}
