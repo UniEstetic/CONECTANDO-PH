@@ -12,7 +12,7 @@ variable "region" {
 variable "backend_url" {
   description = "External backend API URL (otro proyecto)"
   type        = string
-  default     = "http://localhost:3001"
+  default     = "https://connect-ph-api-939729604301.us-central1.run.app/api/v1"
 }
 
 variable "livekit_url" {
@@ -42,7 +42,7 @@ variable "nextauth_secret" {
 variable "auth_client_id" {
   description = "AUTH_CLIENT_ID del backend"
   type        = string
-  default     = "cliente"
+  default     = "550e8400-e29b-41d4-a716-446655440000"
 }
 
 variable "auth_client_secret" {
