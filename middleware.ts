@@ -39,7 +39,7 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/auth/login", nextUrl));
   }
 
-  /*// 🔐 =========================
+  // 🔐 =========================
   // 🔐 CONTROL DE ROLES (NUEVO)
   // 🔐 =========================
 
@@ -80,8 +80,7 @@ export default auth((req) => {
     if (!permitido) {
       return NextResponse.redirect(new URL("/", nextUrl));
     }
-  }*/
- // Se espera definiicion mas clara  para la gestion y proteccion de roles
+  }
 
   return NextResponse.next();
 });
