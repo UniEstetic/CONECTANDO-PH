@@ -1551,3 +1551,50 @@
   pointer-events: none;
   cursor: not-allowed;
 }
+/* 🔧 Ajuste SOLO para responsive */
+
+
+@media screen and (max-width: 768px) {
+  .guardContainer {
+    width: auto;        /* evita que ocupe todo el ancho */
+    flex: 0 0 auto;     /* evita que crezca dentro del flex column */
+  }
+.roles {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;            /* Estas son las franjas moradas que ves */
+    width: 100% !important;
+    max-width: 400px;
+    margin: 2rem auto !important;    /* Este es el espacio naranja que ves */
+
+    /* EL AJUSTE PRINCIPAL: */
+    height: auto !important;         /* Esto quita el límite de 362px y deja que crezca */
+    min-height: min-content;         /* Asegura que el contenedor respete a sus hijos */
+}
+
+.role {
+    width: 100% !important;
+    /* AJUSTE COMPLEMENTARIO: */
+    min-height: 120px;               /* Sube esto; 80px es muy poco para texto + imagen */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;         /* Centra el contenido en el área azul */
+    padding: 10px;
+}
+
+.userTable {
+    min-width: 500px; /* 👈 más compacta */
+  }
+
+  .userTable th,
+  .userTable td {
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+ 
+}
+
+
