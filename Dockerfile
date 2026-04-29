@@ -1,15 +1,13 @@
 # Stage 1: Install dependencies
-FROM node:20-alpine AS deps
-
-RUN apk add --no-cache libc6-compat python3 build-base
+FROM node:20 AS deps
 
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
-RUN corepack enable pnpm && pnpm install --frozen-lockfile
+RUN npm install -g pnpm@9 && pnpm install --frozen-lockfile
 
 # Stage 2: Build the application
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
@@ -17,10 +15,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Next.js build
-RUN corepack enable pnpm && pnpm build
+RUN npm install -g pnpm@9 && pnpm build
 
 # Stage 3: Production runner
-FROM node:20-alpine AS runner
+FROM node:20 AS runner
 
 WORKDIR /app
 
