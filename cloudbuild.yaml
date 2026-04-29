@@ -1,32 +1,37 @@
 steps:
-  # 1. Install dependencies
-  - name: 'node:20-alpine'
-    entrypoint: 'npm'
-    args: ['ci']
+  # 1. Install dependencies (using pnpm)
+  - name: 'node:20'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npx -y pnpm@9 install --frozen-lockfile
 
   # 2. Build Next.js (includes typecheck)
-  - name: 'node:20-alpine'
-    entrypoint: 'npm'
-    args: ['run', 'build']
+  - name: 'node:20'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npx -y pnpm@9 build
 
   # 3. Construir imagen Docker
   - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'build',
-      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph/frontend:latest',
-      '.'
-    ]
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph/frontend:latest'
+      - '.'
 
   # 4. Subir imagen a Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'push',
-      'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph/frontend:latest'
-    ]
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph/frontend:latest'
 
   # 5. Desplegar en Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
+    entrypoint: 'gcloud'
     args:
       - 'run'
       - 'deploy'
