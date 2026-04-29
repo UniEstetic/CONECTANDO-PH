@@ -21,7 +21,7 @@ steps:
       - 'deploy'
       - 'conectando-ph-frontend'
       - '--image'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph/frontend:latest'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -45,7 +45,7 @@ steps:
       - 'AUTH_CLIENT_ID=550e8400-e29b-41d4-a716-446655440000'
 
 images:
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph/frontend:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
