@@ -13,7 +13,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
-      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest',
+      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph/frontend:latest',
       '.'
     ]
 
@@ -21,7 +21,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'push',
-      'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'
+      'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph/frontend:latest'
     ]
 
   # 5. Desplegar en Cloud Run
@@ -47,9 +47,13 @@ steps:
       - '--set-env-vars'
       - 'NEXT_PUBLIC_APP_NAME=Conectando PH'
       - '--set-env-vars'
+      - 'NEXT_PUBLIC_BACKEND_URL=https://connect-ph-api-939729604301.us-central1.run.app/api/v1'
+      - '--set-env-vars'
       - 'NEXTAUTH_SESSION_TIMEOUT=3600'
       - '--set-env-vars'
       - 'AUTH_PROVIDER_DEFAULT=accessEmail'
+      - '--set-env-vars'
+      - 'AUTH_CLIENT_ID=550e8400-e29b-41d4-a716-446655440000'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/conectando-ph-repo/frontend-image:latest'

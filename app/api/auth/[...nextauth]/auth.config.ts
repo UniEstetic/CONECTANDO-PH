@@ -83,6 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   jwt: {
     maxAge: SESSION_TIMEOUT,
   },
+  trustHost: true,
   providers: [
     Credentials({
       name: "Credentials",
