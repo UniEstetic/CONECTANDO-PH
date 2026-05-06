@@ -1,27 +1,45 @@
-import React from 'react';
+'use client';
+
+import React, { useMemo } from 'react';
 import styles from '@/app/ui/styles/usuarios.module.css';
 
 interface AccessProps {
-  rolesUsuario: string[];  // Los roles que tiene el usuario logueado
-  permisosRequeridos: string[]; // Los roles permitidos para este contenido
+  rolesUsuario: string[];
+  permisosRequeridos: string[];
   children: React.ReactNode;
 }
 
 /**
- * Este componente envuelve cualquier botón o sección.
- * Si el usuario no tiene el rol, "apaga" el contenido sin mover el diseño.
+ * Envuelve cualquier componente (botón, sección, etc.)
+ * Si el usuario no tiene permisos:
+ * - Aplica estilo visual (.noAcceso)
+ * - Bloquea interacción (CSS)
+ * - No rompe el layout
  */
-export const AccessGuard = ({ rolesUsuario, permisosRequeridos, children }: AccessProps) => {
-  // Limpiamos los roles del usuario (user tiene "Residentes")
-  const rolesLimpios = rolesUsuario.map(r => r.toLowerCase().trim());
-  
-  // Verificamos si alguno de los permisos requeridos coincide con los del usuario
-  const tieneAcceso = permisosRequeridos.some(p => 
-    rolesLimpios.includes(p.toLowerCase().trim())
-  );
+export const AccessGuard = ({
+  rolesUsuario,
+  permisosRequeridos,
+  children
+}: AccessProps) => {
+
+  // 🔹 Normaliza y valida roles (optimizado)
+  const tieneAcceso = useMemo(() => {
+    if (!rolesUsuario || rolesUsuario.length === 0) return false;
+
+    const rolesLimpios = rolesUsuario.map(r =>
+      r.toLowerCase().trim()
+    );
+
+    return permisosRequeridos.some(p =>
+      rolesLimpios.includes(p.toLowerCase().trim())
+    );
+  }, [rolesUsuario, permisosRequeridos]);
 
   return (
-    <div className={`${styles.guardContainer} ${!tieneAcceso ? styles.noAcceso : ''}`}>
+    <div
+      className={`${styles.guardContainer} ${!tieneAcceso ? styles.noAcceso : ''}`}
+      title={!tieneAcceso ? 'No tienes permisos' : undefined}
+    >
       {children}
     </div>
   );

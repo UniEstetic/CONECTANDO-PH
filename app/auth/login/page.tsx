@@ -79,6 +79,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="andres@gmail.com"
+          suppressHydrationWarning
         />
 
         <p className={styles.textinputHome}>Contraseña</p>
@@ -88,14 +89,18 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="********"
+          suppressHydrationWarning
         />
 
         <Link href="/auth/reset-password" className={styles.forgot}>
           ¿Olvidaste tu contraseña?
         </Link>
 
-        <button className={styles.btnUsuarios} type="submit">
+        <button 
+        suppressHydrationWarning
+        className={styles.btnUsuarios} type="submit">
           {loading ? 'Cargando...' : 'Iniciar Sesión'}
+          
         </button>
 
       </form>
