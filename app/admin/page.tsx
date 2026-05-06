@@ -2,23 +2,9 @@ import styles from '@/app/ui/styles/usuarios.module.css';
 import Image from 'next/image'
 import Link from 'next/link'
 import UsuariosHeader from '@/app/components/UsuariosHeader'
+import DashboardNotifications from '@/app/components/DashboardNotifications';
 
 export default function UsuariosAdministrativo() {
-  const opciones = [
-    {
-      titulo: 'Noviembre 12 del 2024',
-      descripcion: 'Tienes 4 nuevos PQRS por gestionar'
-    },
-    {
-      titulo: 'Noviembre 13 del 2024',
-      descripcion: 'Tienes 5 nuevas reservas de zonas comunes'
-    },
-    {
-      titulo: 'Noviembre 14 del 2024',
-      descripcion: 'Tienes un nuevo módulo de capacitación'
-    }
-  ]
-
   const accesos = [
     { img: '/imagenes/15_boton mis copropiedades.svg', url: '/admin/copropiedades', alt: 'Mis copropiedades' },
     { img: '/imagenes/16_boton mis usuarios.svg', url: '/admin/usuarios', alt: 'Mis usuarios' },
@@ -37,18 +23,7 @@ export default function UsuariosAdministrativo() {
 
           <UsuariosHeader />
         
-        {/* Lista superior */}
-        <section className={styles.list}>
-          {opciones.map((opcion, i) => (
-            <label key={i} className={styles.item}>
-              <span className={styles.fechaResidentes}>{opcion.titulo}</span>
-              <div className={styles.containerRadioResidentes}>
-                <input type="radio" name="noticia" />
-                <span className={styles.text}>{opcion.descripcion}</span>
-              </div>
-            </label>
-          ))}
-        </section>
+        <DashboardNotifications scope="admin" />
 
         {/* Accesos */}
         <section className={styles.accessAdministrativo}>
