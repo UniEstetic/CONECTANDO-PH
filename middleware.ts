@@ -39,48 +39,7 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/auth/login", nextUrl));
   }
 
-  // 🔐 =========================
-  // 🔐 CONTROL DE ROLES (NUEVO)
-  // 🔐 =========================
-
-  const path = nextUrl.pathname;
-
-  // 🔒 ADMIN
-  if (path.startsWith("/admin")) {
-    const esAdmin =
-      rolesLimpios.includes("administrador") ||
-      rolesLimpios.includes("admin");
-
-    if (!esAdmin) {
-      return NextResponse.redirect(new URL("/", nextUrl));
-    }
-  }
-
-  // 🔒 PORTERIA
-  if (path.startsWith("/porteria")) {
-    const esPortero =
-      rolesLimpios.includes("portero") ||
-      rolesLimpios.includes("porteria") ||
-      rolesLimpios.includes("administrador") ||
-      rolesLimpios.includes("admin");
-
-    if (!esPortero) {
-      return NextResponse.redirect(new URL("/", nextUrl));
-    }
-  }
-
-  // 🔒 RESIDENTES
-  if (path.startsWith("/residentes")) {
-    const permitido =
-      rolesLimpios.includes("residentes") ||
-      rolesLimpios.includes("residente") ||
-      rolesLimpios.includes("administrador") ||
-      rolesLimpios.includes("admin");
-
-    if (!permitido) {
-      return NextResponse.redirect(new URL("/", nextUrl));
-    }
-  }
+ 
 
   return NextResponse.next();
 });
