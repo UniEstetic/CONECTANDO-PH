@@ -1,81 +1,41 @@
 import NextAuth, { DefaultSession } from "next-auth";
 
 export interface AuthProfileUser {
+  id?: string;
   email: string;
   firstName: string;
   lastName: string;
-  document: string;
-  documentType: string;
-  phone: string;
-  avatar: string;
-  roles: string[];
-}
-
-export interface AuthOwnership {
-  id: string;
-  name: string;
-  tax_id: string;
-  address: string;
-  city: string;
-  country: string;
-  state: string;
+  document?: string;
+  documentType?: string;
+  phone?: string;
+  avatar?: string;
+  roles: Array<string | { name: string }>;
 }
 
 export interface AuthTokenProfile {
-  ownerships: (any[] & { id: string; name: string; tax_id?: string | undefined; address?: string | undefined; city?: string | undefined; country?: string | undefined; state?: string | undefined; }) | undefined;
-  userProfile?: AuthProfileUser;
-  ownership?: AuthOwnership;
-  userId?: string;
-  scope?: string[];
-  firstName?: string;
+  userId: string;
+  scope: string[];
+  roles: string[];
+  email: string;
+  name: string;
 }
 
 declare module "next-auth" {
   interface Session {
     accessToken?: string;
     accessTokenExpiresAt?: number;
-    userId?: string;
     error?: string;
     user: {
-      userId?: string;
-      scope?: string[];
-      firstName?: string;
-      userProfile?: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        roles: string[];
-        avatar: string;
-        document?: string;
-        documentType?: string;
-        phone?: string;
-      };
-      ownership?: {
-        id: string;
-        name: string;
-        tax_id?: string;
-        address?: string;
-        city?: string;
-        country?: string;
-        state?: string;
-        logo_url?: string;
-      };
-      ownerships?: {
-        id: string;
-        name: string;
-        tax_id?: string;
-        address?: string;
-        city?: string;
-        country?: string;
-        state?: string;
-      }[];
+      id: string;
+      name: string;
+      email: string;
+      roles: string[];
+      scope: string[];
     } & DefaultSession["user"];
   }
 
   interface User {
     userProfile?: any;
-    ownership?: any;
-    ownerships?: any[];
     accessToken?: string;
     userId?: string;
   }
@@ -84,8 +44,6 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     userProfile?: any;
-    ownership?: any;
-    ownerships?: any[];
     accessToken?: string;
     refreshToken?: string;
     accessTokenExpiresAt?: number;
@@ -98,13 +56,12 @@ declare module "next-auth/jwt" {
 export interface UserAuth{
   userProfile: AuthProfileUser,
   userId: string,
-  ownership: AuthOwnership,
-  ownerships?: any[];
-  scope: string[]
+  scope: string[],
+  roles?: string[]
 }
 
 export interface AuthUser extends UserAuth {
-  ownerships: any;
+  email: string;
   id: string;
   accessToken: string;
   refreshToken?: string;

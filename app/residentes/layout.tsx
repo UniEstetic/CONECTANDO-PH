@@ -4,12 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import LoadingState from '@/app/components/LoadingState';
 
-// ✅ Tipado de roles
-interface Role {
-  id: string;
-  name: string;
-}
-
 export default function ResidentesLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -17,12 +11,8 @@ export default function ResidentesLayout({ children }: { children: React.ReactNo
   useEffect(() => {
     if (status === 'loading') return;
 
-    // ✅ Obtener roles correctamente tipados
-    const roles: Role[] = (session?.user as any)?.userProfile?.roles || [];
-
-    // ✅ Normalizar a string[]
-    const rolesLimpios: string[] = roles.map(r =>
-      r.name.toLowerCase().trim()
+    const rolesLimpios: string[] = (session?.user?.roles || []).map((r) =>
+      r.toLowerCase().trim()
     );
 
     // ✅ Roles permitidos

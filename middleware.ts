@@ -9,12 +9,14 @@ export default auth((req) => {
   const hasSessionError = !!req.auth?.error;
   const isLoggedIn = !!req.auth && hasAccessToken && !hasSessionError;
 
-  // 🔐 NUEVO: obtener roles desde el token
-  const roles = req.auth?.user?.userProfile?.roles || [];
+  // Lee roles del shape actual de sesión: user.roles (string[])
+  // Mantiene compatibilidad defensiva por si algún rol llega como objeto.
+  const roles = req.auth?.user?.roles || [];
 
-  const rolesLimpios = roles.map((r: any) =>
-    r.name.toLowerCase().trim()
-  );
+  const rolesLimpios = roles
+    .map((r: any) => (typeof r === 'string' ? r : r?.name || ''))
+    .map((r: string) => r.toLowerCase().trim())
+    .filter(Boolean);
 
   // 1. Definir qué rutas son de autenticación (donde no quieres que esté si ya entró)
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
@@ -38,10 +40,6 @@ export default auth((req) => {
   if (!isLoggedIn && !isAuthRoute) {
     return NextResponse.redirect(new URL("/auth/login", nextUrl));
   }
-
-  // 🔐 =========================
-  // 🔐 CONTROL DE ROLES (NUEVO)
-  // 🔐 =========================
 
   const path = nextUrl.pathname;
 

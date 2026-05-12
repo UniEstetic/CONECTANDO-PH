@@ -20,7 +20,7 @@ interface CardRequestToSpeakProps {
 
 export function CardRequestToSpeak({ assemblyId }: CardRequestToSpeakProps) {
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
   const [showWordRequests, setShowWordRequests] = useState(true);
   const [wordRequests, setWordRequests] = useState<WordRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);

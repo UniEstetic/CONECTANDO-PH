@@ -12,7 +12,7 @@ import { auth } from "@/app/api/auth/[...nextauth]/auth.config";
 export default async function UsuariosPage() {
   // 1. Obtenemos la sesión para conocer los roles del usuario
   const session = await auth();
-  const userRoles = session?.user?.userProfile?.roles?.map((r: any) => r.name) || [];
+  const userRoles = session?.user?.roles || [];
   return (
     <div className={styles.container}>
       <Header/>
@@ -20,7 +20,7 @@ export default async function UsuariosPage() {
 
       <div className={styles.roles}>
         {/* BOTÓN RESIDENTE: Permitido para Residentes y Administradores */}
-        <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Residentes', 'Administrador']}>
+        <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Residente', 'Administrador']}>
         <div className={styles.role}>
           <div className={styles.imagenUsuarios}>
             <Link href="/residentes" className={styles.btnUsuarios}>

@@ -10,13 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (status === 'loading') return;
 
-    // ✅ Obtener roles correctamente desde userProfile
-    const roles = (session?.user as any)?.userProfile?.roles || [];
-
-    // ✅ Limpiar nombres de roles
-    const rolesLimpios = roles.map((r: any) =>
-      r.name.toLowerCase().trim()
-    );
+    const rolesLimpios = (session?.user?.roles || []).map((r) => r.toLowerCase().trim());
 
     // ✅ Validar acceso
     const esAdmin =

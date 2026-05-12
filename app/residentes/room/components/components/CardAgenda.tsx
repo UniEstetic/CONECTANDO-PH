@@ -36,7 +36,7 @@ interface AgendaWithQuestions {
 
 export function CardAgenda({ assemblyId }: CardAgendaProps) {
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
   const participants = useParticipants();
   const [showAgenda, setShowAgenda] = useState(true);
   const [showVoteModal, setShowVoteModal] = useState(false);

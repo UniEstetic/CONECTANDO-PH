@@ -29,7 +29,7 @@ function AssemblyInterfaceContent() {
   const roomName = params.get('r') || '';
   
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
   const cardVideoMethodsRef = useRef<CardVideoMethods>(null);
   const [wordRequestNotifications, setWordRequestNotifications] = useState<WordRequest[]>([]);
   const [assemblyDetails, setAssemblyDetails] = useState<AssemblyDetails | null>(null);

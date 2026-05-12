@@ -25,7 +25,7 @@ interface MessageNotificationsProps {
 // Componente para notificaciones de mensajes
 export function MessageNotifications() { //{ onClose }: MessageNotificationsProps
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
 
   // Mensajes y notificaciones
   const [message, setMessage] = useState("");

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const URL_BACKEND = process.env.BACKEND_API_URL ?? "http://localhost:3001/api/v1";
+const URL_BACKEND = process.env.BACKEND_API_URL;
 const CLIENT_ID = process.env.AUTH_CLIENT_ID;
 const SECRET_ID = process.env.AUTH_CLIENT_SECRET;
 
@@ -22,9 +22,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log('[reset-password-request] Enviando:', { email: body.email });
-    console.log('[reset-password-request] URL:', `${URL_BACKEND}/auth/reset-password-request`);
-
     const res = await fetch(`${URL_BACKEND}/auth/reset-password-request`, {
       method: "POST",
       headers: {
@@ -36,9 +33,6 @@ export async function POST(req: NextRequest) {
     });
 
     const data = await res.json().catch(() => ({}));
-
-    console.log('[reset-password-request] Status:', res.status);
-    console.log('[reset-password-request] Respuesta:', data);
 
     if (!res.ok) {
       return NextResponse.json(

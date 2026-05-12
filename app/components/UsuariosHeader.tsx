@@ -7,11 +7,7 @@ import { useSession } from 'next-auth/react'
 
 export default function UsuariosHeader() {
   const { data: session } = useSession()
-  const user = (session?.user as any) || {}
-  const profile = user?.userProfile || {}
-
-  const firstName =
-    user?.firstName || 'Usuario';
+  const firstName = session?.user?.name || 'Usuario';
 
   return (
     <div className={styles.headerUsuariosPropiedad}>

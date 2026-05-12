@@ -4,12 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import LoadingState from '@/app/components/LoadingState';
 
-// ✅ Tipado correcto
-interface Role {
-  id: string;
-  name: string;
-}
-
 export default function PorteriaLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -18,12 +12,8 @@ export default function PorteriaLayout({ children }: { children: React.ReactNode
   useEffect(() => {
     if (status === 'loading') return;
 
-    // ✅ Obtener roles correctamente
-    const roles: Role[] = (session?.user as any)?.userProfile?.roles || [];
-
-    // ✅ Normalizar
-    const rolesLimpios: string[] = roles.map(r =>
-      r.name.toLowerCase().trim()
+    const rolesLimpios: string[] = (session?.user?.roles || []).map((r) =>
+      r.toLowerCase().trim()
     );
 
     // ✅ Roles permitidos
