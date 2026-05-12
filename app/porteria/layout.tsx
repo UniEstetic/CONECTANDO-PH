@@ -16,7 +16,7 @@ export default function PorteriaLayout({ children }: { children: React.ReactNode
       r.toLowerCase().trim()
     );
 
-    // ✅ Roles permitidos
+    // Roles permitidos
     const permitidos: string[] = ['portero', 'porteria', 'administrador', 'admin'];
 
     const tieneAcceso = rolesLimpios.some(role =>
@@ -31,7 +31,7 @@ export default function PorteriaLayout({ children }: { children: React.ReactNode
 
   }, [status, session, router]);
 
-  // ⛔ Evita el flash
+  // Evita el flash
   if (status === 'loading' || !autorizado) {
     return <LoadingState message="Cargando módulo de portería..." variant="fullPage" />;
   }

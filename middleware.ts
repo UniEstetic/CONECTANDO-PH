@@ -43,7 +43,7 @@ export default auth((req) => {
 
   const path = nextUrl.pathname;
 
-  // 🔒 ADMIN
+  // ADMIN
   if (path.startsWith("/admin")) {
     const esAdmin =
       rolesLimpios.includes("administrador") ||
@@ -54,7 +54,7 @@ export default auth((req) => {
     }
   }
 
-  // 🔒 PORTERIA
+  // PORTERIA
   if (path.startsWith("/porteria")) {
     const esPortero =
       rolesLimpios.includes("portero") ||
@@ -67,7 +67,7 @@ export default auth((req) => {
     }
   }
 
-  // 🔒 RESIDENTES
+  // RESIDENTES
   if (path.startsWith("/residentes")) {
     const permitido =
       rolesLimpios.includes("residentes") ||

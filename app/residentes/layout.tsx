@@ -15,10 +15,10 @@ export default function ResidentesLayout({ children }: { children: React.ReactNo
       r.toLowerCase().trim()
     );
 
-    // ✅ Roles permitidos
+    // Roles permitidos
     const permitidos: string[] = ['residentes', 'residente', 'administrador', 'admin'];
 
-    // ✅ Validación sin error de TypeScript
+    // Validación sin error de TypeScript
     const tieneAcceso = rolesLimpios.some(role =>
       permitidos.includes(role)
     );
