@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useParticipants, useRoomContext } from "@livekit/components-react";
 import { getCited, getAttendees, getAbsences, getCoefficient, getQuorum } from "@/app/services/assemblies.service";
+import { Check } from "lucide-react";
 
 interface CardAttendanceProps {
   assemblyId?: string;
@@ -126,7 +127,12 @@ export function CardAttendance({ assemblyId }: CardAttendanceProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-gray-800">Asistencia</h3>
+        <div className="flex items-center gap-2">
+          <div className="bg-green-600 p-1 rounded-full flex items-center justify-center w-6 h-6">
+            <Check size={16} className="text-white" strokeWidth={3} />
+          </div>
+           <h3 className="text-lg font-semibold text-gray-800">Asistencia</h3>
+        </div>
         <span className="text-sm text-gray-500">
           {isLoading ? 'Cargando...' : `${stats?.total_asistentes || 0} en sala`}
         </span>
