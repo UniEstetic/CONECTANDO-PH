@@ -486,13 +486,13 @@
     position: relative;
 }
 
-.option-item.selected .option-radio {
-    border-color: #ff9800 !important; /* Naranja del diseño */
+.option-radio.selected {
+    border-color: #ff9800 ; 
     background: rgba(255, 152, 0, 0.2);
 }
 
-/* Crea el punto naranja central */
-.option-item.selected .option-radio::after {
+
+.option-radio.selected::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -504,11 +504,6 @@
     border-radius: 50%;
 }
 
-/* Resalta el nombre de la opción seleccionada */
-.option-item.selected .option-name {
-    color: #ff9800;
-    font-weight: bold;
-}
 
 .option-name {
     flex: 1;
@@ -864,16 +859,17 @@
     border-radius: 10px;
     margin-bottom: 10px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ;
 }
 
 .vote-option-item:hover {
     background: #e8e8e8;
 }
-
+/*Resaltar la opción seleccionada*/
 .vote-option-item.selected {
     background: rgba(255, 152, 0, 0.15);
     border: 2px solid #ff9800;
+    transition: all 0.2s ease;
 }
 
 .vote-radio {
@@ -932,6 +928,12 @@
     border-radius: 14px;
     font-weight: 600;
     cursor: pointer;
+}
+/*Desactivar el botón “Votar” hasta que haya selección*/
+.vote-submit:disabled {
+  background-color: #d9d9d9;
+  color: #777;
+  cursor: not-allowed;
 }
 
 /* MODAL DE VER RESULTADOS (nuevo - estilo imagen) */

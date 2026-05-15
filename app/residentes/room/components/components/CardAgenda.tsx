@@ -45,7 +45,7 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
   const [agendaItems, setAgendaItems] = useState<AgendaWithQuestions[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   
   // Attendance data for modals
   const [attendanceStats, setAttendanceStats] = useState({
@@ -299,31 +299,20 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
                           <div className={styles["voting-label"]}>
                             {question.question_text}
                           </div>
-                         {options.map((option, idx) => {
-                          // 1. Cálculo de la variable (Lógica)
-                          const isSelected = selectedOptions[question.id] === option.id;
-
-                       // 2. Retorno del JSX
-                            return (
+                         {options.map((option, idx) => (
+                          
                               <div 
                                 key={option.id} 
-                                className={`${styles["option-item"]} ${isSelected ? styles["selected"] : ""}`}
-                                onClick={() => isVotable && setSelectedOptions({
-                                  ...selectedOptions,
-                                  [question.id]: option.id
-                                })}
-                              >
+                                className={styles["option-item"]}>
                                 <div className={styles["option-radio"]}></div>
                                 <div className={styles["option-name"]}>{option.option_text}</div>
                                 <div className={styles["option-votes"]}>-</div>
                               </div>
-                            ); 
-                          })} 
+                         ))} 
                           {isVotable && (
                             <div className={styles["action-buttons"]}>
                               <button
                                 className={styles["btn-vote"]}
-                                disabled={!selectedOptions[question.id]}
                                 onClick={() => handleVoteClick(agendaItem, question)}
                               >
                                 Votar
@@ -386,16 +375,19 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
             </div>
 
             <div className={styles["vote-options"]}>
-              {currentVote.options.map((opt: any, idx: number) => (
+              {currentVote.options.map((opt: any, idx: number) => {
+                const isSelected = selectedOption === opt.id;
+                return(
                 <div
-                  className={styles["vote-option-item"]}
+                  className={`${styles["vote-option-item"]}${isSelected ? styles["selected"] : ""}`}
                   key={idx}
-                  onClick={() => {/* Aquí manejas la selección */ }}
+                  onClick={() => setSelectedOption(opt.id)}
                 >
                   <div className={styles["vote-radio"]}></div>
                   <div className={styles["vote-option-name"]}>{opt.name}</div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className={styles["vote-actions"]}>
@@ -407,7 +399,9 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
               </button>
               <button
                 className={styles["vote-submit"]}
+                disabled={!selectedOption}
                 onClick={() => {
+                  console.log("Voto enviado:", selectedOption);
                   // Aquí envías el voto
                   setShowVoteModal(false);
                 }}

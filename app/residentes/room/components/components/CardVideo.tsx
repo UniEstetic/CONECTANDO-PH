@@ -17,7 +17,8 @@ import {
   Monitor,
   Hand,
   VideoOff,
-  MicOff
+  MicOff,
+  MonitorUp 
 } from "lucide-react";
 import styles from '@/app/ui/styles/roomResidentes.module.css';
 import { RecordingIndicator } from "./RecordingIndicator";
@@ -193,6 +194,17 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
     }
   };
 
+  /*const handleShareScreen = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    // Aquí puedes conectar el stream al canal de LiveKit o mostrarlo localmente
+    console.log("Pantalla compartida:", stream);
+  } catch (error) {
+    console.error("Error al compartir pantalla:", error);
+  }
+};*/
+
+
   return (<>
     <div className={styles["video-section"]}>
       <div className={styles["current-speaker"]}>
@@ -240,7 +252,7 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
         </button>
         <button
           className={styles["control-btn"]}
-          title="Compartir pantalla"
+          title="Pantalla completa"
         >
           <Monitor size={24} color="#666" />
         </button>
@@ -251,6 +263,11 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
           title={isHandRaised ? "Bajar mano" : "Levantar mano"}
         >
           <Hand size={24} color={isHandRaised ? "#fff" : "#666"} />
+        </button>
+        <button className={styles["control-btn"]} 
+        title="Compartir pantalla"
+        >
+        <MonitorUp size={20} color="black" />
         </button>
         <RecordingControls />
       </div>
