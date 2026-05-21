@@ -203,7 +203,8 @@ export function CardAttendance({ assemblyId }: CardAttendanceProps) {
             ? 'bg-green-100 text-green-800' 
             : 'bg-red-100 text-red-800'
         }`}>
-          {stats.tiene_quorum ? '✓ Quórum alcanzado' : '✗ Sin quórum'}
+          {stats.tiene_quorum ? `✓ Quórum alcanzado(${stats.quorum_actual}% alcanzado)`
+          : `✗ Sin quórum(${stats.quorum_actual}% actual, requerido ${stats.quorum_requerido}%)`}
         </div>
       )}
     </div>

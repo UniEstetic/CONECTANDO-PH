@@ -56,6 +56,17 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
     setIsMicOn(localParticipant.isMicrophoneEnabled);
   }, [localParticipant]);
 
+  // Sincronizar estado de la mano con los metadatos reales de LiveKit al montar el componente
+  useEffect(() => {
+    if (!localParticipant) return;
+    try {
+      const meta = JSON.parse(localParticipant.metadata || '{}');
+      setIsHandRaised(!!meta.handRaised);
+    } catch (e) {
+      setIsHandRaised(false);
+    }
+  }, [localParticipant]);
+
   // Check if user already has an active word request on mount
   useEffect(() => {
     const checkExistingRequest = async () => {
@@ -139,9 +150,15 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
     if (isHandRaised && currentQaEntryId) {
       setIsLoadingHand(true);
       try {
-        await remove(currentQaEntryId);
-        setCurrentQaEntryId(null);
-        setIsHandRaised(false);
+        if (localParticipant) {
+          const currentMeta = JSON.parse(localParticipant.metadata || '{}');
+          const updatedMeta = {
+            ...currentMeta,
+            handRaised: false,
+            handRaisedTimestamp: null
+          };
+          await localParticipant.setMetadata(JSON.stringify(updatedMeta));
+        }
       } catch (err) {
         console.error('Error removing word request:', err);
       } finally {
@@ -185,6 +202,16 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
       if (qaEntry.data?.id) {
         setCurrentQaEntryId(qaEntry.data.id);
         setIsHandRaised(true);
+     // Notificación en vivo a LiveKit sin alterar el comportamiento de arriba
+        if (localParticipant) {
+          const currentMeta = JSON.parse(localParticipant.metadata || '{}');
+          const updatedMeta = {
+            ...currentMeta,
+            handRaised: true,
+            handRaisedTimestamp: Date.now()
+          };
+          await localParticipant.setMetadata(JSON.stringify(updatedMeta));
+        }
       }
     } catch (err) {
       console.error('Error creating word request:', err);

@@ -44,7 +44,6 @@ export default function CasilleroPage() {
 
         <div className={styles.headerCasillero}>
           <Link href="/residentes" className={styles.btnBack}>
-            <span>← Panel</span>
           </Link>
           <h1 className={styles.title}>Mi Casillero Virtual</h1>
         </div>

@@ -1447,12 +1447,13 @@
         color: #333333 !important; 
     }
 
-    /* Estilo para los elementos de lista (archivos/conectados) en fondo blanco */
-    .info-card [class*="item"], 
-    .info-card [class*="row"] {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #f0f0f0;
-    }
+    /* Estilo específico para los elementos de lista (archivos/conectados) en fondo blanco */
+.info-card .file-item,
+.info-card .connected-item,
+.info-card [class*="row"] {
+    background-color: #ffffff !important;
+    
+}
     .info-card input::placeholder,
 .info-card textarea::placeholder {
     color: #888888 !important; /* Gris para el texto de sugerencia */
@@ -1478,7 +1479,6 @@
 @media (min-width: 1024px) {
     /* El cuerpo de la tarjeta se mantiene blanco */
     .info-card {
-        background: #ffffff !important;
         color: #333;
         border-radius: 16px;
         overflow: hidden; /* Asegura que el encabezado negro respete las esquinas redondeadas */
