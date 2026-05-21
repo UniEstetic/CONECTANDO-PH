@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getByPh } from '@/app/services/assemblies.service';
+import { getAll } from '@/app/services/assemblies.service';
 import { useProperty } from '@/app/context/PropertyContext';
 import { Assembly } from '@/app/types/assemblies';
 import styles from '@/app/ui/styles/dashboardNotifications.module.css';
@@ -27,6 +27,14 @@ interface AssemblyNotificationItem {
 
 const MAX_VISIBLE_NOTIFICATIONS = 4;
 const ASSEMBLY_DOT_COLOR = '#a434b7';
+const DASHBOARD_ASSEMBLY_FIELDS = [
+  'id',
+  'name',
+  'status',
+  'scheduled_at',
+  'created_at',
+  'livekit_room_name',
+];
 const STATUS_PRIORITY: Record<AssemblyStatus, number> = {
   en_progreso: 0,
   programada: 1,
@@ -95,8 +103,12 @@ export default function DashboardNotifications({ scope }: DashboardNotifications
 
       try {
         setLoading(true);
-        const response = await getByPh(selectedPropertyId);
+        const response = await getAll({
+          phs_id: selectedPropertyId,
+          fields: DASHBOARD_ASSEMBLY_FIELDS.join(','),
+        });
         const data = Array.isArray(response?.data) ? response.data : [];
+        console.log("Las asambleas", data);
 
         // Filtramos y mapeamos en un solo paso
         const mapped = data

@@ -9,12 +9,14 @@ export default auth((req) => {
   const hasSessionError = !!req.auth?.error;
   const isLoggedIn = !!req.auth && hasAccessToken && !hasSessionError;
 
-  // 🔐 NUEVO: obtener roles desde el token
-  const roles = req.auth?.user?.userProfile?.roles || [];
+  // Lee roles del shape actual de sesión: user.roles (string[])
+  // Mantiene compatibilidad defensiva por si algún rol llega como objeto.
+  const roles = req.auth?.user?.roles || [];
 
-  const rolesLimpios = roles.map((r: any) =>
-    r.name.toLowerCase().trim()
-  );
+  const rolesLimpios = roles
+    .map((r: any) => (typeof r === 'string' ? r : r?.name || ''))
+    .map((r: string) => r.toLowerCase().trim())
+    .filter(Boolean);
 
   // 1. Definir qué rutas son de autenticación (donde no quieres que esté si ya entró)
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
@@ -39,7 +41,44 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/auth/login", nextUrl));
   }
 
- 
+  const path = nextUrl.pathname;
+
+  // ADMIN
+  if (path.startsWith("/admin")) {
+    const esAdmin =
+      rolesLimpios.includes("administrador") ||
+      rolesLimpios.includes("admin");
+
+    if (!esAdmin) {
+      return NextResponse.redirect(new URL("/", nextUrl));
+    }
+  }
+
+  // PORTERIA
+  if (path.startsWith("/porteria")) {
+    const esPortero =
+      rolesLimpios.includes("portero") ||
+      rolesLimpios.includes("porteria") ||
+      rolesLimpios.includes("administrador") ||
+      rolesLimpios.includes("admin");
+
+    if (!esPortero) {
+      return NextResponse.redirect(new URL("/", nextUrl));
+    }
+  }
+
+  // RESIDENTES
+  if (path.startsWith("/residentes")) {
+    const permitido =
+      rolesLimpios.includes("residentes") ||
+      rolesLimpios.includes("residente") ||
+      rolesLimpios.includes("administrador") ||
+      rolesLimpios.includes("admin");
+
+    if (!permitido) {
+      return NextResponse.redirect(new URL("/", nextUrl));
+    }
+  }
 
   return NextResponse.next();
 });

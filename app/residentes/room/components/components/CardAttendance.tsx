@@ -36,7 +36,7 @@ interface AttendanceStats {
 
 export function CardAttendance({ assemblyId }: CardAttendanceProps) {
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
   const participants = useParticipants();
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);

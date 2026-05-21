@@ -6,9 +6,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Assembly } from '@/app/types/assemblies';
 import { getAll, remove } from '@/app/services/assemblies.service';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
-import { useRouter } from 'next/navigation';
 import { useProperty } from '@/app/context/PropertyContext';
 import LoadingState from '@/app/components/LoadingState';
+import ConfirmDeleteModal from '@/app/components/ConfirmDeleteModal';
 
 const STATUS_CLASS_MAP: Record<string, string> = {
   scheduled: 'statusScheduled',
@@ -32,13 +32,24 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: '2-digit',
 };
 
+const ASAMBLEAS_LIST_FIELDS = [
+  'id',
+  'name',
+  'scheduled_at',
+  'status',
+];
+
 export default function MenuAsambleas() {
-  const router = useRouter();
   const { selectedPropertyId: phsId } = useProperty();
   const [assemblies, setAssemblies] = useState<Assembly[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{ show: boolean; id: string | null; name: string }>({
+    show: false,
+    id: null,
+    name: '',
+  });
 
   useEffect(() => {
     if (phsId) {
@@ -50,8 +61,14 @@ export default function MenuAsambleas() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAll({ phs_id: phsId || '', limit: '100', page: '1' });
+      const response = await getAll({
+        phs_id: phsId || '',
+        fields: ASAMBLEAS_LIST_FIELDS.join(','),
+        limit: '100',
+        page: '1',
+      });
       setAssemblies(response.data || []);
+      console.log('Asambleas cargadas:', response.data);
     } catch (err) {
       console.error('Error cargando asambleas:', err);
       setError('Error al cargar las asambleas');
@@ -61,21 +78,22 @@ export default function MenuAsambleas() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta asamblea?')) {
-      return;
-    }
-
     try {
       setDeletingId(id);
       await remove(id);
+      setDeleteModal({ show: false, id: null, name: '' });
       // Actualizar la lista después de eliminar
-      setAssemblies(assemblies.filter(a => a.id !== id));
+      setAssemblies((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
       console.error('Error al eliminar asamblea:', err);
       alert('Error al eliminar la asamblea');
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const openDeleteModal = (id: string, name: string) => {
+    setDeleteModal({ show: true, id, name });
   };
 
   const formatDate = useCallback((dateString: string) => {
@@ -148,8 +166,8 @@ export default function MenuAsambleas() {
                           Editar
                         </Link>
                         <button
-                          onClick={() => handleDelete(asembly.id!)}
-                          disabled={deletingId === asembly.id}
+                          onClick={() => asembly.id && openDeleteModal(asembly.id, asembly.name || 'Asamblea')}
+                          disabled={!asembly.id || deletingId === asembly.id}
                           className={`${styles.assambleaActionBtn} ${styles.deleteBtn}`}
                         >
                           {deletingId === asembly.id ? '...' : 'Eliminar'}
@@ -209,6 +227,16 @@ export default function MenuAsambleas() {
           
         </div>
       </main>
+
+      <ConfirmDeleteModal
+        isOpen={deleteModal.show}
+        title="Confirmar eliminación"
+        message="¿Está seguro de que desea eliminar la asamblea"
+        itemName={deleteModal.name}
+        isProcessing={Boolean(deletingId)}
+        onCancel={() => setDeleteModal({ show: false, id: null, name: '' })}
+        onConfirm={() => deleteModal.id && handleDelete(deleteModal.id)}
+      />
     </div>
   );
 }
