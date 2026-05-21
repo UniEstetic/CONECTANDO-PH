@@ -10,6 +10,16 @@ import { useProperty } from '@/app/context/PropertyContext'
 import LoadingState from '@/app/components/LoadingState'
 import ConfirmDeleteModal from '@/app/components/ConfirmDeleteModal';
 
+const USUARIOS_LIST_FIELDS = [
+  'id',
+  'first_name',
+  'last_name',
+  'email',
+  'document_number',
+  'type_person',
+  'is_active',
+];
+
 export default function ListadoUsuariosPage() {
   const { selectedPropertyId: phId } = useProperty();
 
@@ -32,8 +42,12 @@ export default function ListadoUsuariosPage() {
   const loadUsuarios = async () => {
     try {
       setLoading(true)
-      const response = await getAll({ phs_id: phId })
+      const response = await getAll({
+        phs_id: phId,
+        fields: USUARIOS_LIST_FIELDS.join(','),
+      })
       setUsuarios(response.data)
+      console.log("Los usuarios", response.data)
     } catch (error) {
       console.error('Error al cargar usuarios:', error)
     } finally {

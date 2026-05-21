@@ -12,7 +12,15 @@ import LoadingState from '@/app/components/LoadingState'
 import { useSession } from 'next-auth/react'
 import ConfirmDeleteModal from '@/app/components/ConfirmDeleteModal';
 
-const COPROPIEDADES_LIST_FIELDS = 'id,name,address,city,is_active,number_of_towers,amount_of_real_estate';
+const COPROPIEDADES_LIST_FIELDS = [
+  'id',
+  'name',
+  'address',
+  'city',
+  'is_active',
+  'number_of_towers',
+  'amount_of_real_estate',
+];
 
 export default function CopropiedadesPage() {
   const { data: session } = useSession();
@@ -38,7 +46,7 @@ export default function CopropiedadesPage() {
       setLoading(true)
       const response = await getAll({
         user_id: userId,
-        fields: COPROPIEDADES_LIST_FIELDS,
+        fields: COPROPIEDADES_LIST_FIELDS.join(','),
       })
       console.log("Las copropiedades", response)
       setCopropiedades(response.data)
