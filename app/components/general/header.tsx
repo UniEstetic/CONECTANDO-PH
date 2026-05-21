@@ -8,7 +8,7 @@ import { HeaderPropertySelector } from '@/app/components/HeaderPropertySelector'
 
 export default function Header() {
   const { data: session } = useSession();
-  const firstName = session?.user?.userProfile?.firstName || 'Usuario';
+  const firstName = session?.user?.name || 'Usuario';
 
   return (
     <div className={styles.header}>

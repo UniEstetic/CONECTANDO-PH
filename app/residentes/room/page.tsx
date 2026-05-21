@@ -19,19 +19,19 @@ import { getLivekitToken, getViewerToken, getHostToken } from "@/app/actions/liv
 import { AssemblyInterface } from "./components/AssemblyInterface";
 import { getByPh } from "@/app/services/assemblies.service";
 import { Assembly } from "@/app/types/assemblies";
+import { useProperty } from "@/app/context/PropertyContext";
 
 export default function RoomPage() {
   const params = useSearchParams();
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { selectedProperty, selectedPropertyId } = useProperty();
 
   // Get user data from session
-  const userProfile = session?.user?.userProfile;
-  const userId = session?.user?.userId;
-  const userName = userProfile ? `${userProfile.firstName} ${userProfile.lastName}`.trim() : "";
-  const userEmail = userProfile?.email || "";
-  const userRoles = userProfile?.roles || [];
-  const ownership = session?.user?.ownership?.[0];
+  const userId = session?.user?.id;
+  const userName = session?.user?.name || "";
+  const userEmail = session?.user?.email || "";
+  const userRoles = session?.user?.roles || [];
 
   const [room, setRoom] = useState("");
   const [name, setName] = useState(userName);
@@ -70,14 +70,13 @@ export default function RoomPage() {
   // Load assemblies for user's PH
   useEffect(() => {
     const loadAssemblies = async () => {
-      //if (status !== "authenticated" || !ownership?.id || room) return;
+      if (status !== "authenticated" || !selectedPropertyId || room) return;
       
       setIsLoadingAssemblies(true);
       setAssembliesError("");
       
       try {
-        const response = await getByPh("48a0acf8-32d0-4340-9712-1e890529e932");//ownership.id);
-        console.log('response', response);
+        const response = await getByPh(selectedPropertyId);
         if (response.data) {
           setAssemblies(response.data);
         }
@@ -90,7 +89,7 @@ export default function RoomPage() {
     };
 
     loadAssemblies();
-  }, [status, ownership, room]);
+  }, [status, selectedPropertyId, room]);
 
   // Auto-join room when session is loaded and room is available
   useEffect(() => {
@@ -168,9 +167,9 @@ export default function RoomPage() {
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
               Asambleas de tu Propiedad
             </h1>
-            {ownership && (
+            {selectedProperty && (
               <p className="text-gray-600 mb-6">
-                Propiedad: <span className="font-medium">{ownership.name}</span>
+                Propiedad: <span className="font-medium">{selectedProperty.name}</span>
               </p>
             )}
           </div>
@@ -306,9 +305,9 @@ export default function RoomPage() {
                   <p className="text-sm text-blue-700">
                     <span className="font-medium">Conectado como:</span> {userName}
                   </p>
-                  {ownership && (
+                  {selectedProperty && (
                     <p className="text-xs text-blue-600">
-                      <span className="font-medium">Propiedad:</span> {ownership.name}
+                      <span className="font-medium">Propiedad:</span> {selectedProperty.name}
                     </p>
                   )}
                 </div>

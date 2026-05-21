@@ -15,6 +15,10 @@ export interface Property {
   logo_url?: string;
 }
 
+interface PropertyApiResponse {
+  data?: unknown;
+}
+
 // Definición de los valores que el Contexto compartirá con toda la app
 interface PropertyContextValue {
   // Todas las copropiedades a las que el usuario tiene acceso 
@@ -51,6 +55,37 @@ function storeId(id: string) {
   if (typeof window !== 'undefined') localStorage.setItem(STORAGE_KEY, id);
 }
 
+function normalizeProperties(input: unknown): Property[] {
+  if (!Array.isArray(input)) return [];
+
+  return input
+    .map((item) => ({
+      id: item?.id,
+      name: item?.name,
+      tax_id: item?.tax_id,
+      address: item?.address,
+      city: item?.city,
+      country: item?.country,
+      state: item?.state,
+      logo_url: item?.logo_url,
+    }))
+    .filter((item) => !!item.id && !!item.name);
+}
+
+function pickSelectedProperty(list: Property[]): Property | null {
+  if (list.length === 0) return null;
+
+  const storedId = getStoredId();
+  const fromStorage = list.find((property) => property.id === storedId);
+  const selected = fromStorage ?? list[0];
+
+  if (selected?.id) {
+    storeId(selected.id);
+  }
+
+  return selected;
+}
+
 export function PropertyProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
 
@@ -59,49 +94,70 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Efecto principal: Extrae las propiedades de la sesión del usuario
+  // Efecto principal: Carga las propiedades del usuario desde API interna.
   useEffect(() => {
-    // Si no está autenticado, dejamos de cargar y salimos
-    if (status !== 'authenticated' || !session?.user) {
-      if (status !== 'loading') setIsLoading(false);
-      return;
+    let isCancelled = false;
+
+    async function hydrateProperties() {
+      if (status === 'loading') {
+        setIsLoading(true);
+        return;
+      }
+
+      if (status !== 'authenticated' || !session?.user) {
+        if (isCancelled) return;
+        setProperties([]);
+        setSelectedProperty(null);
+        setShowModal(false);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!session.user?.id) {
+        if (isCancelled) return;
+        setProperties([]);
+        setSelectedProperty(null);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/phs/my', {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store',
+        });
+
+        if (!res.ok) {
+          if (isCancelled) return;
+          setProperties([]);
+          setSelectedProperty(null);
+          setIsLoading(false);
+          return;
+        }
+
+        const body = (await res.json()) as PropertyApiResponse;
+        const fromApi = normalizeProperties(body?.data);
+
+        if (isCancelled) return;
+        setProperties(fromApi);
+        setSelectedProperty(pickSelectedProperty(fromApi));
+        setIsLoading(false);
+      } catch {
+        if (isCancelled) return;
+        setProperties([]);
+        setSelectedProperty(null);
+        setIsLoading(false);
+      }
     }
 
-    const user = session.user as any;
-    let list: Property[] = [];
+    hydrateProperties();
 
-    // Verificamos si el usuario trae una lista de copropiedades o solo una
-    if (Array.isArray(user.ownerships) && user.ownerships.length > 0) {
-      list = user.ownerships;
-    } else if (user.ownership) {
-      list = [user.ownership];
-    }
+    return () => {
+      isCancelled = true;
+    };
 
-    setProperties(list);
-
-    if (list.length === 0) {
-      setIsLoading(false);
-      return;
-    }
-
-    // Lógica para decidir cuál propiedad mostrar al entrar
-    const storedId = getStoredId();
-    const stored = list.find(p => p.id === storedId);
-
-    if (stored) {
-      // 1. Si el ID guardado en el navegador existe en su lista actual
-      setSelectedProperty(stored);
-    } else if (list.length === 1) {
-      // 2. Si solo tiene una propiedad, la seleccionamos por defecto
-      setSelectedProperty(list[0]);
-      storeId(list[0].id);
-    } else {
-      // 3. Si tiene varias pero ninguna guardada, seleccionamos la primera
-      setSelectedProperty(list[0]);
-      storeId(list[0].id);
-    }
-
-    setIsLoading(false);
   }, [session, status]);
 
   // Función para cambiar de propiedad manualmente

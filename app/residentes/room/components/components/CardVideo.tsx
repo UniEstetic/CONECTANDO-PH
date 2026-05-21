@@ -39,8 +39,8 @@ export interface CardVideoMethods {
 export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, ref) => {
   const { data: session } = useSession();
   const assemblyId = props.assemblyId;
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
-  const userId = session?.user?.userProfile?.id || '';
+  const userName = session?.user?.name || '';
+  const userId = session?.user?.id || '';
   const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone]);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isMicOn, setIsMicOn] = useState(false);

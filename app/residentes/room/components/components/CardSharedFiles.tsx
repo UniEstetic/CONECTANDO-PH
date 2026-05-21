@@ -13,7 +13,7 @@ import {
 
 export function CardSharedFiles() {
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
   const [showSharedFiles, setShowSharedFiles] = useState(true);
 
   return (<>
