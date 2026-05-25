@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useParticipants, useRoomContext } from "@livekit/components-react";
 import { getCited, getAttendees, getAbsences, getCoefficient, getQuorum } from "@/app/services/assemblies.service";
+import { Check } from "lucide-react";
 
 interface CardAttendanceProps {
   assemblyId?: string;
@@ -35,7 +36,7 @@ interface AttendanceStats {
 
 export function CardAttendance({ assemblyId }: CardAttendanceProps) {
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
   const participants = useParticipants();
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -126,7 +127,12 @@ export function CardAttendance({ assemblyId }: CardAttendanceProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-gray-800">Asistencia</h3>
+        <div className="flex items-center gap-2">
+          <div className="bg-green-600 p-1 rounded-full flex items-center justify-center w-6 h-6">
+            <Check size={16} className="text-white" strokeWidth={3} />
+          </div>
+           <h3 className="text-lg font-semibold text-gray-800">Asistencia</h3>
+        </div>
         <span className="text-sm text-gray-500">
           {isLoading ? 'Cargando...' : `${stats?.total_asistentes || 0} en sala`}
         </span>
@@ -197,7 +203,8 @@ export function CardAttendance({ assemblyId }: CardAttendanceProps) {
             ? 'bg-green-100 text-green-800' 
             : 'bg-red-100 text-red-800'
         }`}>
-          {stats.tiene_quorum ? '✓ Quórum alcanzado' : '✗ Sin quórum'}
+          {stats.tiene_quorum ? `✓ Quórum alcanzado(${stats.quorum_actual}% alcanzado)`
+          : `✗ Sin quórum(${stats.quorum_actual}% actual, requerido ${stats.quorum_requerido}%)`}
         </div>
       )}
     </div>

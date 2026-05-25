@@ -29,7 +29,7 @@ function AssemblyInterfaceContent() {
   const roomName = params.get('r') || '';
   
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
   const cardVideoMethodsRef = useRef<CardVideoMethods>(null);
   const [wordRequestNotifications, setWordRequestNotifications] = useState<WordRequest[]>([]);
   const [assemblyDetails, setAssemblyDetails] = useState<AssemblyDetails | null>(null);
@@ -129,9 +129,9 @@ function AssemblyInterfaceContent() {
 
         {/* COLUMNA DERECHA */}
         <div className={styles["desktop-right-column"]}>
-          <div className={`${styles["info-card"]}`}>
-            <CardAttendance assemblyId={assemblyDetails?.id}></CardAttendance>
-          </div>
+          <div className={`${styles["info-card"]} ${styles["desktop-attendance-card"]}`}>
+  <CardAttendance assemblyId={assemblyDetails?.id}></CardAttendance>
+</div>
 
           <div className={styles["info-card"]}>
             <CardRequestToSpeak assemblyId={assemblyDetails?.id}></CardRequestToSpeak>
@@ -141,6 +141,14 @@ function AssemblyInterfaceContent() {
             <CardUsersOnline toggleCamera={toggleCamera} toggleMic={toggleMic}></CardUsersOnline>
           </div>
         </div>
+        <div className={styles["mobile-only-section"]}>
+    <div className={styles["info-card"]}>
+      <CardSharedFiles></CardSharedFiles>
+    </div>
+    <div className={styles["info-card"]}>
+      <CardMessages assemblyDetails={assemblyDetails}></CardMessages>
+    </div>
+  </div>
       </div>
     </div>
   );

@@ -21,11 +21,11 @@ interface CardMessagesProps {
 
 export function CardMessages({ assemblyDetails }: CardMessagesProps) {
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
-  const userId = session?.user?.userId as string || '';
+  const userName = session?.user?.name || '';
+  const userId = session?.user?.id || '';
   
   // Determine user role from session (default: participant)
-  const userRoles = session?.user?.userProfile?.roles || [];
+  const userRoles = session?.user?.roles || [];
   const userRole = userRoles.includes('admin') ? 'admin' : 
                    userRoles.includes('moderator') ? 'moderator' : 'participant';
 

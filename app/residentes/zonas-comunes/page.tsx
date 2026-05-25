@@ -38,7 +38,6 @@ export default function ZonasComunesPage() {
 
         <div className={styles.headerSection}>
           <Link href="/residentes" className={styles.btnBack}>
-            <span>← Inicio</span>
           </Link>
           <h1 className={styles.title}>Zonas Comunes</h1>
         </div>

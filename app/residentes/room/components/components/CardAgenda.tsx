@@ -32,11 +32,15 @@ interface AgendaWithQuestions {
   is_active: boolean;
   votingQuestions: any[];
   options: Record<string, any[]>;
+  // Nuevos campos dinámicos mapeados desde mockData/DB
+  duration?: number;
+  is_treated?: boolean;
+  status?: 'open' | 'closed' | 'pending';
 }
 
 export function CardAgenda({ assemblyId }: CardAgendaProps) {
   const { data: session } = useSession();
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
+  const userName = session?.user?.name || '';
   const participants = useParticipants();
   const [showAgenda, setShowAgenda] = useState(true);
   const [showVoteModal, setShowVoteModal] = useState(false);
@@ -45,6 +49,8 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
   const [agendaItems, setAgendaItems] = useState<AgendaWithQuestions[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  
   
   // Attendance data for modals
   const [attendanceStats, setAttendanceStats] = useState({
@@ -154,6 +160,9 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
     const options = agendaItem.options[question.id] || [];
     const statusInfo = getStatusInfo(question);
 
+    // Regla de quórum requerida del punto o 50% por defecto
+    const tieneQuorum = attendanceStats.quorum >= (agendaItem.required_quorum || 50);
+
     setCurrentVote({
       agendaItemId: agendaItem.id,
       questionId: question.id,
@@ -162,6 +171,7 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
       status: statusInfo.label,
       statusStyle: statusInfo.style,
       isVotable: agendaItem.is_votable && question.status !== 'closed',
+      tieneQuorum: tieneQuorum, // Pasar estado de quórum al modal
       options: options.map((opt, idx) => ({
         id: opt.id,
         name: opt.option_text,
@@ -255,18 +265,30 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
               ) : agendaItems.length === 0 ? (
                 <div className="p-4 text-center text-gray-500">No hay puntos en la agenda</div>
               ) : (
-                agendaItems.map((agendaItem, agendaIdx) => (
-                  <div key={agendaItem.id} className={styles["agenda-item"]}>
+                agendaItems.map((agendaItem, agendaIdx) => {
+                  // Evaluar si el punto completo de la agenda está cerrado
+                  const esPuntoCerrado = agendaItem.status === 'closed';
+                  return(
+                  
+                  <div key={agendaItem.id} className={`${styles["agenda-item"]}${esPuntoCerrado ? styles["item-closed"] : ""}`}
+                  style={esPuntoCerrado ? { opacity: 0.8 } : {}}
+                  >
                     {/* Header */}
                     <div className={styles["agenda-header"]}>
                       <div className={styles["agenda-number"]}>
-                        <span style={{ fontSize: "0.75rem", color: "#fff" }}>●</span>
+                        <span style={{ fontSize: "0.75rem", color: esPuntoCerrado ? "#ef4444" : "#4ade80" }}>●</span>
                       </div>
                       <div className={styles["agenda-details"]}>
                         <div className={styles["agenda-title-text"]}>PUNTO {agendaIdx + 1}</div>
-                        <div style={{ fontSize: "0.875rem", marginBottom: "0.25rem" }}>
+                        <div style={{ fontSize: "0.875rem", marginBottom: "0.25rem", fontWeight: "500"}}>
                           {agendaItem.title}
                         </div>
+                        {/* Metadatos Dinámicos: Duración y Tratado */}
+                          <div style={{ display: 'flex', gap: '12px', fontSize: "0.75rem", color: "#aaa", marginBottom: "0.5rem" }}>
+                            <span>⏱️ {agendaItem.duration || 15} min</span>
+                            <span>📋 {agendaItem.is_treated ? 'Tratado' : 'No tratado'}</span>
+                          </div>
+
                         {agendaItem.votingQuestions.length > 0 ? (
                           agendaItem.votingQuestions.map((question) => {
                             const statusInfo = getStatusInfo(question);
@@ -292,29 +314,40 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
                       const options = agendaItem.options[question.id] || [];
                       const statusInfo = getStatusInfo(question);
                       const isVotable = agendaItem.is_votable && question.status !== 'closed';
+                      const tieneQuorum = attendanceStats.quorum >= (agendaItem.required_quorum || 50);
+                      // Bloqueo total si el punto completo está cerrado o si no hay quórum reglamentario
+                        const botonBloqueado = esPuntoCerrado || !tieneQuorum;
 
                       return (
                         <div key={question.id} className={styles["voting-options"]}>
                           <div className={styles["voting-label"]}>
                             {question.question_text}
                           </div>
-                          {options.map((option, idx) => (
-                            <div key={option.id} className={styles["option-item"]}>
-                              <div className={styles["option-radio"]}></div>
-                              <div className={styles["option-name"]}>{option.option_text}</div>
-                              <div className={styles["option-votes"]}>-</div>
-                            </div>
-                          ))}
+                         {options.map((option) => (
+                          
+                              <div 
+                                key={option.id} 
+                                className={styles["option-item"]}>
+                                <div className={styles["option-radio"]}></div>
+                                <div className={styles["option-name"]}>{option.option_text}</div>
+                                <div className={styles["option-votes"]}>-</div>
+                              </div>
+                         ))} 
                           {isVotable && (
                             <div className={styles["action-buttons"]}>
                               <button
                                 className={styles["btn-vote"]}
+                                /*disabled={botonBloqueado}
+                                  style={botonBloqueado ? { opacity: 0.4, cursor: 'not-allowed' } : {}}*/
                                 onClick={() => handleVoteClick(agendaItem, question)}
                               >
+                                {esPuntoCerrado ? 'Punto Cerrado' : tieneQuorum ? 'Votar' : 'Sin quórum'}
                                 Votar
                               </button>
                               <button
                                 className={styles["btn-view"]}
+                               /* disabled={esPuntoCerrado}*/
+                               /* style={esPuntoCerrado ? { opacity: 0.4, cursor: 'not-allowed' } : {}}*/
                                 onClick={() => handleResultsClick(agendaItem, question)}
                               >
                                 Ver votos
@@ -334,7 +367,8 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
                       </div>
                     )}
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}
@@ -371,17 +405,23 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
             </div>
 
             <div className={styles["vote-options"]}>
-              {currentVote.options.map((opt: any, idx: number) => (
+              {currentVote.options.map((opt: any, idx: number) => {
+                const isSelected = selectedOption === opt.id;
+                return(
                 <div
-                  className={styles["vote-option-item"]}
+                  className={`${styles["vote-option-item"]}${isSelected ? styles["selected"] : ""}`}
                   key={idx}
-                  onClick={() => {/* Aquí manejas la selección */ }}
+                  onClick={() => setSelectedOption(opt.id)}
+                 /*onClick={() => currentVote.tieneQuorum && setSelectedOption(opt.id)}*/
+                  /*style={!currentVote.tieneQuorum ? { cursor: 'not-allowed', opacity: 0.7 } : {}}*/
                 >
                   <div className={styles["vote-radio"]}></div>
                   <div className={styles["vote-option-name"]}>{opt.name}</div>
                 </div>
-              ))}
+                );
+              })}
             </div>
+
 
             <div className={styles["vote-actions"]}>
               <button
@@ -392,7 +432,9 @@ export function CardAgenda({ assemblyId }: CardAgendaProps) {
               </button>
               <button
                 className={styles["vote-submit"]}
+                disabled={!selectedOption}
                 onClick={() => {
+                  console.log("Voto enviado:", selectedOption);
                   // Aquí envías el voto
                   setShowVoteModal(false);
                 }}

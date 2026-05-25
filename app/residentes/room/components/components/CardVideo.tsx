@@ -17,7 +17,8 @@ import {
   Monitor,
   Hand,
   VideoOff,
-  MicOff
+  MicOff,
+  MonitorUp 
 } from "lucide-react";
 import styles from '@/app/ui/styles/roomResidentes.module.css';
 import { RecordingIndicator } from "./RecordingIndicator";
@@ -38,8 +39,8 @@ export interface CardVideoMethods {
 export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, ref) => {
   const { data: session } = useSession();
   const assemblyId = props.assemblyId;
-  const userName = (`${session?.user?.userProfile?.firstName} ${session?.user?.userProfile?.lastName}`) || '';
-  const userId = session?.user?.userProfile?.id || '';
+  const userName = session?.user?.name || '';
+  const userId = session?.user?.id || '';
   const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone]);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isMicOn, setIsMicOn] = useState(false);
@@ -53,6 +54,17 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
   useEffect(() => {
     setIsCameraOn(localParticipant.isCameraEnabled);
     setIsMicOn(localParticipant.isMicrophoneEnabled);
+  }, [localParticipant]);
+
+  // Sincronizar estado de la mano con los metadatos reales de LiveKit al montar el componente
+  useEffect(() => {
+    if (!localParticipant) return;
+    try {
+      const meta = JSON.parse(localParticipant.metadata || '{}');
+      setIsHandRaised(!!meta.handRaised);
+    } catch (e) {
+      setIsHandRaised(false);
+    }
   }, [localParticipant]);
 
   // Check if user already has an active word request on mount
@@ -138,9 +150,15 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
     if (isHandRaised && currentQaEntryId) {
       setIsLoadingHand(true);
       try {
-        await remove(currentQaEntryId);
-        setCurrentQaEntryId(null);
-        setIsHandRaised(false);
+        if (localParticipant) {
+          const currentMeta = JSON.parse(localParticipant.metadata || '{}');
+          const updatedMeta = {
+            ...currentMeta,
+            handRaised: false,
+            handRaisedTimestamp: null
+          };
+          await localParticipant.setMetadata(JSON.stringify(updatedMeta));
+        }
       } catch (err) {
         console.error('Error removing word request:', err);
       } finally {
@@ -184,6 +202,16 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
       if (qaEntry.data?.id) {
         setCurrentQaEntryId(qaEntry.data.id);
         setIsHandRaised(true);
+     // Notificación en vivo a LiveKit sin alterar el comportamiento de arriba
+        if (localParticipant) {
+          const currentMeta = JSON.parse(localParticipant.metadata || '{}');
+          const updatedMeta = {
+            ...currentMeta,
+            handRaised: true,
+            handRaisedTimestamp: Date.now()
+          };
+          await localParticipant.setMetadata(JSON.stringify(updatedMeta));
+        }
       }
     } catch (err) {
       console.error('Error creating word request:', err);
@@ -192,6 +220,17 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
       setIsLoadingHand(false);
     }
   };
+
+  /*const handleShareScreen = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    // Aquí puedes conectar el stream al canal de LiveKit o mostrarlo localmente
+    console.log("Pantalla compartida:", stream);
+  } catch (error) {
+    console.error("Error al compartir pantalla:", error);
+  }
+};*/
+
 
   return (<>
     <div className={styles["video-section"]}>
@@ -240,7 +279,7 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
         </button>
         <button
           className={styles["control-btn"]}
-          title="Compartir pantalla"
+          title="Pantalla completa"
         >
           <Monitor size={24} color="#666" />
         </button>
@@ -251,6 +290,11 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
           title={isHandRaised ? "Bajar mano" : "Levantar mano"}
         >
           <Hand size={24} color={isHandRaised ? "#fff" : "#666"} />
+        </button>
+        <button className={styles["control-btn"]} 
+        title="Compartir pantalla"
+        >
+        <MonitorUp size={20} color="black" />
         </button>
         <RecordingControls />
       </div>
