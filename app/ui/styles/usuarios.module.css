@@ -1589,5 +1589,1131 @@
   
  
 }
+/* VISTA: MIS PETICIONES Y QUEJAS (PQRS)*/
 
+/* Encabezado de la sección */
+.headerPqrs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; 
+  gap: 15px;
+  width: 100%;
+  max-width: 650px;
+  margin: 20px auto 25px auto;
+  padding: 0;
+}
+.headerPqrs .btnBack {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+/* Sección del botón "Crear nueva solicitud" */
+.actionSection {
+  margin-bottom: 35px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 
+.btnNuevoPqrs {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background-color: #F3DEAA;
+  border-radius: 16px;
+  padding: 15px 25px;
+  width: 100%;
+  max-width: 650px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btnNuevoPqrs:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.iconPlus {
+  font-size: 32px;
+  font-weight: 300;
+  color: #b6924b;
+  background: white;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.textBtn {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.textBtn strong {
+  font-size: 16px;
+  color: #222;
+}
+
+.textBtn span {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Listado de solicitudes (Historial) */
+.listSection {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 5rem auto;
+}
+
+.subTitle {
+  font-size: 18px;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.pqrsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Tarjetas individuales de radicado */
+.pqrsCard {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pqrsCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Cabecera de la tarjeta (ID y Estado) */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.radicado {
+  font-weight: 700;
+  color: #b6924b;
+  font-size: 14px;
+}
+
+/* Badges de estado dinámicos */
+.estadoBadge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.estadoBadge.enrevisión {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.estadoBadge.cerrado {
+  background-color: #eee;
+  color: #666;
+}
+
+.estadoBadge.resuelto {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* Cuerpo de la tarjeta (Asunto y Categoría) */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.asunto {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.metaInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #7a7a7a;
+}
+
+.separator {
+  color: #ccc;
+}
+
+/* Footer de la tarjeta (Alertas de respuesta y flecha) */
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.viewLink {
+  color: #b6924b;
+  font-weight: 500;
+}
+
+.newMessage {
+  color: #2e7d32;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #28a745;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.arrow {
+  color: #b6924b;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* ============================================
+   Ajustes Responsivos para móviles
+   ============================================ */
+@media screen and (max-width: 1024px) {
+  .headerPqrs {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0 15px;
+  }
+
+  .actionSection, .listSection {
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+
+  .btnNuevoPqrs {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .iconPlus {
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+  }
+
+  .asunto {
+    font-size: 15px;
+  }
+}
+
+/* VISTA: DOCUMENTOS Y ARCHIVOS (RESIDENTES)*/
+
+/* Encabezado unificado en ancho máximo */
+.headerSection {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  width: 100%;
+  max-width: 650px;
+  margin: 20px auto 25px auto !important;
+  flex-direction: row !important; /* Evita que herede el column de otras vistas */
+}
+
+/* Buscador */
+.searchBar {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 25px auto;
+}
+
+.inputSearch {
+  width: 100%;
+  padding: 12px 20px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  background-color: white;
+  transition: border-color 0.2s;
+}
+
+.inputSearch:focus {
+  border-color: #c4a861;
+}
+
+/* Contenedor principal de la lista */
+.listadoDocumentos {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 5rem auto;
+}
+
+/* Tarjeta individual de cada documento */
+.cardDoc {
+  background: white;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.cardDoc:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Icono / Badge de Tipo de Archivo */
+.iconDoc {
+  flex-shrink: 0;
+}
+
+.extBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  text-transform: uppercase;
+}
+
+/* Colores condicionales según la extensión del archivo */
+.extBadge.pdf {
+  background-color: #e53935; /* Rojo PDF */
+}
+
+.extBadge.jpg, .extBadge.jpeg {
+  background-color: #1e88e5; /* Azul imágenes */
+}
+
+.extBadge.png {
+  background-color: #00acc1;
+}
+
+/* Bloque central de información */
+.infoDoc {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.docName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.docDesc {
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Metadata inferior */
+.metaDoc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #7a7a7a;
+  margin-top: 2px;
+}
+
+.category {
+  font-weight: 500;
+  color: #b6924b;
+}
+
+.size {
+  color: #666;
+}
+
+/* Botón de acción / Descarga */
+.actionsDoc {
+  flex-shrink: 0;
+}
+
+.btnDownload {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btnDownload:hover {
+  background-color: #f5f5f5;
+}
+
+/* ============================================
+   Ajustes de Media Queries (Móvil)
+   ============================================ */
+@media screen and (max-width: 1024px) {
+  .headerSection, .searchBar, .listadoDocumentos {
+    max-width: 90%;
+    padding: 0;
+  }
+
+  .cardDoc {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .extBadge {
+    width: 44px;
+    height: 44px;
+    font-size: 12px;
+  }
+
+  .docName {
+    font-size: 14px;
+  }
+
+  .docDesc {
+    font-size: 12px;
+  }
+}
+
+/* VISTA: ZONAS COMUNES Y RESERVAS */
+
+/* Alertas de próximas reservas */
+.myReservations {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 30px auto;
+}
+
+.reservationAlert {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-left: 5px solid #28a745; /* Verde de confirmado */
+  border-radius: 12px;
+  padding: 16px 20px;
+  gap: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.resIcon {
+  font-size: 24px;
+}
+
+.resInfo {
+  flex: 1;
+  text-align: left;
+}
+
+.resInfo p {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.resInfo p strong {
+  font-size: 16px;
+  color: #222;
+}
+
+.resStatus {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Catálogo de Espacios en Grid */
+.gridZonas {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 5rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Tarjeta de Zona */
+.zonaCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+/* Contenedor de la Imagen / Placeholder superior */
+.zonaImage {
+  height: 140px;
+  background: linear-gradient(135deg, #c4a861 0%, #9c7b2f 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.priceTag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Contenido de la tarjeta */
+.zonaBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.zonaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.zonaName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+/* Badges de estado dinámicos según clases inyectadas */
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Estilos dinámicos usando los nombres normalizados en tu JS */
+.disponible .statusBadge {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.reservadohoy .statusBadge {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.mantenimiento .statusBadge {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.zonaDesc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Botón de reserva */
+.btnReserve {
+  width: 100%;
+  padding: 12px;
+  background-color: #c4a861;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btnReserve:hover:not(:disabled) {
+  background-color: #b08d4a;
+}
+
+.btnReserve:disabled {
+  background-color: #e0e0e0;
+  color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   Ajustes Responsivos (Móviles)
+   ============================================ */
+@media screen and (max-width: 1024px) {
+  .myReservations, .gridZonas {
+    max-width: 90%;
+    padding: 0;
+  }
+
+  .reservationAlert {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .resIcon {
+    font-size: 20px;
+  }
+
+  .resStatus {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+
+  .zonaBody {
+    padding: 15px;
+  }
+
+  .zonaName {
+    font-size: 16px;
+  }
+}
+
+/* VISTA: MI CASILLERO VIRTUAL */
+
+/* Encabezado del Casillero */
+.headerCasillero {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  width: 100%;
+  max-width: 650px;
+  margin: 20px auto 25px auto !important;
+  flex-direction: row !important;
+}
+
+/* Banner superior de alertas */
+.alertBanner {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 30px auto;
+}
+
+.alertActive {
+  display: flex;
+  align-items: center;
+  background-color: #FFF9E6; /* Fondo sutil amarillo/alerta */
+  border: 1px solid #F3DEAA;
+  border-radius: 12px;
+  padding: 16px 20px;
+  gap: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+}
+
+.alertEmpty {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 16px 20px;
+  gap: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+}
+
+.alertIcon {
+  font-size: 24px;
+}
+
+.alertText {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* Lista y Tarjetas de Paquetes */
+.packageList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.packageCard {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+/* Encabezado de la Tarjeta (ID y Tiempo) */
+.packageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.packageId {
+  font-weight: 700;
+  color: #b6924b;
+  font-size: 14px;
+}
+
+.packageTime {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Cuerpo de la Tarjeta */
+.packageBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.companyName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.description {
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+}
+
+.receivedBy {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Footer de la tarjeta */
+.packageFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+/* Indicador con punto de estado  */
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Variaciones de estado mapeadas desde las propiedades del componente */
+.pendiente .statusIndicator {
+  color: #e65100;
+}
+.pendiente .dot {
+  background-color: #ff9800;
+  box-shadow: 0 0 0 4px #fff3e0;
+}
+
+.entregado .statusIndicator {
+  color: #2e7d32;
+}
+.entregado .dot {
+  background-color: #4caf50;
+  box-shadow: 0 0 0 4px #e8f5e9;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Botón de acción: Recordarme luego */
+.btnNotify {
+  background-color: #fcf8f0;
+  border: 1px solid #f3deaa;
+  color: #b6924b;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnNotify:hover {
+  background-color: #f3deaa;
+  color: #222;
+}
+/* ============================================
+   Ajustes Responsivos para móviles
+   ============================================ */
+@media screen and (max-width: 1024px) {
+  .headerCasillero, .alertBanner, .listSection {
+    max-width: 90%;
+    padding: 0;
+  }
+
+  .packageCard {
+    padding: 16px;
+    gap: 10px;
+  }
+
+  .companyName {
+    font-size: 15px;
+  }
+}
+
+/* VISTA: MIS VISITANTES */
+
+/* Sección del botón de acción rápida */
+.mainActions {
+  margin-bottom: 35px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.btnAutorizar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  background-color: #F3DEAA;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 25px;
+  width: 100%;
+  max-width: 650px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btnAutorizar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.plusCircle {
+  font-size: 24px;
+  font-weight: 400;
+  color: #b6924b;
+  background: white;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Contenedor de las tarjetas de visita */
+.visitContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Tarjeta base */
+.visitCard {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+/* Fila principal de contenido */
+.cardMain {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.iconType {
+  font-size: 22px;
+  background: #fcf8f0;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.info {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.meta {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+/* Badge de estado general */
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Estilos dinámicos basados en la normalización  */
+.ensitio .statusBadge {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.autorizado .statusBadge {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.finalizado .statusBadge {
+  background-color: #eee;
+  color: #666;
+}
+
+/* Footer expandido (Solo visibles cuando el estado es 'Autorizado') */
+.cardFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 15px;
+  width: 100%;
+}
+
+.btnShare {
+  background-color: #fcf8f0;
+  border: 1px solid #f3deaa;
+  color: #b6924b;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnShare:hover {
+  background-color: #f3deaa;
+  color: #222;
+}
+
+.btnCancel {
+  background-color: #fff5f5;
+  border: 1px solid #ffcccc;
+  color: #e53935;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnCancel:hover {
+  background-color: #e53935;
+  color: white;
+  border-color: #e53935;
+}
+
+/* ============================================
+   Ajustes de Adaptabilidad Móvil
+   ============================================ */
+@media screen and (max-width: 1024px) {
+  .mainActions, .listSection {
+    max-width: 90%;
+    padding: 0;
+  }
+
+  .btnAutorizar {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .visitCard {
+    padding: 16px;
+  }
+
+  .cardMain {
+    gap: 12px;
+  }
+
+  .iconType {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .name {
+    font-size: 15px;
+  }
+
+  .cardFooter {
+    justify-content: space-between;
+  }
+
+  .btnShare, .btnCancel {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* Aplicar a todos los contenedores de encabezado de las nuevas vistas */
+.headerPqrs,
+.headerSection,
+.headerCasillero {
+  display: flex !important;
+  flex-direction: row !important; /* Fuerza que el botón y el título vayan lado a lado */
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 16px !important;
+  width: 100% !important;
+  max-width: 650px !important;
+  margin: 30px auto 25px auto !important; /* Centra el bloque entero respecto a las tarjetas */
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Estilizar el botón de regresar */
+.btnBack {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #b6924b !important; /* Dorado institucional */
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  text-decoration: none !important;
+  font-weight: bold !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+  flex-shrink: 0 !important; /* Evita que el título lo aplaste */
+  transition: transform 0.2s ease, background-color 0.2s ease !important;
+}
+
+.btnBack:hover {
+  transform: scale(1.05);
+  background-color: #ffffff !important;
+}
+
+/* Ocultar el texto "Inicio" o "Panel" en pantallas grandes para dejar solo la flecha limpia si es necesario, 
+   o asegurar que si se muestra, no rompa la línea */
+.btnBack span {
+  font-size: 16px !important;
+  display: inline-block !important;
+}
+
+/* Asegurar que los títulos h1 no hereden márgenes extrañas */
+.title {
+  font-size: 24px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  text-align: left !important;
+  line-height: 1.2 !important;
+}
+
+/* Forzar que las secciones de contenido sigan exactamente el mismo eje centrado */
+.actionSection,
+.mainActions,
+.searchBar,
+.listSection,
+.myReservations,
+.gridZonas,
+.alertBanner {
+  width: 100% !important;
+  max-width: 650px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}

@@ -38,7 +38,6 @@ export default function VisitantesResidentesPage() {
 
         <div className={styles.headerSection}>
           <Link href="/residentes" className={styles.btnBack}>
-            <span>← Inicio</span>
           </Link>
           <h1 className={styles.title}>Mis Visitantes</h1>
         </div>

@@ -38,7 +38,6 @@ export default function PqrsResidentesPage() {
 
         <div className={styles.headerPqrs}>
           <Link href="/residentes" className={styles.btnBack}>
-            <span>← Inicio</span>
           </Link>
           <h1 className={styles.title}>Mis Peticiones y Quejas</h1>
         </div>

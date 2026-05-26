@@ -46,7 +46,6 @@ export default function DocumentosResidentesPage() {
 
         <div className={styles.headerSection}>
           <Link href="/residentes" className={styles.btnBack}>
-            <span>← Inicio</span>
           </Link>
           <h1 className={styles.title}>Documentos y Archivos</h1>
         </div>
