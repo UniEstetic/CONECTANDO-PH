@@ -34,6 +34,7 @@ function AssemblyInterfaceContent() {
   const [wordRequestNotifications, setWordRequestNotifications] = useState<WordRequest[]>([]);
   const [assemblyDetails, setAssemblyDetails] = useState<AssemblyDetails | null>(null);
   const [isLoadingAssembly, setIsLoadingAssembly] = useState(false);
+  const [wordRequestRefreshKey, setWordRequestRefreshKey] = useState(0);
 
   // Fetch assembly details using room name
   useEffect(() => {
@@ -68,6 +69,10 @@ function AssemblyInterfaceContent() {
 
   const toggleMic = () => {
     cardVideoMethodsRef.current?.toggleFn('mic');
+  };
+
+  const refreshWordRequests = () => {
+    setWordRequestRefreshKey((prev) => prev + 1);
   };
 
   // Use assembly name from details, fallback to default
@@ -107,7 +112,11 @@ function AssemblyInterfaceContent() {
           </div>
 
           <div className={styles["desktop-video-wrapper"]}>
-            <CardVideo assemblyId={assemblyDetails?.id} ref={cardVideoMethodsRef}></CardVideo>
+            <CardVideo
+              assemblyId={assemblyDetails?.id}
+              onWordRequestChanged={refreshWordRequests}
+              ref={cardVideoMethodsRef}
+            ></CardVideo>
           </div>
 
           <div className={styles["desktop-bottom-panels"]}>
@@ -134,7 +143,10 @@ function AssemblyInterfaceContent() {
 </div>
 
           <div className={styles["info-card"]}>
-            <CardRequestToSpeak assemblyId={assemblyDetails?.id}></CardRequestToSpeak>
+            <CardRequestToSpeak
+              assemblyId={assemblyDetails?.id}
+              refreshKey={wordRequestRefreshKey}
+            ></CardRequestToSpeak>
           </div>
 
           <div className={styles["info-card"]}>

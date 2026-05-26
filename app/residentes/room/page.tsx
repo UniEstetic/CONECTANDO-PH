@@ -4,13 +4,14 @@ import {
   LiveKitRoom
 } from "@livekit/components-react";
 import "@livekit/components-styles";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { LiveKitResponse } from "@/app/types/livekit";
 import { Video, Calendar, Clock, Users, ArrowRight } from "lucide-react";
 import styles from '@/app/ui/styles/usuarios.module.css';
 import UsuariosHeader from '@/app/components/UsuariosHeader';
+import LoadingState from '@/app/components/LoadingState';
 
 // Import server actions
 import { getLivekitToken, getViewerToken, getHostToken } from "@/app/actions/livekit";
@@ -32,6 +33,7 @@ export default function RoomPage() {
   const userName = session?.user?.name || "";
   const userEmail = session?.user?.email || "";
   const userRoles = session?.user?.roles || [];
+  const userRoleKey = userRoles.slice().sort().join('|');
 
   const [room, setRoom] = useState("");
   const [name, setName] = useState(userName);
@@ -44,6 +46,7 @@ export default function RoomPage() {
   const [assemblies, setAssemblies] = useState<Assembly[]>([]);
   const [isLoadingAssemblies, setIsLoadingAssemblies] = useState(false);
   const [assembliesError, setAssembliesError] = useState("");
+  const isJoiningRef = useRef(false);
 
   // Get room from URL query parameter 'r'
   useEffect(() => {
@@ -94,7 +97,14 @@ export default function RoomPage() {
   // Auto-join room when session is loaded and room is available
   useEffect(() => {
     const autoJoin = async () => {
-      if (status === "authenticated" && room && userName) {
+      if (
+        status === "authenticated" &&
+        room &&
+        userName &&
+        !token &&
+        !isLoading &&
+        !isJoiningRef.current
+      ) {
         const identity = userId || userEmail || name;
         const displayName = name || userName;
 
@@ -110,6 +120,7 @@ export default function RoomPage() {
         // Regular users can only subscribe (view-only), admins and moderators can publish
         const canPublish = userRole === 'ADMIN' || userRole === 'MODERATOR';
 
+        isJoiningRef.current = true;
         setIsLoading(true);
         setError("");
 
@@ -132,25 +143,22 @@ export default function RoomPage() {
           );
           console.error(err);
         } finally {
+          isJoiningRef.current = false;
           setIsLoading(false);
         }
       }
     };
 
     autoJoin();
-  }, [status, room, userName, userId, userEmail, name, userRoles]);
+  }, [status, room, userName, userId, userEmail, name, userRoleKey, token, isLoading]);
 
   // Show loading while checking auth or joining room
-  if (status === "loading" || isLoading) {
+  if ((status === "loading" && !token) || isLoading) {
     return (
       <div className={styles.blockResidentes}>
         <main className={styles.containerResidentes}>
           <UsuariosHeader />
-          <div className="flex flex-col gap-4 items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600">Conectando a la sala...</p>
-            {room && <p className="text-sm text-gray-500 mt-2">Sala: {room}</p>}
-          </div>
+          <LoadingState message="Conectando a la sala..." />
         </main>
       </div>
     );
@@ -175,9 +183,7 @@ export default function RoomPage() {
           </div>
 
           {isLoadingAssemblies && (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            </div>
+            <LoadingState message="Cargando asambleas..." />
           )}
 
           {assembliesError && (
@@ -360,10 +366,9 @@ export default function RoomPage() {
       serverUrl={serverUrl}
       data-lk-theme="default"
       onDisconnected={() => {
-        setToken("");
-        setServerUrl("");
-        setRoom("");
-        setName("");
+        // Evita reiniciar toda la vista por desconexiones transitorias.
+        // LiveKit maneja reconexiones automáticamente.
+        console.warn("LiveKit disconnected");
       }}
     >
       <AssemblyInterface />

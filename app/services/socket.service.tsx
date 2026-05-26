@@ -17,9 +17,9 @@ export interface ChatMessage {
   authorId?: string;
   text: string;
   time: string;
-  isRead: boolean;
+  isRead?: boolean;
   isModerator?: boolean;
-  status: 'pending' | 'approved' | 'rejected';
+  status?: 'pending' | 'approved' | 'rejected';
   replyTo?: {
     author: string;
     text: string;
@@ -58,7 +58,7 @@ export function useChatSocket({
         userId: userId || '',
         userRole,
       },
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -130,22 +130,26 @@ export function useChatSocket({
     (text: string) => {
       if (!socketRef.current || !text.trim()) return;
 
-      const question: ChatMessage = {
-        id: Date.now().toString(),
+      const questionPayload = {
         assemblyId,
+        authorId: userId || '',
         author: userName,
-        authorId: userId,
         text: text.trim(),
-        time: new Date().toLocaleTimeString('es-CO', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        isRead: false,
-        status: 'pending',
+        isPrivate: false,
+      };
+
+      // Legacy-compatible payload in case backend still reads old keys internally.
+      const legacyPayload = {
+        userId: userId || '',
+        userName,
+        questionText: text.trim(),
       };
 
       // Emit to server
-      socketRef.current.emit('send_question', question);
+      socketRef.current.emit('send_question', {
+        ...questionPayload,
+        ...legacyPayload,
+      });
     },
     [assemblyId, userName, userId]
   );
@@ -196,7 +200,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const socket = io(`${SOCKET_URL}${SOCKET_NAMESPACE}`, {
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
       reconnection: true,
     });
 
