@@ -76,3 +76,49 @@ export async function getByAssembly(assemblyId: string): Promise<responseListVot
   }
   return res.json() as Promise<responseListVotingQuestions>;
 }
+
+// Abrir votación (solo admin)
+export async function openVotingQuestion(
+  id: string,
+  statusMessage?: string
+): Promise<responseVotingQuestions> {
+  const res = await apiClientSession(`/voting-questions/${id}/open`, {
+    method: 'PATCH',
+    body: JSON.stringify(statusMessage ? { statusMessage } : {}),
+  });
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al abrir la votación'));
+  }
+  return res.json() as Promise<responseVotingQuestions>;
+}
+
+// Cerrar votación (solo admin)
+export async function closeVotingQuestion(
+  id: string,
+  statusMessage?: string
+): Promise<responseVotingQuestions> {
+  const res = await apiClientSession(`/voting-questions/${id}/close`, {
+    method: 'PATCH',
+    body: JSON.stringify(statusMessage ? { statusMessage } : {}),
+  });
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al cerrar la votación'));
+  }
+  return res.json() as Promise<responseVotingQuestions>;
+}
+
+// Cambiar estado manual (solo admin)
+export async function setVotingQuestionStatus(
+  id: string,
+  status: 'PENDING' | 'OPEN' | 'CLOSED',
+  statusMessage?: string
+): Promise<responseVotingQuestions> {
+  const res = await apiClientSession(`/voting-questions/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status, ...(statusMessage ? { statusMessage } : {}) }),
+  });
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res, 'Error al cambiar estado de la votación'));
+  }
+  return res.json() as Promise<responseVotingQuestions>;
+}
