@@ -133,3 +133,43 @@ export async function getQuorum(assemblyId: string): Promise<any> {
   }
   return res.json() as Promise<any>;
 }
+
+// ---------Servicios de estado de asamblea--------------------------------
+//Iniciar Asamblea
+export async function startAssembly(id:string): Promise<responseAssembly> {
+  const res = await apiClientSession(`/assemblies/${id}/start`,{
+    method: 'PATCH',
+  });
+  if(!res.ok){
+    throw new Error(await extractErrorMessage(res, 'Error al iniciar asamblea '));
+  }
+  return res.json() as Promise<responseAssembly>
+}
+  //Finalizar Asamblea
+  export async function endAssembly(id: string): Promise<responseAssembly> {
+    const res = await apiClientSession(`/assemblies/${id}/end`, {
+      method: 'PATCH',
+    });
+    if(!res.ok){
+      throw new Error(await extractErrorMessage(res, 'Error al finalizar asamblea'));
+    }
+    return res.json() as Promise<responseAssembly>;
+  }
+  //Cambiar estado de Asamblea
+  export async function changeAssemblyStatus(id: string, status: string): Promise<responseAssembly> {
+    const res = await apiClientSession(`/assemblies/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status }), // <-- Enviamos el nuevo estado aquí
+    });
+    if(!res.ok){
+      throw new Error(await extractErrorMessage(res, 'Error al cambiar estado de asamblea'));
+    }
+    return res.json() as Promise<responseAssembly>
+
+  }
+  
+
+  

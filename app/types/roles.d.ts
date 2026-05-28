@@ -1,7 +1,14 @@
 import { propertiesList } from "@/app/types/definitions";
+export type UserRole =
+  | 'ADMIN'
+  | 'MODERATOR'
+  | 'USER'
+  | 'RESIDENT'
+  | 'SECURITY_GUARD'
+  | 'SUPERVISOR';
 export interface Roles {
   id?: string;
-  name: string;
+  name: UserRole;
   description: string;
   scopes: string;
   is_active: boolean;
