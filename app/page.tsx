@@ -20,7 +20,7 @@ export default async function UsuariosPage() {
 
       <div className={styles.roles}>
         {/* BOTÓN RESIDENTE: Permitido para Residentes y Administradores */}
-        <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['Residente', 'Administrador']}>
+        <AccessGuard rolesUsuario={userRoles} permisosRequeridos={['residentes', 'Administrador']}>
         <div className={styles.role}>
           <div className={styles.imagenUsuarios}>
             <Link href="/residentes" className={styles.btnUsuarios}>
