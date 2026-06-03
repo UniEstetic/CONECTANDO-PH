@@ -4,7 +4,7 @@ import LogoUsuarios from '@/app/components/logo_usuarios';
 import styles from '@/app/ui/styles/roomResidentes.module.css';
 import { useRef, useState, Suspense, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 // Import types and components from separate files 
 import { WordRequest } from "../types";
@@ -27,6 +27,8 @@ type AssemblyDetails = Assembly;
 function AssemblyInterfaceContent() {
   const params = useSearchParams();
   const roomName = params.get('r') || '';
+
+  const router = useRouter();
   
   const { data: session } = useSession();
   const userName = session?.user?.name || '';
@@ -99,6 +101,21 @@ function AssemblyInterfaceContent() {
           </p>
           <strong className={styles.saludoName}>{userName}</strong>
         </div>
+        {/* 🚀 BOTÓN FLOTANTE / DISCRETO EXCLUSIVO PARA EL ADMINISTRADOR */}
+        {session?.user?.roles?.some((role: any) => {
+          const roleName = typeof role === 'string' ? role : role?.name;
+          return roleName === "ADMIN" || roleName === "Administrador";
+        }) && roomName && (
+          <div className="mt-3 flex justify-center">
+            <button
+              onClick={() => router.push(`/admin/asambleas/${roomName}/control`)}
+              className={styles.btnAdminFlotante}
+              title="Panel de Control de Asamblea"
+            >
+              <span>⚙️</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className={styles["assembly-main"]}>

@@ -1774,5 +1774,40 @@
   scrollbar-color: #888888 #f1f1f1;
 }
 
+.btnAdminFlotante {
+  position: fixed !important; /* El !important asegura que rompa cualquier flexbox del padre */
+  top: 24px !important;
+  right: 24px !important;
+  z-index: 9999 !important; /* Lo pone por encima del fondo dorado */
+  background-color: #ffffff;
+  color: #27272a;
+  border: 1px solid #e4e4e7;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Efecto hover para que sea interactivo */
+.btnAdminFlotante:hover {
+  background-color: #f4f4f5;
+  transform: scale(1.1);
+}
+
+.btnAdminFlotante span {
+  font-size: 24px;
+  display: inline-block;
+  transition: transform 0.5s ease;
+}
+
+.btnAdminFlotante:hover span {
+  transform: rotate(45deg);
+}
+
 
 

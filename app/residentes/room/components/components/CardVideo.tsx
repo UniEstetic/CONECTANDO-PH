@@ -58,7 +58,7 @@ export const CardVideo = forwardRef<CardVideoMethods, CardVideoProps>((props, re
   const { localParticipant } = useLocalParticipant();
   const participants = useParticipants();
 
-  const FALLBACK_PROXY_FILE_ID = '00000000-0000-0000-0000-000000000000';
+  const FALLBACK_PROXY_FILE_ID = undefined;
 
   const normalizeText = (value: string): string => String(value || '').trim().toLowerCase();
 
